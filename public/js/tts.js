@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver1.70 Implementation
+// TTS Engine Module - LingoBot2 Ver1.75 Implementation
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
@@ -43,7 +43,7 @@ window.LingoTTS = {
         }
         this.isPlaying = false;
         
-        // Reset all play buttons UI
+        // Reset all play buttons UI back to "▶ 再生" / "▶ Phát"
         const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
         document.querySelectorAll(".btn-play, .btn-sample-play").forEach(btn => {
             btn.classList.remove("playing");
@@ -56,11 +56,11 @@ window.LingoTTS = {
         if (!text) return;
         this.stop();
 
-        const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát", btnStop: "⏹ STOP" };
+        const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát", btnPlaying: "▶ 再生中" };
 
         if (playBtnElement) {
             playBtnElement.classList.add("playing");
-            playBtnElement.textContent = dict.btnStop || "⏹ STOP";
+            playBtnElement.textContent = dict.btnPlaying || "▶ 再生中";
         }
 
         const ttsSelect = document.getElementById("ttsModelSelect");
@@ -72,18 +72,14 @@ window.LingoTTS = {
                              .replace(/\(.*?\)/g, '')
                              .replace(/【.*?】/g, '');
 
-        // -------------------------------------------------------------------
-        // OPTION A: User Explicitly Selected "General (Web Speech API)"
-        // -------------------------------------------------------------------
+        // Option A: User Explicitly Selected "General (Web Speech API)"
         if (selectedVoice === "browser-native") {
             window.LingoLog.add(`Phát âm thanh [Voice: General (Web Speech API)]: "${cleanText.substring(0, 30)}..."`);
             this.playBrowserNativeSpeech(cleanText, playBtnElement);
             return;
         }
 
-        // -------------------------------------------------------------------
-        // OPTION B: Cloud TTS API Call via Vercel Backend (/api/tts)
-        // -------------------------------------------------------------------
+        // Option B: Cloud TTS API Call via Vercel Backend (/api/tts)
         window.LingoLog.add(`Yêu cầu Google Cloud TTS [Voice: ${selectedVoice}]: "${cleanText.substring(0, 30)}..."`);
 
         try {
@@ -142,6 +138,9 @@ window.LingoTTS = {
     },
 
     playBrowserNativeSpeech(text, playBtnElement = null) {
+        // Dynamically update active header badge to General when fallback to browser native speech happens
+        this.updateActiveTtsBadge("browser-native");
+
         if (!('speechSynthesis' in window)) {
             alert("Trình duyệt của bạn không hỗ trợ Web SpeechSynthesis API.");
             if (playBtnElement) {

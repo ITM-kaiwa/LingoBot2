@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.70 Implementation
+// Main Application Controller - LingoBot2 Ver1.75 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -70,8 +70,9 @@ window.LingoApp = {
             aiThinking: "AI đang suy nghĩ...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
 
-            // Inner Chat & Pronunciation Buttons (STOP button standardized)
+            // Inner Chat & Pronunciation Buttons (PLAYING button standardized per user directive)
             btnPlay: "▶ Phát",
+            btnPlaying: "▶ Đang phát",
             btnStop: "⏹ STOP",
             btnDownload: "⬇ Tải MP3",
             btnSamplePlay: "▶ Nghe mẫu",
@@ -139,8 +140,9 @@ window.LingoApp = {
             aiThinking: "AIが思考中です...",
             aiSummarizing: "AIがまとめています...",
 
-            // Inner Chat & Pronunciation Buttons (STOP button standardized)
+            // Inner Chat & Pronunciation Buttons (PLAYING button standardized to "▶ 再生中")
             btnPlay: "▶ 再生",
+            btnPlaying: "▶ 再生中",
             btnStop: "⏹ STOP",
             btnDownload: "⬇ DL MP3",
             btnSamplePlay: "▶ お手本を聞く",
@@ -208,8 +210,9 @@ window.LingoApp = {
             aiThinking: "AI is thinking...",
             aiSummarizing: "AI is summarizing...",
 
-            // Inner Chat & Pronunciation Buttons (STOP button standardized)
+            // Inner Chat & Pronunciation Buttons (PLAYING button standardized)
             btnPlay: "▶ Play",
+            btnPlaying: "▶ Playing",
             btnStop: "⏹ STOP",
             btnDownload: "⬇ DL MP3",
             btnSamplePlay: "▶ Play Sample",
@@ -324,7 +327,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.70]. Đặt Chirp làm mặc định & General làm giọng đọc dự phòng cuối cùng.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.75]. Nút phát đổi sang ▶ 再生中 / ▶ Đang phát & Đồng bộ nhãn General tự động.");
     },
 
     updateUiLanguage(lang) {
@@ -407,7 +410,11 @@ window.LingoApp = {
 
         // Dynamically update all existing chat bubble buttons to UI language
         document.querySelectorAll(".btn-play").forEach(btn => {
-            if (!btn.classList.contains("playing")) btn.textContent = dict.btnPlay;
+            if (btn.classList.contains("playing")) {
+                btn.textContent = dict.btnPlaying || "▶ 再生中";
+            } else {
+                btn.textContent = dict.btnPlay || "▶ 再生";
+            }
         });
         document.querySelectorAll(".btn-stop").forEach(btn => btn.textContent = dict.btnStop);
         document.querySelectorAll(".btn-download").forEach(btn => btn.textContent = dict.btnDownload);
@@ -731,7 +738,6 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         const select = document.getElementById("ttsModelSelect");
         if (!select) return;
         
-        // Primary Default: Chirp 3 HD for Japanese and English, Neural2 for Vietnamese
         if (lang.includes("日本語")) select.value = "ja-JP-Chirp3-HD-F";
         else if (lang.includes("English")) select.value = "en-US-Chirp3-HD-F";
         else select.value = "vi-VN-Neural2-A";
