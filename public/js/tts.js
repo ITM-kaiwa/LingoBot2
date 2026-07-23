@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver1.50 Implementation
+// TTS Engine Module - LingoBot2 Ver1.60 Implementation
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
@@ -73,7 +73,7 @@ window.LingoTTS = {
                              .replace(/【.*?】/g, '');
 
         // -------------------------------------------------------------------
-        # OPTION A: User Explicitly Selected "Browser Native (Web Speech API)"
+        // OPTION A: User Explicitly Selected "Browser Native (Web Speech API)"
         // -------------------------------------------------------------------
         if (selectedVoice === "browser-native") {
             window.LingoLog.add(`Phát âm thanh [Voice: ブラウザ標準音声 (Web Speech API)]: "${cleanText.substring(0, 30)}..."`);
@@ -82,7 +82,7 @@ window.LingoTTS = {
         }
 
         // -------------------------------------------------------------------
-        # OPTION B: Cloud TTS API Call via Vercel Backend (/api/tts)
+        // OPTION B: Cloud TTS API Call via Vercel Backend (/api/tts)
         // -------------------------------------------------------------------
         window.LingoLog.add(`Yêu cầu Google Cloud TTS [Voice: ${selectedVoice}]: "${cleanText.substring(0, 30)}..."`);
 

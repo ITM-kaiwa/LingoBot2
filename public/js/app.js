@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.55 Implementation
+// Main Application Controller - LingoBot2 Ver1.60 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.55]. Đọc mã hóa Base64 GCP_SERVICE_ACCOUNT_JSON từ môi trường Vercel.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.60]. Khắc phục lỗi cú pháp LingoTTS.");
     },
 
     updateUiLanguage(lang) {
@@ -475,7 +475,7 @@ window.LingoApp = {
     },
 
     endSession() {
-        window.LingoTTS.stop();
+        if (window.LingoTTS) window.LingoTTS.stop();
         window.LingoLog.add("Nhấn [Kết thúc bài học] -> Mở Báo cáo tổng kết.");
         window.LingoSummary.generateReport(this.messages, this.uiLang, this.targetLang, this.level);
     },
@@ -547,7 +547,7 @@ window.LingoApp = {
         if (ttsSelect) {
             ttsSelect.addEventListener("change", (e) => {
                 this.userSelectedTtsModel = e.target.value;
-                window.LingoTTS.updateActiveTtsBadge(e.target.value);
+                if (window.LingoTTS) window.LingoTTS.updateActiveTtsBadge(e.target.value);
                 window.LingoLog.add(`Thay đổi giọng đọc TTS thủ công: ${e.target.value}`);
             });
         }
@@ -651,7 +651,9 @@ window.LingoApp = {
             playBtn.type = "button";
             playBtn.className = "btn-sample btn-sample-play";
             playBtn.textContent = dict.btnSamplePlay || "▶ Nghe mẫu";
-            playBtn.addEventListener("click", () => window.LingoTTS.playText(item.text, playBtn));
+            playBtn.addEventListener("click", () => {
+                if (window.LingoTTS) window.LingoTTS.playText(item.text, playBtn);
+            });
 
             const recBtn = document.createElement("button");
             recBtn.type = "button";
@@ -707,7 +709,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
             const data = await res.json();
             if (data.reply) {
                 feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
-                window.LingoTTS.playText(targetText);
+                if (window.LingoTTS) window.LingoTTS.playText(targetText);
             } else {
                 feedbackText.innerHTML = `<span style="color:red">Lỗi: ${data.error}</span>`;
             }
@@ -763,7 +765,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
 
     resetConversation() {
         this.messages = [];
-        window.LingoTTS.stop();
+        if (window.LingoTTS) window.LingoTTS.stop();
         
         const container = document.getElementById("chatContainer");
         if (container) {
@@ -846,7 +848,9 @@ Quy tắc ứng xử:
                 const aiBubbleEl = this.appendMessage("model", reply, modelUsed, retrySeconds);
 
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
-                window.LingoTTS.playText(reply, playBtn);
+                if (window.LingoTTS) {
+                    window.LingoTTS.playText(reply, playBtn);
+                }
             } else {
                 if (data.api_key_required) {
                     this.showSetupPromptRow();
@@ -932,20 +936,26 @@ Quy tắc ứng xử:
             playBtn.type = "button";
             playBtn.className = "audio-btn btn-play";
             playBtn.textContent = dict.btnPlay || "▶ Phát";
-            playBtn.addEventListener("click", () => window.LingoTTS.playText(content, playBtn));
+            playBtn.addEventListener("click", () => {
+                if (window.LingoTTS) window.LingoTTS.playText(content, playBtn);
+            });
 
             const stopBtn = document.createElement("button");
             stopBtn.type = "button";
             stopBtn.className = "audio-btn btn-stop";
             stopBtn.textContent = dict.btnStop || "⏹ STOP";
-            stopBtn.addEventListener("click", () => window.LingoTTS.stop());
+            stopBtn.addEventListener("click", () => {
+                if (window.LingoTTS) window.LingoTTS.stop();
+            });
 
             const downloadBtn = document.createElement("button");
             downloadBtn.type = "button";
             downloadBtn.className = "audio-btn btn-download";
             downloadBtn.textContent = dict.btnDownload || "⬇ Tải MP3";
             downloadBtn.title = "Tải tệp âm thanh MP3 về máy";
-            downloadBtn.addEventListener("click", () => window.LingoTTS.downloadAudio(content, playBtn._cachedAudioUrl));
+            downloadBtn.addEventListener("click", () => {
+                if (window.LingoTTS) window.LingoTTS.downloadAudio(content, playBtn._cachedAudioUrl);
+            });
 
             controlsDiv.appendChild(playBtn);
             controlsDiv.appendChild(stopBtn);
