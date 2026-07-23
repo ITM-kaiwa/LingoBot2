@@ -1,220 +1,168 @@
-// Google Cloud Text-To-Speech Manager (Chirp 3 HD -> Neural2 -> WaveNet -> Standard + Audio Download + Short Model Badge)
+// Google Cloud Text-to-Speech Controller - LingoBot2 Ver1.35 Implementation
 window.LingoTTS = {
-    audioPlayer: null,
-    currentActiveBtn: null,
+    currentAudio: null,
+    currentPlayBtn: null,
 
-    init() {
-        this.audioPlayer = document.getElementById("globalAudioPlayer");
-        if (!this.audioPlayer) {
-            this.audioPlayer = document.createElement("audio");
-            this.audioPlayer.id = "globalAudioPlayer";
-            document.body.appendChild(this.audioPlayer);
+    async playText(text, btnElement = null) {
+        this.stop();
+
+        if (btnElement) {
+            this.currentPlayBtn = btnElement;
+            btnElement.classList.add("playing");
+            btnElement.textContent = "⏳...";
         }
 
-        this.audioPlayer.addEventListener("ended", () => {
-            this.resetActiveButton();
-        });
+        const cleanText = text.replace(/（[^）]+）/g, "").replace(/\([^)]+\)/g, "").trim();
+        if (!cleanText) {
+            this.resetBtnState();
+            return;
+        }
 
-        this.audioPlayer.addEventListener("error", (e) => {
-            window.LingoLog.add("Lỗi phát Audio Player", e);
-            this.resetActiveButton();
-        });
+        const ttsSelect = document.getElementById("ttsModelSelect");
+        const voiceName = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
+        const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
 
-        // Initialize active badge with currently selected dropdown option
-        this.updateActiveTtsBadge(this.getSelectedVoiceModel());
+        window.LingoLog.add(`Yêu cầu Google Cloud TTS [Voice: ${voiceName}]: "${cleanText.substring(0, 30)}..."`);
+
+        try {
+            const reqPayload = {
+                text: cleanText,
+                voice_name: voiceName
+            };
+            if (apiKey && apiKey.trim().length > 5) {
+                reqPayload.api_key = apiKey.trim();
+            }
+
+            const response = await fetch("/api/tts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reqPayload)
+            });
+
+            const data = await response.json();
+
+            if (data.audio_url) {
+                const audio = new Audio(data.audio_url);
+                this.currentAudio = audio;
+                
+                if (btnElement) {
+                    btnElement._cachedAudioUrl = data.audio_url;
+                }
+
+                audio.onplay = () => {
+                    const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : {};
+                    if (btnElement) btnElement.textContent = "🔊 " + (dict.btnPlay || "Phát");
+                    window.LingoLog.add(`Đang phát Google Cloud TTS MP3 (${data.model_used || voiceName}).`);
+                };
+
+                audio.onended = () => {
+                    this.resetBtnState();
+                    window.LingoLog.add("Phát âm thanh hoàn tất.");
+                };
+
+                audio.onerror = (e) => {
+                    console.error("Audio playback error:", e);
+                    window.LingoLog.add("Lỗi phát tệp âm thanh MP3. Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...");
+                    this.playBrowserTts(cleanText, voiceName);
+                };
+
+                await audio.play();
+            } else {
+                window.LingoLog.add(`Google Cloud TTS API (${data.error || "Không thể tổng hợp"}). Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...`);
+                this.playBrowserTts(cleanText, voiceName);
+            }
+        } catch (err) {
+            window.LingoLog.add(`Lỗi kết nối TTS Server: ${err.message}. Chuyển sang Web SpeechSynthesis dự phòng...`);
+            this.playBrowserTts(cleanText, voiceName);
+        }
     },
 
-    // Convert full voice model ID into short abbreviation e.g. "JP-Chirp", "US-Chirp", "JP-Neural2"
-    formatShortVoiceName(voiceName) {
-        if (!voiceName) return "JP-Chirp";
-        if (voiceName.includes("Chirp3-HD") || voiceName.includes("Chirp")) {
-            if (voiceName.startsWith("ja")) return "JP-Chirp";
-            if (voiceName.startsWith("en")) return "US-Chirp";
-            return "Chirp-3D";
+    playBrowserTts(text, voiceName) {
+        if (!('speechSynthesis' in window)) {
+            alert("Trình duyệt của bạn không hỗ trợ Web Speech Synthesis.");
+            this.resetBtnState();
+            return;
         }
-        if (voiceName.includes("Neural2")) {
-            if (voiceName.startsWith("ja")) return "JP-Neural2";
-            if (voiceName.startsWith("en")) return "US-Neural2";
-            if (voiceName.startsWith("vi")) return "VN-Neural2";
-            return "Neural2";
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        if (voiceName.includes("ja-JP") || voiceName.includes("Chirp3-HD-F") || voiceName.includes("Chirp3-HD-M")) {
+            utterance.lang = "ja-JP";
+        } else if (voiceName.includes("en-US")) {
+            utterance.lang = "en-US";
+        } else {
+            utterance.lang = "vi-VN";
         }
-        if (voiceName.includes("Wavenet") || voiceName.includes("WaveNet")) {
-            if (voiceName.startsWith("ja")) return "JP-Wavenet";
-            if (voiceName.startsWith("en")) return "US-Wavenet";
-            if (voiceName.startsWith("vi")) return "VN-Wavenet";
-            return "Wavenet";
-        }
-        if (voiceName.includes("Standard")) {
-            if (voiceName.startsWith("ja")) return "JP-Standard";
-            if (voiceName.startsWith("en")) return "US-Standard";
-            if (voiceName.startsWith("vi")) return "VN-Standard";
-            return "Standard";
-        }
-        if (voiceName === "browser" || voiceName.includes("Web")) return "Web-Speech";
-        return voiceName;
-    },
 
-    updateActiveTtsBadge(modelName) {
-        const badge = document.getElementById("activeTtsBadge");
-        if (badge) {
-            const shortName = this.formatShortVoiceName(modelName);
-            badge.textContent = shortName;
-        }
-    },
+        utterance.onstart = () => {
+            const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : {};
+            if (this.currentPlayBtn) this.currentPlayBtn.textContent = "🔊 " + (dict.btnPlay || "Phát");
+        };
 
-    // Clean Japanese furigana annotations before TTS playback or download
-    stripFurigana(text) {
-        if (!text) return "";
-        let cleaned = text;
+        utterance.onend = () => {
+            this.resetBtnState();
+        };
 
-        // 1. Remove HTML ruby tags: <ruby>漢字<rt>かんじ</rt></ruby> -> 漢字
-        cleaned = cleaned.replace(/<ruby>(.*?)<rt>.*?<\/rt><\/ruby>/gi, '$1');
-        cleaned = cleaned.replace(/<rt>.*?<\/rt>/gi, '');
-        cleaned = cleaned.replace(/<\/?ruby>/gi, '');
+        utterance.onerror = () => {
+            this.resetBtnState();
+        };
 
-        // 2. Remove full-width Japanese furigana brackets: 漢字（かんじ） -> 漢字
-        cleaned = cleaned.replace(/([\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]+)（[\u3040-\u309f\u30a0-\u30ff\s]+）/g, '$1');
-
-        // 3. Remove half-width furigana brackets: 漢字(かんじ) -> 漢字
-        cleaned = cleaned.replace(/([\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]+)\([\u3040-\u309f\u30a0-\u30ff\s]+\)/g, '$1');
-
-        // 4. Remove square bracket furigana: 漢字[かんじ] -> 漢字
-        cleaned = cleaned.replace(/([\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]+)\[[\u3040-\u309f\u30a0-\u30ff\s]+\]/g, '$1');
-
-        // 5. Fallback remove any remaining brackets containing hiragana/katakana readings
-        cleaned = cleaned.replace(/（[\u3040-\u309f\u30a0-\u30ff]+）/g, '');
-        cleaned = cleaned.replace(/\([\u3040-\u309f\u30a0-\u30ff]+\)/g, '');
-
-        return cleaned.trim();
-    },
-
-    getSelectedVoiceModel() {
-        const select = document.getElementById("ttsModelSelect");
-        return (select && select.value) ? select.value : "ja-JP-Chirp3-HD-F";
+        window.speechSynthesis.speak(utterance);
     },
 
     stop() {
-        if (this.audioPlayer) {
-            this.audioPlayer.pause();
-            this.audioPlayer.currentTime = 0;
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio.currentTime = 0;
+            this.currentAudio = null;
         }
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }
-        this.resetActiveButton();
+        this.resetBtnState();
         window.LingoLog.add("Đã dừng phát âm thanh.");
     },
 
-    resetActiveButton() {
-        if (this.currentActiveBtn) {
-            this.currentActiveBtn.classList.remove("playing");
-            const uiLang = window.LingoApp ? window.LingoApp.uiLang : "tiếng Việt";
-            const dict = window.LingoApp && window.LingoApp.i18n ? window.LingoApp.i18n[uiLang] : null;
-            this.currentActiveBtn.textContent = dict ? dict.btnPlay : "▶ Phát";
-            this.currentActiveBtn = null;
+    resetBtnState() {
+        if (this.currentPlayBtn) {
+            const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : {};
+            this.currentPlayBtn.classList.remove("playing");
+            this.currentPlayBtn.textContent = dict.btnPlay || "▶ Phát";
+            this.currentPlayBtn = null;
         }
     },
 
-    async playText(text, btnElement = null, customVoiceModel = null) {
-        const cleanSpeechText = this.stripFurigana(text);
-
-        if (btnElement && this.currentActiveBtn === btnElement && this.audioPlayer && !this.audioPlayer.paused) {
-            this.stop();
+    downloadAudio(text, cachedUrl = null) {
+        if (cachedUrl) {
+            this.triggerDownload(cachedUrl, "LingoBot2_TTS_Audio.mp3");
             return;
         }
 
-        this.stop();
-
-        if (btnElement) {
-            this.currentActiveBtn = btnElement;
-            this.currentActiveBtn.classList.add("playing");
-            this.currentActiveBtn.textContent = "▶ ...";
-        }
-
+        const cleanText = text.replace(/（[^）]+）/g, "").replace(/\([^)]+\)/g, "").trim();
+        const ttsSelect = document.getElementById("ttsModelSelect");
+        const voiceName = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
         const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
-        const requestedVoice = customVoiceModel || this.getSelectedVoiceModel();
 
-        window.LingoLog.add(`Yêu cầu Google Cloud TTS [Voice: ${requestedVoice}]: "${cleanSpeechText.substring(0, 35)}..."`);
+        const reqPayload = { text: cleanText, voice_name: voiceName };
+        if (apiKey && apiKey.trim().length > 5) reqPayload.api_key = apiKey.trim();
 
-        try {
-            const response = await fetch("/api/tts", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    api_key: apiKey,
-                    text: cleanSpeechText,
-                    voice_name: requestedVoice
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.audio_url) {
-                this.audioPlayer.src = data.audio_url;
-                if (btnElement) btnElement._cachedAudioUrl = data.audio_url;
-                await this.audioPlayer.play();
-                
-                const usedModel = data.model_used || requestedVoice;
-                this.updateActiveTtsBadge(usedModel);
-                
-                if (data.note) {
-                    window.LingoLog.add(`Phát thành công giọng Google Cloud TTS: ${usedModel} (${data.note})`);
-                } else {
-                    window.LingoLog.add(`Phát thành công giọng Google Cloud TTS: (${usedModel})`);
-                }
+        fetch("/api/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reqPayload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.audio_url) {
+                this.triggerDownload(data.audio_url, "LingoBot2_TTS_Audio.mp3");
             } else {
-                this.updateActiveTtsBadge("Web-Speech");
-                window.LingoLog.add(`Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...`);
-                this.fallbackBrowserTTS(cleanSpeechText, requestedVoice);
+                alert("Không thể tải audio MP3 từ Google Cloud TTS.");
             }
-        } catch (err) {
-            this.updateActiveTtsBadge("Web-Speech");
-            window.LingoLog.add("Lỗi kết nối TTS API, chuyển dự phòng Web Speech", err.message);
-            this.fallbackBrowserTTS(cleanSpeechText, requestedVoice);
-        }
+        })
+        .catch(err => alert("Lỗi tải audio: " + err.message));
     },
 
-    // Download synthesized MP3 audio file
-    async downloadAudio(text, cachedUrl = null) {
-        if (cachedUrl && cachedUrl.startsWith("data:audio")) {
-            this.triggerFileDownload(cachedUrl, "lingobot2_ai_speech.mp3");
-            window.LingoLog.add("Đã tải xuống tệp âm thanh MP3 từ bộ nhớ đệm.");
-            return;
-        }
-
-        const cleanSpeechText = this.stripFurigana(text);
-        const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
-        const requestedVoice = this.getSelectedVoiceModel();
-
-        window.LingoLog.add(`Tải xuống MP3 [Giọng: ${requestedVoice}]...`);
-
-        try {
-            const response = await fetch("/api/tts", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    api_key: apiKey,
-                    text: cleanSpeechText,
-                    voice_name: requestedVoice
-                })
-            });
-
-            const data = await response.json();
-            if (response.ok && data.audio_url) {
-                this.triggerFileDownload(data.audio_url, "lingobot2_ai_speech.mp3");
-                const usedModel = data.model_used || requestedVoice;
-                this.updateActiveTtsBadge(usedModel);
-                window.LingoLog.add(`Đã tải xuống MP3 thành công (${usedModel}).`);
-            } else {
-                alert("Không thể tạo tệp âm thanh. Vui lòng kiểm tra Google API Key.");
-            }
-        } catch (err) {
-            window.LingoLog.add("Lỗi tải xuống audio", err.message);
-            alert("Lỗi tải xuống tệp âm thanh: " + err.message);
-        }
-    },
-
-    triggerFileDownload(url, filename) {
+    triggerDownload(url, filename) {
         const a = document.createElement("a");
         a.href = url;
         a.download = filename;
@@ -223,26 +171,19 @@ window.LingoTTS = {
         document.body.removeChild(a);
     },
 
-    fallbackBrowserTTS(text, voiceName) {
-        if (!('speechSynthesis' in window)) {
-            this.resetActiveButton();
-            return;
-        }
+    updateActiveTtsBadge(modelName) {
+        const badge = document.getElementById("activeTtsBadge");
+        if (!badge) return;
 
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        if (voiceName.startsWith("ja")) utterance.lang = "ja-JP";
-        else if (voiceName.startsWith("en")) utterance.lang = "en-US";
-        else utterance.lang = "vi-VN";
+        let abbr = "JP-Chirp";
+        if (modelName.includes("ja-JP-Chirp3-HD-F")) abbr = "JP-Chirp(♀)";
+        else if (modelName.includes("ja-JP-Chirp3-HD-M")) abbr = "JP-Chirp(♂)";
+        else if (modelName.includes("en-US-Chirp3-HD-F")) abbr = "EN-Chirp(♀)";
+        else if (modelName.includes("en-US-Chirp3-HD-M")) abbr = "EN-Chirp(♂)";
+        else if (modelName.includes("ja-JP-Neural2")) abbr = "JP-Neural2";
+        else if (modelName.includes("en-US-Neural2")) abbr = "EN-Neural2";
+        else if (modelName.includes("vi-VN-Neural2")) abbr = "VN-Neural2";
 
-        utterance.onend = () => this.resetActiveButton();
-        utterance.onerror = () => this.resetActiveButton();
-
-        window.speechSynthesis.speak(utterance);
+        badge.textContent = abbr;
     }
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-    window.LingoTTS.init();
-});

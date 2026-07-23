@@ -29,7 +29,6 @@ PRIMARY_MODELS = [
     "gemini-1.5-pro"
 ]
 
-# Local Fallback Role Responses by Scenario if 429 Quota limit hits all Google API models
 SCENARIO_FALLBACK_REPLIES = {
     "空港のチェックイン会話": [
         "かしこまりました。パスポートとお手荷物を確認させていただきますね。ご搭乗券を発行いたします。",
@@ -51,7 +50,7 @@ SCENARIO_FALLBACK_REPLIES = {
     ],
     "買い物の会話": [
         "いらっしゃいませ！何かお探しの商品はございますでしょうか？ご試着もしていただけますよ。",
-        "ありがとうございます。お会計は現金とクレジットカードのどちらをご利用になりますか？"
+        "ありがとうございます。お会計は現金とクレジットカードのどちらをご利用になられますか？"
     ]
 }
 
@@ -69,9 +68,19 @@ def get_smart_fallback_reply(scenario_name):
     return random.choice(DEFAULT_FALLBACK_REPLIES)
 
 def resolve_api_key(client_key):
-    if client_key and client_key != "demo_skipped" and len(client_key.strip()) > 5:
+    """
+    Priority:
+    1. If client explicitly provided a valid key (>5 chars), use client_key.
+    2. Otherwise, read GOOGLE_API_KEY from Vercel Server Environment Variable.
+    """
+    if client_key and isinstance(client_key, str) and len(client_key.strip()) > 5:
         return client_key.strip()
-    return os.environ.get("GOOGLE_API_KEY", "").strip()
+    
+    env_key = os.environ.get("GOOGLE_API_KEY", "").strip()
+    if env_key:
+        return env_key
+        
+    return ""
 
 def get_gcp_oauth2_token():
     if not GOOGLE_AUTH_AVAILABLE:
@@ -252,7 +261,6 @@ def chat():
         }), 200
 
     except Exception as ex:
-        # Emergency safety fallback with "Local" label & 15s retry hint
         smart_reply = get_smart_fallback_reply("")
         return jsonify({
             "reply": smart_reply,
@@ -265,9 +273,15 @@ def chat():
 
 @app.route("/api/tts", methods=["POST"])
 def tts():
+    """
+    Path Architecture:
+    JavaScript (Browser) -> Vercel Python Server (/api/tts) -> Google Cloud TTS API -> Base64 MP3 -> JavaScript Audio Player
+    """
     try:
         data = request.get_json() or {}
         client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
+        
+        # 1. Resolve API Key from Client or Vercel Environment Variable (GOOGLE_API_KEY)
         api_key = resolve_api_key(client_key)
 
         text = data.get("text", "").strip()
@@ -279,7 +293,7 @@ def tts():
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # 1. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token
+        # 2. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token if configured
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
         if "Chirp" in requested_voice and oauth_token:
@@ -304,43 +318,42 @@ def tts():
                     if audio_base64:
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": requested_voice
+                            "model_used": requested_voice,
+                            "provider": "Google Cloud TTS (Chirp3 OAuth2)"
                         })
             except Exception as e:
                 print("Chirp 3 HD OAuth2 exception:", e)
 
-        # 2. Robust API Key Google Cloud TTS Synthesis (Neural2 -> WaveNet -> Standard)
-        effective_voice = requested_voice
-        if "Chirp" in effective_voice:
-            if "ja-JP" in lang_code:
-                effective_voice = "ja-JP-Neural2-B"
-            elif "en-US" in lang_code:
-                effective_voice = "en-US-Neural2-F"
-            else:
-                effective_voice = "vi-VN-Neural2-A"
-
-        fallback_voices = [effective_voice]
+        # 3. Server-side Cascading Voice List via Google Cloud API Key
+        # If Chirp 3 HD fails or API Key doesn't support OAuth2-only Chirp, fallback to Neural2 -> WaveNet -> Standard
+        candidate_voices = [requested_voice]
+        
         if "ja-JP" in lang_code:
-            fallback_voices += ["ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
+            candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-A", "ja-JP-Wavenet-B", "ja-JP-Standard-A", "ja-JP-Standard-B"]
         elif "en-US" in lang_code:
-            fallback_voices += ["en-US-Neural2-C", "en-US-Wavenet-F", "en-US-Standard-F"]
+            candidate_voices += ["en-US-Neural2-F", "en-US-Neural2-C", "en-US-Wavenet-F", "en-US-Standard-F"]
         else:
-            fallback_voices += ["vi-VN-Wavenet-A", "vi-VN-Standard-A"]
+            candidate_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
+        # Deduplicate preserving order
         seen = set()
-        clean_fallback_voices = []
-        for v in fallback_voices:
-            if v not in seen and "Chirp" not in v:
+        clean_candidate_voices = []
+        for v in candidate_voices:
+            if v not in seen:
                 seen.add(v)
-                clean_fallback_voices.append(v)
+                clean_candidate_voices.append(v)
 
         if not api_key:
-            return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 200
+            return jsonify({
+                "error": "Google API Key chưa được cài đặt ở Vercel (GOOGLE_API_KEY) và chưa được nhập từ giao diện.",
+                "fallback_browser": True
+            }), 400
 
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
         last_error = ""
 
-        for v_name in clean_fallback_voices:
+        # 4. Iterate candidate voices directly in Python backend
+        for v_name in clean_candidate_voices:
             v_parts = v_name.split("-")
             v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
             
@@ -361,18 +374,21 @@ def tts():
                     res_json = res.json()
                     audio_base64 = res_json.get("audioContent", "")
                     if audio_base64:
+                        print(f"Google Cloud TTS Success! Voice: {v_name}")
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": v_name
+                            "model_used": v_name,
+                            "provider": "Google Cloud TTS API Key"
                         })
                 else:
                     last_error = f"HTTP {res.status_code}: {res.text[:100]}"
+                    print(f"Google Cloud TTS Voice {v_name} error:", last_error)
             except Exception as e:
                 last_error = str(e)
                 continue
 
         return jsonify({
-            "error": f"Google Cloud TTS ({last_error})",
+            "error": f"Không thể tổng hợp Google Cloud TTS ({last_error})",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code
@@ -394,12 +410,10 @@ def summary():
         target_lang = data.get("target_lang", "jp 日本語")
         level = data.get("level", "Sơ cấp (CEFR A1, A2)")
 
-        # Prepare Multilingual Prompts & Fallback Templates based on UI Language
         if "Nhật" in ui_lang or "Japan" in ui_lang or "jp" in ui_lang.lower():
-            output_lang_instruction = "日本語 (Japanese)"
             system_prompt = f"""あなたはプロの言語学習コーチです。
 ユーザーとAIの会話履歴を分析し、以下のフォーマットで学習総括レポートを作成してください。
-【厳格な規則】タイトル、見出し、本文、アドバイス、全ての記述を必ず【日本語】のみで作成してください。ベトナム語や英語の単語を混ぜないでください。
+【厳格な規則】タイトル、見出し、本文、アドバイス、全ての記述を必ず【日本語】のみで作成してください。
 
 会話履歴:
 {json.dumps(messages, ensure_ascii=False, indent=2)}
@@ -438,7 +452,6 @@ def summary():
 - 発音練習モードを活用して、シャドーイングを繰り返し行いましょう。"""
 
         elif "Anh" in ui_lang or "English" in ui_lang or "en" in ui_lang.lower():
-            output_lang_instruction = "English"
             system_prompt = f"""You are a professional language learning coach.
 Analyze the conversation history and generate a structured summary report in ENGLISH ONLY.
 
@@ -477,8 +490,6 @@ Format (STRICTLY IN ENGLISH ONLY):
 - Practice regularly in Pronunciation mode using shadowing techniques."""
 
         else:
-            # Vietnamese Default
-            output_lang_instruction = "tiếng Việt"
             system_prompt = f"""Bạn là một chuyên gia đào tạo ngôn ngữ hàng đầu.
 Hãy đánh giá buổi luyện tập thoại giữa người học và AI theo thông tin sau.
 MỌI TIÊU ĐỀ, HẠNG MỤC, NỘI DUNG, VÀ LỜI KHUYÊN BẮT BUỘC CHỈ ĐƯỢC VIẾT BẰNG tiếng Việt.
@@ -541,7 +552,6 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
                 print(f"Summary generation error with {model}:", e)
                 continue
 
-        # Local Fallback summary aligned with UI language
         return jsonify({"summary": fallback_summary, "used_model": "Local"}), 200
 
     except Exception as ex:

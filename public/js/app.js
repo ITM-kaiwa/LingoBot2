@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.30 Implementation
+// Main Application Controller - LingoBot2 Ver1.35 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -257,7 +257,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -288,7 +288,7 @@ window.LingoApp = {
         { id: 224, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
         { id: 225, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Rapid technological advancement necessitates a comprehensive overhaul of traditional business paradigms.", translation: "Tiến bộ công nghệ nhanh đòi hỏi đại tu toàn diện mô hình kinh doanh truyền thống." },
         { id: 226, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Swift and decisive leadership is pivotal in navigating unprecedented organizational crises.", translation: "Lãnh đạo nhanh nhạy và quyết đoán là then chốt để vượt qua khủng hoảng." },
-        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi ưu tiên nâng cao trải nghiệm khách hàng." },
+        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 228, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We remain committed to optimizing resource allocation while enforcing strict cost discipline.", translation: "Chúng tôi cam kết tối ưu phân bổ nguồn lực đồng thời kỷ luật chi phí nghiêm ngặt." },
         { id: 229, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Fostering a culture of transparent communication empowers employees to take initiative.", translation: "Nuôi dưỡng văn hóa giao tiếp minh bạch giúp nhân viên chủ động hơn." },
         { id: 300, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Adopting a prudent yet agile approach will allow us to navigate volatile market dynamics.", translation: "Áp dụng phương pháp thận trọng nhưng linh hoạt giúp vượt biến động thị trường." },
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.30]. Tự động ghi chép thông số PC, Browser & User-Agent vào Nhật ký hệ thống.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.35]. Cấu hình máy chủ Python /api/tts tự động ưu tiên Vercel GOOGLE_API_KEY.");
     },
 
     updateUiLanguage(lang) {
@@ -692,13 +692,16 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
 3. **Mẹo luyện tập hiệu quả**`;
 
         try {
+            const reqPayload = {
+                messages: [{ role: "user", content: prompt }]
+            };
+            const apiKey = this.getApiKey();
+            if (apiKey && apiKey.trim().length > 5) reqPayload.api_key = apiKey.trim();
+
             const res = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    api_key: this.getApiKey(),
-                    messages: [{ role: "user", content: prompt }]
-                })
+                body: JSON.stringify(reqPayload)
             });
 
             const data = await res.json();
@@ -806,14 +809,17 @@ Quy tắc ứng xử:
         const typingBubble = this.showTypingIndicator();
 
         try {
+            const reqPayload = {
+                messages: historyMessages,
+                system_instruction: systemPrompt
+            };
+            const apiKey = this.getApiKey();
+            if (apiKey && apiKey.trim().length > 5) reqPayload.api_key = apiKey.trim();
+
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    api_key: this.getApiKey(),
-                    messages: historyMessages,
-                    system_instruction: systemPrompt
-                })
+                body: JSON.stringify(reqPayload)
             });
 
             const data = await response.json();
