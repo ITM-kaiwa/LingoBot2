@@ -43,6 +43,12 @@ def parse_retry_seconds(error_text):
             pass
     return None
 
+def resolve_api_key(client_key):
+    """Priority: 1. User hand-entered key -> 2. Vercel/Server Environment Variable (GOOGLE_API_KEY)"""
+    if client_key and client_key != "demo_skipped" and len(client_key.strip()) > 5:
+        return client_key.strip()
+    return os.environ.get("GOOGLE_API_KEY", "").strip()
+
 def get_gcp_oauth2_token():
     """dynamically load GCP Service Account JSON from Env or local file and generate OAuth2 Bearer token"""
     if not GOOGLE_AUTH_AVAILABLE:
@@ -116,14 +122,14 @@ def discover_available_gemini_models(api_key):
 def chat():
     try:
         data = request.get_json() or {}
-        api_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
+        client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
         
-        if not api_key or api_key == "demo_skipped":
-            api_key = os.environ.get("GOOGLE_API_KEY", "")
+        api_key = resolve_api_key(client_key)
 
         if not api_key:
             return jsonify({
-                "error": "Google API Keyが設定されていません。Gemini AIを使用するにはAPI Keyを入力してください。",
+                "error": "Google API Key chưa được cài đặt ở môi trường Vercel và chưa được nhập từ giao diện. Vui lòng nhập Google Gemini API Key để bắt đầu.",
+                "api_key_required": True,
                 "logs": ["API Key missing"]
             }), 400
 
@@ -229,9 +235,8 @@ def chat():
 def tts():
     try:
         data = request.get_json() or {}
-        api_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
-        if not api_key or api_key == "demo_skipped":
-            api_key = os.environ.get("GOOGLE_API_KEY", "")
+        client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
+        api_key = resolve_api_key(client_key)
 
         text = data.get("text", "").strip()
         requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
@@ -302,7 +307,7 @@ def tts():
                 clean_fallback_voices.append(v)
 
         if not api_key:
-            print("Google Cloud TTS API Warning: No Google API Key provided!")
+            print("Google Cloud TTS API Warning: No Google API Key provided in Env or Client!")
             return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 200
 
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
@@ -357,9 +362,8 @@ def tts():
 def summary():
     try:
         data = request.get_json() or {}
-        api_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
-        if not api_key or api_key == "demo_skipped":
-            api_key = os.environ.get("GOOGLE_API_KEY", "")
+        client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
+        api_key = resolve_api_key(client_key)
 
         messages = data.get("messages", [])
         user_lang = data.get("user_lang", "tiếng Việt")

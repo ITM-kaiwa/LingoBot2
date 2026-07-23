@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver0.70 - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBot2 Ver0.70 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
+    <title>LingoBot2 Ver0.80 - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBot2 Ver0.80 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=0.70">
-    <link rel="stylesheet" href="styles/components.css?v=0.70">
+    <link rel="stylesheet" href="styles/main.css?v=0.80">
+    <link rel="stylesheet" href="styles/components.css?v=0.80">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver0.70 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver0.80 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver0.70</span>
+                    <span class="version-badge">Ver0.80</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -86,7 +86,7 @@
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
 
-                    <!-- NEW: Language Setup Prompt Guide Bubble ABOVE API Key Setup Bubble -->
+                    <!-- Language Setup Prompt Guide Bubble ABOVE API Key Setup Bubble -->
                     <div class="chat-row ai-row" id="langGuideBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble" style="border-left: 4px solid #f97316;">
                             <div class="setup-title" style="color: #ea580c;">
@@ -104,17 +104,17 @@
                         </div>
                     </div>
                     
-                    <!-- API Key Setup Prompt Bubble (English Only Title) -->
-                    <div class="chat-row ai-row" id="setupBubbleRow">
+                    <!-- API Key Setup Prompt Bubble (Hidden by default unless server environment key is missing) -->
+                    <div class="chat-row ai-row hidden" id="setupBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
                                 🔑 Google Gemini API Key Setup:
                             </div>
                             <div class="setup-text-vn" id="setupTextVn">
-                                <strong>vn</strong> Chào bạn! Vui lòng nhập Google Gemini API Key (ví dụ: AIzaSy...) vào khung chat bên dưới để bắt đầu:
+                                <strong>vn</strong> Vui lòng nhập Google Gemini API Key (ví dụ: AIzaSy...) vào khung chat bên dưới để bắt đầu (nếu môi trường Vercel chưa được cấu hình):
                             </div>
                             <div class="setup-text-jp" id="setupTextJp">
-                                <strong>jp</strong> こんにちは！ご使用前に Google Gemini APIキー（例: AIzaSy...）を下のチャット入力欄に入力してください：
+                                <strong>jp</strong> Vercel環境変数にキーが設定されていない場合は、Google Gemini APIキー（例: AIzaSy...）を下の入力欄に入力してください：
                             </div>
                             
                             <div class="setup-meta">
@@ -125,7 +125,7 @@
                     </div>
 
                     <!-- Scenario Selection Card INSIDE CHAT BUBBLE with 20 Categorized Scenarios -->
-                    <div class="chat-row ai-row hidden" id="scenarioBubbleRow">
+                    <div class="chat-row ai-row" id="scenarioBubbleRow">
                         <div class="chat-bubble scenario-prompt-bubble">
                             <div class="scenario-title" id="txtScenarioTitle">🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:</div>
                             
@@ -331,10 +331,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=0.70"></script>
-    <script src="js/tts.js?v=0.70"></script>
-    <script src="js/stt.js?v=0.70"></script>
-    <script src="js/summary.js?v=0.70"></script>
-    <script src="js/app.js?v=0.70"></script>
+    <script src="js/log.js?v=0.80"></script>
+    <script src="js/tts.js?v=0.80"></script>
+    <script src="js/stt.js?v=0.80"></script>
+    <script src="js/summary.js?v=0.80"></script>
+    <script src="js/app.js?v=0.80"></script>
 </body>
 </html>

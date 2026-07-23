@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.70 Implementation
+// Main Application Controller - LingoBot2 Ver0.80 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -260,7 +260,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -321,13 +321,14 @@ window.LingoApp = {
     ],
 
     init() {
-        this.checkApiKey();
         this.bindEvents();
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.70].");
+        // Always show scenario card so user can start practicing instantly using Vercel environment API key!
+        this.showScenarioCard();
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.80]. Tự động ưu tiên Key môi trường Vercel.");
     },
 
     updateUiLanguage(lang) {
@@ -500,15 +501,7 @@ window.LingoApp = {
     setApiKey(key) {
         this.apiKey = key.trim();
         localStorage.setItem("lingobot_api_key", this.apiKey);
-        window.LingoLog.add("Đã lưu API Key vào trình duyệt.");
-    },
-
-    checkApiKey() {
-        const storedKey = localStorage.getItem("lingobot_api_key");
-        if (storedKey && storedKey !== "demo_skipped") {
-            this.apiKey = storedKey;
-            this.showScenarioCard();
-        }
+        window.LingoLog.add("Đã lưu API Key nhập thủ công vào trình duyệt.");
     },
 
     bindEvents() {
@@ -691,7 +684,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
                 feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
                 window.LingoTTS.playText(targetText);
             } else {
-                if (data.retry_seconds) {
+                if (data.api_key_required) {
+                    this.showSetupPromptRow();
+                    feedbackText.innerHTML = `<span style="color:#dc2626">🔑 ${data.error}</span>`;
+                } else if (data.retry_seconds) {
                     feedbackText.innerHTML = `<span style="color:#c2410c">${dict.apiRetryWait(data.retry_seconds)}</span>`;
                 } else {
                     feedbackText.innerHTML = `<span style="color:red">Lỗi: ${data.error}</span>`;
@@ -721,6 +717,11 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         if (scenarioBubbleRow) scenarioBubbleRow.classList.remove("hidden");
     },
 
+    showSetupPromptRow() {
+        const setupRow = document.getElementById("setupBubbleRow");
+        if (setupRow) setupRow.classList.remove("hidden");
+    },
+
     startConversation() {
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
@@ -746,10 +747,8 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         }
 
         const langGuideRow = document.getElementById("langGuideBubbleRow");
-        const setupRow = document.getElementById("setupBubbleRow");
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         if (langGuideRow) langGuideRow.classList.remove("hidden");
-        if (setupRow) setupRow.classList.remove("hidden");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.remove("hidden");
 
         window.LingoLog.add("Đã đặt lại cuộc trò chuyện.");
@@ -778,16 +777,12 @@ Quy tắc ứng xử:
         const chatInput = document.getElementById("chatInput");
         const text = chatInput ? chatInput.value.trim() : "";
 
-        if (!this.getApiKey() && (text.startsWith("AIzaSy") || text.length > 20)) {
+        // If user manually pastes an API Key starting with AIzaSy
+        if (text.startsWith("AIzaSy") || text.length > 20) {
             this.setApiKey(text);
             chatInput.value = "";
             this.showScenarioCard();
-            alert("Google API Key を設定しました！");
-            return;
-        }
-
-        if (!this.getApiKey()) {
-            alert("Gemini AI を sử dụng thì vui lòng nhập Google API Key / Gemini AIを使用するにはAPI Keyを入力してください。");
+            alert("Đã lưu Google API Key thành công! / Google API Key を設定しました！");
             return;
         }
 
@@ -829,9 +824,12 @@ Quy tắc ứng xử:
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
                 window.LingoTTS.playText(reply, playBtn);
             } else {
-                if (data.retry_seconds) {
+                if (data.api_key_required) {
+                    this.showSetupPromptRow();
+                    this.appendMessage("model", `🔑 ${data.error}`);
+                    window.LingoLog.add("Cần bổ sung Google API Key.");
+                } else if (data.retry_seconds) {
                     const waitMsg = dict.apiRetryWait ? dict.apiRetryWait(data.retry_seconds) : `⚠️ ${data.error}`;
-                    // Skip auto-TTS playback for warning bubbles
                     this.appendMessage("model", waitMsg);
                     window.LingoLog.add(`API Busy (Wait ${data.retry_seconds}s): ${data.error}`);
                 } else {
