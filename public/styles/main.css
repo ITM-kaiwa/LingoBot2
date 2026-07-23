@@ -1,4 +1,4 @@
-/* Main Design System - Screenshot Matched Styling with Mobile Responsive Layout Optimization (Ver1.10) */
+/* Main Design System - Screenshot Matched Styling with Mobile Responsive Layout Optimization (Ver1.20) */
 :root {
     --bg-page: #f9f3ec;
     --card-bg: #ffffff;
@@ -224,6 +224,36 @@ body {
     white-space: nowrap;
 }
 
+/* Compact API Key Group in Header */
+.header-key-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-key-input {
+    width: 90px;
+    padding: 5px 8px;
+    border-radius: 12px;
+    border: 1px solid #fed7aa;
+    background: #ffffff;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    outline: none;
+    transition: width 0.2s ease, border-color 0.2s ease;
+}
+
+.header-key-input:focus {
+    width: 140px;
+    border-color: #ea580c;
+}
+
+.btn-key {
+    background: #2563eb;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
 .action-btn {
     display: inline-flex;
     align-items: center;
@@ -377,16 +407,15 @@ body {
     100% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.2); }
 }
 
-/* Retry Countdown Badge Styling */
+/* Retry Countdown Badge Styling - Blend in seamlessly with meta text color */
 .retry-countdown-badge {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #ea580c;
-    background: #fff7ed;
-    border: 1px solid #ffedd5;
-    padding: 1px 6px;
-    border-radius: 8px;
-    margin-left: 4px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-left: 2px;
 }
 
 /* ==========================================
@@ -434,9 +463,13 @@ body {
     }
 
     .header-select {
-        max-width: 130px;
+        max-width: 120px;
         font-size: 0.75rem;
         padding: 4px 6px;
+    }
+
+    .header-key-input {
+        width: 70px;
     }
 
     .action-btn {

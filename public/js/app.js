@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.10 Implementation
+// Main Application Controller - LingoBot2 Ver1.20 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -253,7 +253,7 @@ window.LingoApp = {
         { id: 123, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "構造改革を断行しなければ、持続可能な成長を実現することは困難でしょう。", translation: "Nếu không quyết liệt cải cách cơ cấu, rất khó đạt được tăng trưởng bền vững." },
         { id: 124, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "双方の利害を調整し、双方にとって望ましい着地点を模索すべきです。", translation: "Cần điều hòa lợi ích đôi bên và tìm kiếm điểm đồng thuận mong muốn." },
         { id: 125, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "技術革新の波に伴い、従来のビジネスモデルの再構築が強く求められています。", translation: "Cùng với làn sóng đổi mới công nghệ, việc tái cấu trúc mô hình kinh doanh cũ là cấp thiết." },
-        { id: 126, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく, 迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
+        { id: 126, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.10]. Hiển thị nhãn Local (要リトライ 15s) kèm đếm ngược khi máy chủ quá tải.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.20]. Thêm ô nhập API Key gọn nhẹ trên thanh Header.");
     },
 
     updateUiLanguage(lang) {
@@ -512,6 +512,18 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
         alert("Đã lưu Google API Key thủ công thành công! / Google API Key を設定しました！");
+    },
+
+    saveHeaderApiKey() {
+        const inputEl = document.getElementById("headerApiKeyInput");
+        const val = inputEl ? inputEl.value.trim() : "";
+        if (!val) {
+            alert("Vui lòng nhập Google API Key / APIキーを入力してください。");
+            return;
+        }
+        this.setApiKey(val);
+        inputEl.value = "";
+        alert("Đã lưu Google API Key mới từ thanh Header! / ヘッダーから新しいGoogle API Keyを設定しました！");
     },
 
     bindEvents() {
@@ -880,8 +892,6 @@ Quy tắc ứng xử:
 
             const retryBadge = document.createElement("span");
             retryBadge.className = "retry-countdown-badge";
-            retryBadge.style.color = "#ea580c";
-            retryBadge.style.fontWeight = "bold";
             retryBadge.textContent = `(要リトライ ${retrySeconds}s)`;
             timeSpan.appendChild(retryBadge);
 
