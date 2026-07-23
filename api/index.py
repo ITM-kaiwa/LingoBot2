@@ -390,56 +390,109 @@ def summary():
         api_key = resolve_api_key(client_key)
 
         messages = data.get("messages", [])
-        user_lang = data.get("user_lang", "tiếng Việt")
-        target_lang = data.get("target_lang", "us English")
-        level = data.get("level", "CEFR B1")
+        ui_lang = data.get("ui_lang") or data.get("user_lang") or "tiếng Nhật"
+        target_lang = data.get("target_lang", "jp 日本語")
+        level = data.get("level", "Sơ cấp (CEFR A1, A2)")
 
-        if not api_key:
-            return jsonify({"error": "Thiếu Google API Key"}), 400
+        # Prepare Multilingual Prompts & Fallback Templates based on UI Language
+        if "Nhật" in ui_lang or "Japan" in ui_lang or "jp" in ui_lang.lower():
+            output_lang_instruction = "日本語 (Japanese)"
+            system_prompt = f"""あなたはプロの言語学習コーチです。
+ユーザーとAIの会話履歴を分析し、以下のフォーマットで学習総括レポートを作成してください。
+【厳格な規則】タイトル、見出し、本文、アドバイス、全ての記述を必ず【日本語】のみで作成してください。ベトナム語や英語の単語を混ぜないでください。
 
-        prompt = f"""Bạn là một chuyên gia đào tạo ngôn ngữ hàng đầu.
-Hãy đánh giá buổi luyện tập thoại giữa người học và AI theo các thông tin sau:
-- Ngôn ngữ học tập: {target_lang}
-- Trình độ: {level}
-- Ngôn ngữ xuất báo cáo: {user_lang} (MỌI TIÊU ĐỀ, HẠNG MỤC, NỘI DUNG, PHÂN TÍCH, VÀ LỜI KHUYÊN BẮT BUỘC CHỈ ĐƯỢC VIẾT BẰNG {user_lang})
+会話履歴:
+{json.dumps(messages, ensure_ascii=False, indent=2)}
+
+出力フォーマット (全文章を日本語で記述):
+# 📊 レッスン総括レポート＆アドバイス
+
+## 1. レッスン概要
+- **学習言語**: {target_lang}
+- **レベル**: {level}
+- **状態**: レッスンが正常に完了しました！素晴らしい積極性で会話を継続できました。
+
+## 2. 良かった点
+- 状況に応じた自然な受け答えができており、フレーズの活用がスムーズです。
+- 相手の質問に対して意欲的に返答し、会話を継続する姿勢が見られます。
+
+## 3. 改善点・表現のアドバイス
+- より自然な文法や語彙表現に磨きをかけましょう。
+
+## 4. 今後に向けた学習アドバイス
+- 新しい表現を積極的に取り入れ、発音練習モードで繰り返しシャドーイングを行いましょう。"""
+
+            fallback_summary = f"""# 📊 レッスン総括レポート＆アドバイス
+
+## 1. レッスン概要
+- **学習言語**: {target_lang}
+- **レベル**: {level}
+- **状態**: レッスンが正常に完了しました！素晴らしい積極性で会話を継続できました。
+
+## 2. 良かった点
+- 状況に応じた自然な受け答えができており、フレーズの活用がスムーズです。
+- 対話を積極的に維持しようとする素晴らしい姿勢が見られます。
+
+## 3. 今後に向けたアドバイス
+- 新しい語彙や表現を積極的に取り入れ、表現の幅を広げましょう。
+- 発音練習モードを活用して、シャドーイングを繰り返し行いましょう。"""
+
+        elif "Anh" in ui_lang or "English" in ui_lang or "en" in ui_lang.lower():
+            output_lang_instruction = "English"
+            system_prompt = f"""You are a professional language learning coach.
+Analyze the conversation history and generate a structured summary report in ENGLISH ONLY.
+
+Conversation History:
+{json.dumps(messages, ensure_ascii=False, indent=2)}
+
+Format (STRICTLY IN ENGLISH ONLY):
+# 📊 Lesson Summary & Advice Report
+
+## 1. Overview
+- **Target Language**: {target_lang}
+- **Level**: {level}
+- **Status**: Lesson completed successfully with great active engagement!
+
+## 2. Strengths
+- Natural responses appropriate for the selected scenario.
+- Strong willingness to communicate and maintain dialogue flow.
+
+## 3. Key Improvements & Advice
+- Keep expanding your active vocabulary and refined grammar patterns.
+- Practice regularly in Pronunciation mode using shadowing techniques."""
+
+            fallback_summary = f"""# 📊 Lesson Summary & Advice Report
+
+## 1. Overview
+- **Target Language**: {target_lang}
+- **Level**: {level}
+- **Status**: Lesson completed successfully with great active engagement!
+
+## 2. Strengths
+- Natural responses appropriate for the selected scenario.
+- Strong willingness to communicate and maintain dialogue flow.
+
+## 3. Key Improvements & Advice
+- Keep expanding your active vocabulary and refined grammar patterns.
+- Practice regularly in Pronunciation mode using shadowing techniques."""
+
+        else:
+            # Vietnamese Default
+            output_lang_instruction = "tiếng Việt"
+            system_prompt = f"""Bạn là một chuyên gia đào tạo ngôn ngữ hàng đầu.
+Hãy đánh giá buổi luyện tập thoại giữa người học và AI theo thông tin sau.
+MỌI TIÊU ĐỀ, HẠNG MỤC, NỘI DUNG, VÀ LỜI KHUYÊN BẮT BUỘC CHỈ ĐƯỢC VIẾT BẰNG tiếng Việt.
 
 Hội thoại:
 {json.dumps(messages, ensure_ascii=False, indent=2)}
 
-Yêu cầu xuất báo cáo bằng Markdown (Bắt buộc 100% bằng {user_lang}):
-1. **Tổng quan buổi học**
-2. **Điểm mạnh của người học**
-3. **Các lỗi ngữ pháp / từ vựng cần lưu ý & Cách sửa chuẩn** (Viết ngắn gọn, rõ ràng, không viết dở dang)
-4. **Lời khuyên nâng trình độ (CEFR)**
-
-QUAN TRỌNG: 
-- Tất cả nội dung phải hoàn toàn bằng {user_lang}.
-- Trình bày mạch lạc, ngắn gọn, súc tích và HOÀN TOÀN CÓ HẬU (Không ngắt câu hay ngắt đoạn giữa chừng)."""
-
-        payload = {
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 4096}
-        }
-
-        for model in PRIMARY_MODELS:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-            try:
-                res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=20)
-                if res.status_code == 200:
-                    res_data = res.json()
-                    parts = res_data["candidates"][0]["content"]["parts"]
-                    summary_text = "".join([p.get("text", "") for p in parts])
-                    return jsonify({"summary": summary_text, "used_model": model})
-            except Exception:
-                continue
-
-        # Local Fallback summary if quota exceeded
-        fallback_summary = f"""# 📊 Báo cáo bài học ({user_lang})
+Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
+# 📊 Báo cáo & Lời khuyên tổng kết bài học
 
 ## 1. Tổng quan buổi học
 - **Ngôn ngữ học**: {target_lang}
 - **Trình độ**: {level}
-- **Trạng thái**: Bài học đã hoàn thành xuất sắc! Người học phản xạ nhanh và áp dụng tốt từ vựng tình huống.
+- **Trạng thái**: Bài học đã hoàn thành xuất sắc! Người học phản xạ nhanh và chủ động giao tiếp.
 
 ## 2. Điểm mạnh
 - Phản xạ giao tiếp tự nhiên, nắm bắt ngữ cảnh tốt.
@@ -449,10 +502,51 @@ QUAN TRỌNG:
 - Tiếp tục mở rộng vốn từ vựng chuyên sâu và chú ý nối âm.
 - Luyện tập phát âm thường xuyên qua tính năng Luyện Phát Âm."""
 
-        return jsonify({"summary": fallback_summary, "used_model": "Local"})
+            fallback_summary = f"""# 📊 Báo cáo & Lời khuyên tổng kết bài học
+
+## 1. Tổng quan buổi học
+- **Ngôn ngữ học**: {target_lang}
+- **Trình độ**: {level}
+- **Trạng thái**: Bài học đã hoàn thành xuất sắc! Người học phản xạ nhanh và chủ động giao tiếp.
+
+## 2. Điểm mạnh
+- Phản xạ giao tiếp tự nhiên, nắm bắt ngữ cảnh tốt.
+- Sử dụng đúng cấu trúc câu cơ bản và từ vựng chủ đề.
+
+## 3. Lời khuyên nâng cao trình độ
+- Tiếp tục mở rộng vốn từ vựng chuyên sâu và chú ý nối âm.
+- Luyện tập phát âm thường xuyên qua tính năng Luyện Phát Âm."""
+
+        if not api_key:
+            return jsonify({"summary": fallback_summary, "used_model": "Local"}), 200
+
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": system_prompt}]}],
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 4096}
+        }
+
+        for model in PRIMARY_MODELS:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            try:
+                res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
+                if res.status_code == 200:
+                    res_data = res.json()
+                    candidates = res_data.get("candidates", [])
+                    if candidates and "content" in candidates[0]:
+                        parts = candidates[0]["content"].get("parts", [])
+                        summary_text = "".join([p.get("text", "") for p in parts])
+                        if summary_text and len(summary_text.strip()) > 30:
+                            return jsonify({"summary": summary_text, "used_model": model})
+            except Exception as e:
+                print(f"Summary generation error with {model}:", e)
+                continue
+
+        # Local Fallback summary aligned with UI language
+        return jsonify({"summary": fallback_summary, "used_model": "Local"}), 200
 
     except Exception as ex:
-        return jsonify({"error": f"Lỗi summary: {str(ex)}"}), 500
+        print("Summary endpoint exception:", ex)
+        return jsonify({"summary": "Lỗi kết nối summary.", "used_model": "Local"}), 200
 
 
 @app.route("/")
