@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.95 Implementation
+// Main Application Controller - LingoBot2 Ver1.00 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.95]. Đã khắc phục triệt để lỗi nhận diện API Key.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.00]. Tách biệt 100% ô nhập hội thoại và ô nhập API Key.");
     },
 
     updateUiLanguage(lang) {
@@ -498,6 +498,20 @@ window.LingoApp = {
         this.apiKey = key.trim();
         localStorage.setItem("lingobot_api_key", this.apiKey);
         window.LingoLog.add("Đã lưu Google API Key nhập thủ công vào trình duyệt.");
+    },
+
+    saveManualApiKey() {
+        const inputEl = document.getElementById("manualApiKeyInput");
+        const val = inputEl ? inputEl.value.trim() : "";
+        if (!val) {
+            alert("Vui lòng nhập API Key / APIキーを入力してください。");
+            return;
+        }
+        this.setApiKey(val);
+        inputEl.value = "";
+        const setupRow = document.getElementById("setupBubbleRow");
+        if (setupRow) setupRow.classList.add("hidden");
+        alert("Đã lưu Google API Key thủ công thành công! / Google API Key を設定しました！");
     },
 
     bindEvents() {
@@ -766,14 +780,7 @@ Quy tắc ứng xử:
         const chatInput = document.getElementById("chatInput");
         const text = chatInput ? chatInput.value.trim() : "";
 
-        // STRICT REGEX / PREFIX CHECK for Google Gemini API Keys (Must start with "AIzaSy" and be at least 35 chars)
-        if (text.startsWith("AIzaSy") && text.length >= 35) {
-            this.setApiKey(text);
-            chatInput.value = "";
-            alert("Đã lưu Google API Key thủ công thành công! / Google API Key を設定しました！");
-            return;
-        }
-
+        // Chat Input is 100% DEDICATED to conversation messages ONLY! No Key interceptions!
         if (!text) return;
         chatInput.value = "";
 

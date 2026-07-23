@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver0.95 - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBot2 Ver0.95 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
+    <title>LingoBot2 Ver1.00 - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBot2 Ver1.00 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=0.95">
-    <link rel="stylesheet" href="styles/components.css?v=0.95">
+    <link rel="stylesheet" href="styles/main.css?v=1.00">
+    <link rel="stylesheet" href="styles/components.css?v=1.00">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver0.95 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver1.00 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver0.95</span>
+                    <span class="version-badge">Ver1.00</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -104,19 +104,39 @@
                         </div>
                     </div>
                     
-                    <!-- API Key Setup Prompt Bubble (Hidden by default unless server environment key is missing) -->
+                    <!-- Dedicated API Key Setup Prompt Bubble with INLINE INPUT FIELD -->
                     <div class="chat-row ai-row hidden" id="setupBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
                                 🔑 Google Gemini API Key Setup:
                             </div>
-                            <div class="setup-text-vn" id="setupTextVn">
-                                <strong>vn</strong> Vui lòng nhập Google Gemini API Key (ví dụ: AIzaSy...) vào khung chat bên dưới để bắt đầu (nếu môi trường Vercel chưa được cấu hình):
+                            <div class="setup-text-vn" id="setupTextVn" style="margin-bottom: 8px;">
+                                <strong>vn</strong> Vui lòng nhập Google Gemini API Key của bạn vào ô bên dưới và nhấn nút "Lưu Key":
                             </div>
-                            <div class="setup-text-jp" id="setupTextJp">
-                                <strong>jp</strong> Vercel環境変数にキーが設定されていない場合は、Google Gemini APIキー（例: AIzaSy...）を下の入力欄に入力してください：
+                            <div class="setup-text-jp" id="setupTextJp" style="margin-bottom: 10px;">
+                                <strong>jp</strong> Google Gemini APIキーを下の入力欄に入力し、「設定保存」ボタンを押してください：
                             </div>
                             
+                            <!-- Dedicated Inline Input Form inside Chat Bubble -->
+                            <div class="bubble-input-group" style="display: flex; gap: 8px; margin-top: 6px; margin-bottom: 8px;">
+                                <input 
+                                    type="text" 
+                                    id="manualApiKeyInput" 
+                                    class="bubble-key-input" 
+                                    placeholder="Google Gemini API Key (Ví dụ: AQ.Ab...)"
+                                    style="flex: 1; padding: 8px 12px; border: 1px solid #fdba74; border-radius: 12px; font-size: 0.88rem; outline: none;"
+                                />
+                                <button 
+                                    type="button" 
+                                    id="saveApiKeyBtn" 
+                                    class="bubble-key-btn" 
+                                    onclick="window.LingoApp.saveManualApiKey()"
+                                    style="padding: 8px 16px; background: #ea580c; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;"
+                                >
+                                    💾 Lưu Key / 保存
+                                </button>
+                            </div>
+
                             <div class="setup-meta">
                                 <span class="sender-tag">🤖 LingoBot2</span>
                                 <span class="time-tag" id="setupTimestamp">07:37</span>
@@ -251,7 +271,7 @@
                 </div>
             </main>
 
-            <!-- Footer Controls matching screenshot -->
+            <!-- Footer Controls with DEDICATED Chat Text Input -->
             <footer class="app-footer-bar">
                 <div class="footer-input-wrapper">
                     <input 
@@ -331,10 +351,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=0.95"></script>
-    <script src="js/tts.js?v=0.95"></script>
-    <script src="js/stt.js?v=0.95"></script>
-    <script src="js/summary.js?v=0.95"></script>
-    <script src="js/app.js?v=0.95"></script>
+    <script src="js/log.js?v=1.00"></script>
+    <script src="js/tts.js?v=1.00"></script>
+    <script src="js/stt.js?v=1.00"></script>
+    <script src="js/summary.js?v=1.00"></script>
+    <script src="js/app.js?v=1.00"></script>
 </body>
 </html>
