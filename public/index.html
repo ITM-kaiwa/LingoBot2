@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver0.40 - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBot2 Ver0.40 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
+    <title>LingoBot2 Ver0.41 - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBot2 Ver0.41 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,12 +15,12 @@
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver0.40 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver0.41 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver0.40</span>
+                    <span class="version-badge">Ver0.41</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -33,25 +33,25 @@
                     </button>
                 </div>
 
-                <!-- Status Badges with selectable UI & Target Languages -->
+                <!-- Status Badges with abbreviated VN / JP / EN dropdowns -->
                 <div class="badges-group">
-                    <!-- UI Language Selectable Dropdown (UI Eng label) -->
+                    <!-- UI Language Selectable Dropdown (VN / JP / EN) -->
                     <div class="badge-pill badge-ui">
                         <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
                         <select id="uiLangSelect" class="badge-select">
-                            <option value="tiếng Việt" selected>vn Tiếng Việt</option>
-                            <option value="tiếng Nhật">jp 日本語</option>
-                            <option value="tiếng Anh">us UI Eng</option>
+                            <option value="tiếng Việt" selected>VN</option>
+                            <option value="tiếng Nhật">JP</option>
+                            <option value="tiếng Anh">EN</option>
                         </select>
                     </div>
 
-                    <!-- Target Language Dropdown -->
+                    <!-- Target Language Dropdown (VN / JP / EN) -->
                     <div class="badge-pill badge-target">
                         <span class="badge-prefix" id="lblTargetLang">Mục tiêu:</span>
                         <select id="targetLangSelect" class="badge-select">
-                            <option value="us English" selected>us English</option>
-                            <option value="jp 日本語">jp 日本語</option>
-                            <option value="vn Tiếng Việt">vn Tiếng Việt</option>
+                            <option value="us English" selected>EN</option>
+                            <option value="jp 日本語">JP</option>
+                            <option value="vn Tiếng Việt">VN</option>
                         </select>
                     </div>
                 </div>
@@ -86,11 +86,11 @@
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
                     
-                    <!-- API Key Setup Prompt Bubble (Required API Key) -->
+                    <!-- API Key Setup Prompt Bubble (English Only Title as requested) -->
                     <div class="chat-row ai-row" id="setupBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
-                                🔑 Google Gemini API Key Setup / Google Gemini APIキーの設定:
+                                🔑 Google Gemini API Key Setup:
                             </div>
                             <div class="setup-text-vn" id="setupTextVn">
                                 <strong>vn</strong> Chào bạn! Vui lòng nhập Google Gemini API Key (ví dụ: AIzaSy...) vào khung chat bên dưới để bắt đầu:
@@ -205,9 +205,9 @@
                                 <div class="filter-group">
                                     <span id="lblFilterLang">Ngôn ngữ:</span>
                                     <button type="button" id="chipLangAll" class="filter-chip active" data-lang="all">Tất cả</button>
-                                    <button type="button" class="filter-chip" data-lang="jp 日本語">jp 日本語</button>
-                                    <button type="button" class="filter-chip" data-lang="us English">us English</button>
-                                    <button type="button" class="filter-chip" data-lang="vn Tiếng Việt">vn Tiếng Việt</button>
+                                    <button type="button" class="filter-chip" data-lang="jp 日本語">JP</button>
+                                    <button type="button" class="filter-chip" data-lang="us English">EN</button>
+                                    <button type="button" class="filter-chip" data-lang="vn Tiếng Việt">VN</button>
                                 </div>
 
                                 <div class="filter-group">

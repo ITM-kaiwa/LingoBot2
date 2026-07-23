@@ -22,7 +22,6 @@ def parse_retry_seconds(error_text):
     """Extract retry seconds from Google API error text e.g., 'Please retry after 15.2s' or 'retry in 20 seconds'"""
     if not error_text:
         return None
-    # Match patterns like "retry after 15.2s", "retry after 15 seconds", "Please wait 10s"
     match = re.search(r'retry\s+after\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
     if not match:
         match = re.search(r'retry\s+in\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
@@ -185,21 +184,22 @@ def tts():
         if not text:
             return jsonify({"error": "Nội dung văn bản trống"}), 400
 
-        # Extract language code e.g., ja-JP, en-US, vi-VN
         parts = voice_name.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
         # Build priority list starting strictly with user-selected voice_name
         fallback_voices = [voice_name]
         
+        # Note: Chirp 3 HD requires OAuth2 tokens and returns 401 with API Key.
+        # Fall back immediately to Neural2 / WaveNet / Standard which support API Key authentication!
         if "ja-JP" in lang_code:
-            fallback_voices += ["ja-JP-Chirp3-HD-F", "ja-JP-Chirp3-HD-M", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
+            fallback_voices += ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
         elif "en-US" in lang_code:
-            fallback_voices += ["en-US-Chirp3-HD-F", "en-US-Chirp3-HD-M", "en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
+            fallback_voices += ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
         else:
             fallback_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
-        # Deduplicate preserving strict user selection priority
+        # Deduplicate preserving strict priority
         seen = set()
         dedup_voices = []
         for v in fallback_voices:
@@ -240,8 +240,14 @@ def tts():
                             "model_used": v_name
                         })
                 else:
-                    last_error = f"HTTP {res.status_code}: {res.text[:150]}"
-                    print(f"TTS voice {v_name} returned error: {last_error}")
+                    err_msg = res.text[:180]
+                    # If 401 occurs (Chirp3-HD requiring OAuth2 instead of API Key), log and smoothly continue to Neural2
+                    if res.status_code == 401 and "Chirp" in v_name:
+                        print(f"TTS Note: {v_name} requires OAuth2 token. Falling back to Neural2...")
+                        last_error = "Chirp 3 HD requires OAuth2, fallback to Neural2"
+                    else:
+                        last_error = f"HTTP {res.status_code}: {err_msg}"
+                        print(f"TTS voice {v_name} error: {last_error}")
             except Exception as e:
                 last_error = str(e)
                 print(f"TTS voice {v_name} exception:", e)

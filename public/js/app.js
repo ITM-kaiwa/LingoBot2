@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.40 Implementation
+// Main Application Controller - LingoBot2 Ver0.41 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -12,7 +12,7 @@ window.LingoApp = {
     messages: [],
     isProcessing: false,
 
-    // I18N Dictionary translating 100% of UI elements including API Retry-After messages
+    // I18N Dictionary translating 100% of UI elements
     i18n: {
         "tiếng Việt": {
             tabGiaoTiep: "Giao tiếp",
@@ -71,9 +71,9 @@ window.LingoApp = {
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
             apiRetryWait: (sec) => `⚠️ Hệ thống API đang bận. Vui lòng đợi ${sec} giây trước khi nhập lại.`,
 
-            // Inner Chat & Pronunciation Buttons
+            // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ Phát",
-            btnStop: "⏹ Dừng",
+            btnStop: "⏹ STOP",
             btnDownload: "⬇ Tải MP3",
             btnSamplePlay: "▶ Nghe mẫu",
             btnSampleRecord: "🎙️ Thu âm & Chấm điểm",
@@ -141,9 +141,9 @@ window.LingoApp = {
             aiSummarizing: "AIがまとめています...",
             apiRetryWait: (sec) => `⚠️ APIが混雑しています。${sec}秒待ってから再度入力してください。`,
 
-            // Inner Chat & Pronunciation Buttons
+            // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ 再生",
-            btnStop: "⏹ 停止",
+            btnStop: "⏹ STOP",
             btnDownload: "⬇ DL MP3",
             btnSamplePlay: "▶ お手本を聞く",
             btnSampleRecord: "🎙️ 録音＆判定",
@@ -157,7 +157,7 @@ window.LingoApp = {
         "tiếng Anh": {
             tabGiaoTiep: "Conversation",
             tabPhatAm: "Pronunciation",
-            lblUiLang: "UI Eng:",
+            lblUiLang: "UI Lang:",
             lblTargetLang: "Target Lang:",
             resetBtn: "Reset",
             endBtn: "End",
@@ -211,9 +211,9 @@ window.LingoApp = {
             aiSummarizing: "AI is summarizing...",
             apiRetryWait: (sec) => `⚠️ API is currently busy. Please wait ${sec} seconds before trying again.`,
 
-            // Inner Chat & Pronunciation Buttons
+            // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ Play",
-            btnStop: "⏹ Stop",
+            btnStop: "⏹ STOP",
             btnDownload: "⬇ DL MP3",
             btnSamplePlay: "▶ Play Sample",
             btnSampleRecord: "🎙️ Record & Grade",
@@ -326,7 +326,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.40].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.41].");
     },
 
     updateUiLanguage(lang) {
@@ -889,7 +889,7 @@ Quy tắc ứng xử:
             const stopBtn = document.createElement("button");
             stopBtn.type = "button";
             stopBtn.className = "audio-btn btn-stop";
-            stopBtn.textContent = dict.btnStop || "⏹ Dừng";
+            stopBtn.textContent = dict.btnStop || "⏹ STOP";
             stopBtn.addEventListener("click", () => window.LingoTTS.stop());
 
             const downloadBtn = document.createElement("button");
