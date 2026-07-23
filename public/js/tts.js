@@ -108,7 +108,9 @@ window.LingoTTS = {
     resetActiveButton() {
         if (this.currentActiveBtn) {
             this.currentActiveBtn.classList.remove("playing");
-            this.currentActiveBtn.textContent = "▶ Phát";
+            const uiLang = window.LingoApp ? window.LingoApp.uiLang : "tiếng Việt";
+            const dict = window.LingoApp && window.LingoApp.i18n ? window.LingoApp.i18n[uiLang] : null;
+            this.currentActiveBtn.textContent = dict ? dict.btnPlay : "▶ Phát";
             this.currentActiveBtn = null;
         }
     },
@@ -126,13 +128,13 @@ window.LingoTTS = {
         if (btnElement) {
             this.currentActiveBtn = btnElement;
             this.currentActiveBtn.classList.add("playing");
-            this.currentActiveBtn.textContent = "▶ Đang phát...";
+            this.currentActiveBtn.textContent = "▶ ...";
         }
 
         const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
         const voiceName = customVoiceModel || this.getSelectedVoiceModel();
 
-        window.LingoLog.add(`Phát TTS [Google Cloud: ${voiceName}]: "${cleanSpeechText.substring(0, 35)}..."`);
+        window.LingoLog.add(`Yêu cầu Google Cloud TTS [Voice: ${voiceName}]: "${cleanSpeechText.substring(0, 35)}..."`);
 
         try {
             const response = await fetch("/api/tts", {
@@ -152,13 +154,12 @@ window.LingoTTS = {
                 if (btnElement) btnElement._cachedAudioUrl = data.audio_url;
                 await this.audioPlayer.play();
                 
-                // Update live active running model badge in header
                 const usedModel = data.model_used || voiceName;
                 this.updateActiveTtsBadge(usedModel);
-                window.LingoLog.add(`Đang phát audio thành công bằng giọng đọc (${usedModel}).`);
+                window.LingoLog.add(`Phát thành công giọng Google Cloud TTS: (${usedModel})`);
             } else {
                 this.updateActiveTtsBadge("Web-Speech");
-                window.LingoLog.add(`TTS Backend: Chuyển sang Web SpeechSynthesis trình duyệt (${voiceName})...`, data.error || "");
+                window.LingoLog.add(`Google Cloud TTS API Error (${data.error || 'Thiếu API Key'}). Chuyển sang Web SpeechSynthesis trình duyệt...`);
                 this.fallbackBrowserTTS(cleanSpeechText, voiceName);
             }
         } catch (err) {
@@ -171,7 +172,7 @@ window.LingoTTS = {
     // Download synthesized MP3 audio file
     async downloadAudio(text, cachedUrl = null) {
         if (cachedUrl && cachedUrl.startsWith("data:audio")) {
-            this.triggerFileDownload(cachedUrl, "lingobot_ai_speech.mp3");
+            this.triggerFileDownload(cachedUrl, "lingobot2_ai_speech.mp3");
             window.LingoLog.add("Đã tải xuống tệp âm thanh MP3 từ bộ nhớ đệm.");
             return;
         }
@@ -195,12 +196,12 @@ window.LingoTTS = {
 
             const data = await response.json();
             if (response.ok && data.audio_url) {
-                this.triggerFileDownload(data.audio_url, "lingobot_ai_speech.mp3");
+                this.triggerFileDownload(data.audio_url, "lingobot2_ai_speech.mp3");
                 const usedModel = data.model_used || voiceName;
                 this.updateActiveTtsBadge(usedModel);
                 window.LingoLog.add(`Đã tải xuống MP3 thành công (${usedModel}).`);
             } else {
-                alert("Không thể tạo tệp âm thanh để tải xuống. Vui lòng kiểm tra API Key.");
+                alert("Không thể tạo tệp âm thanh. Vui lòng kiểm tra Google API Key.");
             }
         } catch (err) {
             window.LingoLog.add("Lỗi tải xuống audio", err.message);

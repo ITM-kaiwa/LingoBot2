@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.30 Implementation
+// Main Application Controller - LingoBot2 Ver0.31 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -12,7 +12,7 @@ window.LingoApp = {
     messages: [],
     isProcessing: false,
 
-    // I18N Dictionary translating 100% of UI elements
+    // I18N Dictionary translating 100% of UI elements including all inner buttons
     i18n: {
         "tiếng Việt": {
             tabGiaoTiep: "Giao tiếp",
@@ -63,11 +63,25 @@ window.LingoApp = {
             startBtn: "🚀 Bắt đầu hội thoại ngay",
             pronounceTitle: "🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)",
             pronounceSub: "Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.",
+            pronounceFeedbackTitle: "📊 Kết quả phân tích phát âm từ AI:",
             filterLang: "Ngôn ngữ:",
             filterLevel: "Trình độ:",
             filterAll: "Tất cả",
             aiThinking: "AI đang suy nghĩ...",
-            aiSummarizing: "AI đang tổng hợp báo cáo bài học..."
+            aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
+
+            // Inner Chat & Pronunciation Buttons
+            btnPlay: "▶ Phát",
+            btnStop: "⏹ Dừng",
+            btnDownload: "⬇ Tải MP3",
+            btnSamplePlay: "▶ Nghe mẫu",
+            btnSampleRecord: "🎙️ Thu âm & Chấm điểm",
+
+            // Summary Modal
+            summaryModalTitle: "📊 Báo cáo & Lời khuyên tổng kết bài học",
+            btnPrint: "In báo cáo",
+            btnPdf: "Tải PDF",
+            btnClose: "Đóng"
         },
         "tiếng Nhật": {
             tabGiaoTiep: "対話練習",
@@ -118,11 +132,25 @@ window.LingoApp = {
             startBtn: "🚀 会話を開始する",
             pronounceTitle: "🎯 発音・シャドーイング練習",
             pronounceSub: "下の例文（初級・中級・上級の計80文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
+            pronounceFeedbackTitle: "📊 AI発音分析結果:",
             filterLang: "言語:",
             filterLevel: "レベル:",
             filterAll: "すべて",
             aiThinking: "AIが思考中です...",
-            aiSummarizing: "AIがまとめています..."
+            aiSummarizing: "AIがまとめています...",
+
+            // Inner Chat & Pronunciation Buttons
+            btnPlay: "▶ 再生",
+            btnStop: "⏹ 停止",
+            btnDownload: "⬇ DL MP3",
+            btnSamplePlay: "▶ お手本を聞く",
+            btnSampleRecord: "🎙️ 録音＆判定",
+
+            // Summary Modal
+            summaryModalTitle: "📊 レッスン総括レポート＆アドバイス",
+            btnPrint: "レポートを印刷",
+            btnPdf: "PDF保存",
+            btnClose: "閉じる"
         },
         "tiếng Anh": {
             tabGiaoTiep: "Conversation",
@@ -173,11 +201,25 @@ window.LingoApp = {
             startBtn: "🚀 Start Conversation Now",
             pronounceTitle: "🎯 Pronunciation & Intonation Practice",
             pronounceSub: "Select from 80 sample sentences (Beginner/Intermediate/Advanced) or speak into mic for AI pronunciation feedback.",
+            pronounceFeedbackTitle: "📊 AI Pronunciation Analysis:",
             filterLang: "Language:",
             filterLevel: "Level:",
             filterAll: "All",
             aiThinking: "AI is thinking...",
-            aiSummarizing: "AI is summarizing..."
+            aiSummarizing: "AI is summarizing...",
+
+            // Inner Chat & Pronunciation Buttons
+            btnPlay: "▶ Play",
+            btnStop: "⏹ Stop",
+            btnDownload: "⬇ DL MP3",
+            btnSamplePlay: "▶ Play Sample",
+            btnSampleRecord: "🎙️ Record & Grade",
+
+            // Summary Modal
+            summaryModalTitle: "📊 Lesson Summary & Advice Report",
+            btnPrint: "Print Report",
+            btnPdf: "Download PDF",
+            btnClose: "Close"
         }
     },
 
@@ -193,7 +235,7 @@ window.LingoApp = {
         { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "水（みず）を一杯（いっぱい）ください。", translation: "Cho tôi xin một ly nước lọc." },
         { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "これを試着（しちゃく）してもいいですか。", translation: "Tôi có thể thử cái này được không?" },
         { id: 109, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "免税（めんぜい）の手続（てつづ）きはできますか。", translation: "Có thể làm thủ tục miễn thuế ở đây không?" },
-        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ね가）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
+        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ねが）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
 
         { id: 111, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "飛行機（ひこうき）の出発（しゅっぱつ）時間（じかん）が変更（へんこう）になったようです。", translation: "Hình như giờ xuất phát chuyến bay đã bị thay đổi." },
         { id: 112, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "来週（らいしゅう）の会議（かいぎ）のスケジュールを調整（ちょうせい）していただけますか。", translation: "Bạn có thể điều chỉnh lịch họp tuần sau giúp tôi không?" },
@@ -240,7 +282,7 @@ window.LingoApp = {
         { id: 219, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I am feeling a bit under the weather today, so I will take a sick leave.", translation: "Hôm nay tôi thấy mệt nên xin phép nghỉ bệnh." },
         { id: 220, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We look forward to continuing our fruitful cooperation in the upcoming year.", translation: "Chúng tôi mong tiếp tục hợp tác hiệu quả trong năm tới." },
 
-        { id: 221, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ để lập chiến lược dài hạn." },
+        { id: 221, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ để lập chiến lược trung - dài hạn." },
         { id: 222, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "In light of prevailing economic uncertainties, we decided to postpone the product launch.", translation: "Căn cứ tình hình kinh tế bất ổn, chúng tôi quyết định hoãn ra mắt sản phẩm." },
         { id: 223, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Implementing structural reforms is imperative to securing sustainable corporate growth.", translation: "Thực hiện cải cách cơ cấu là bắt buộc để đảm bảo tăng trưởng bền vững." },
         { id: 224, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
@@ -281,7 +323,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.30].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.31].");
     },
 
     updateUiLanguage(lang) {
@@ -346,16 +388,33 @@ window.LingoApp = {
         setTxt("startChatBtn", dict.startBtn);
         setTxt("txtPronounceTitle", dict.pronounceTitle);
         setTxt("txtPronounceSub", dict.pronounceSub);
+        setTxt("txtPronounceFeedbackTitle", dict.pronounceFeedbackTitle);
         setTxt("lblFilterLang", dict.filterLang);
         setTxt("lblFilterLevel", dict.filterLevel);
         setTxt("chipLangAll", dict.filterAll);
         setTxt("chipLevelAll", dict.filterAll);
         setTxt("txtSummaryLoading", dict.aiSummarizing);
 
+        // Update Summary Modal elements
+        setTxt("txtSummaryModalTitle", dict.summaryModalTitle);
+        setTxt("txtPrintBtn", dict.btnPrint);
+        setTxt("txtPdfBtn", dict.btnPdf);
+        setTxt("txtCloseBtn", dict.btnClose);
+
         const chatInput = document.getElementById("chatInput");
         if (chatInput) chatInput.placeholder = dict.placeholder;
 
-        window.LingoLog.add(`Cập nhật 100% văn bản giao diện sang: ${lang}`);
+        // Dynamically update all existing chat bubble buttons to UI language
+        document.querySelectorAll(".btn-play").forEach(btn => {
+            if (!btn.classList.contains("playing")) btn.textContent = dict.btnPlay;
+        });
+        document.querySelectorAll(".btn-stop").forEach(btn => btn.textContent = dict.btnStop);
+        document.querySelectorAll(".btn-download").forEach(btn => btn.textContent = dict.btnDownload);
+
+        // Re-render sample sentences list to update pronunciation buttons
+        this.renderPronounceSamples();
+
+        window.LingoLog.add(`Cập nhật 100% văn bản & nút bấm giao diện sang: ${lang}`);
     },
 
     openLogModal() {
@@ -468,7 +527,7 @@ window.LingoApp = {
         const ttsSelect = document.getElementById("ttsModelSelect");
         if (ttsSelect) {
             ttsSelect.addEventListener("change", (e) => {
-                this.userSelectedTtsModel = e.target.value; // Store user explicit selection
+                this.userSelectedTtsModel = e.target.value;
                 window.LingoTTS.updateActiveTtsBadge(e.target.value);
                 window.LingoLog.add(`Thay đổi giọng đọc TTS thủ công: ${e.target.value}`);
             });
@@ -534,6 +593,7 @@ window.LingoApp = {
         if (!listEl) return;
 
         listEl.innerHTML = "";
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
 
         const filtered = this.sampleSentences.filter(item => {
             const matchLang = (this.filterLang === 'all' || item.lang === this.filterLang);
@@ -571,13 +631,13 @@ window.LingoApp = {
             const playBtn = document.createElement("button");
             playBtn.type = "button";
             playBtn.className = "btn-sample btn-sample-play";
-            playBtn.textContent = "▶ Nghe mẫu";
+            playBtn.textContent = dict.btnSamplePlay || "▶ Nghe mẫu";
             playBtn.addEventListener("click", () => window.LingoTTS.playText(item.text, playBtn));
 
             const recBtn = document.createElement("button");
             recBtn.type = "button";
             recBtn.className = "btn-sample btn-sample-record";
-            recBtn.textContent = "🎙️ Thu âm & Chấm điểm";
+            recBtn.textContent = dict.btnSampleRecord || "🎙️ Thu âm & Chấm điểm";
             recBtn.addEventListener("click", () => this.assessPronunciation(item.text));
 
             actionsDiv.appendChild(playBtn);
@@ -635,7 +695,6 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     updateTtsModelForLanguage(lang) {
-        // Do NOT overwrite if user explicitly selected a voice model!
         if (this.userSelectedTtsModel) return;
 
         const select = document.getElementById("ttsModelSelect");
@@ -773,6 +832,8 @@ Quy tắc ứng xử:
     appendMessage(role, content, usedModel = null) {
         this.messages.push({ role, content });
 
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+
         const container = document.getElementById("chatContainer");
         const row = document.createElement("div");
         row.className = `chat-row ${role === 'user' ? 'user-row' : 'ai-row'}`;
@@ -791,7 +852,6 @@ Quy tắc ứng xử:
         const timeSpan = document.createElement("span");
         timeSpan.className = "msg-time";
 
-        // Display "Gemini-Other" if used model is not 3.6-flash or 3.5-flash
         let formattedModelTag = usedModel;
         if (usedModel) {
             if (usedModel.includes("Gemini-Other") || (usedModel !== "gemini-3.6-flash" && usedModel !== "gemini-3.5-flash")) {
@@ -809,19 +869,19 @@ Quy tắc ứng xử:
             const playBtn = document.createElement("button");
             playBtn.type = "button";
             playBtn.className = "audio-btn btn-play";
-            playBtn.textContent = "▶ Phát";
+            playBtn.textContent = dict.btnPlay || "▶ Phát";
             playBtn.addEventListener("click", () => window.LingoTTS.playText(content, playBtn));
 
             const stopBtn = document.createElement("button");
             stopBtn.type = "button";
             stopBtn.className = "audio-btn btn-stop";
-            stopBtn.textContent = "⏹ Dừng";
+            stopBtn.textContent = dict.btnStop || "⏹ Dừng";
             stopBtn.addEventListener("click", () => window.LingoTTS.stop());
 
             const downloadBtn = document.createElement("button");
             downloadBtn.type = "button";
             downloadBtn.className = "audio-btn btn-download";
-            downloadBtn.textContent = "⬇ Tải MP3";
+            downloadBtn.textContent = dict.btnDownload || "⬇ Tải MP3";
             downloadBtn.title = "Tải tệp âm thanh MP3 về máy";
             downloadBtn.addEventListener("click", () => window.LingoTTS.downloadAudio(content, playBtn._cachedAudioUrl));
 

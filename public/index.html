@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LingoBot2 Ver0.30 - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBot2 Ver0.30 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
+    <title>LingoBot2 Ver0.31 - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBot2 Ver0.31 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,12 +15,12 @@
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver0.30 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver0.31 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver0.30</span>
+                    <span class="version-badge">Ver0.31</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -35,7 +35,7 @@
 
                 <!-- Status Badges with selectable UI & Target Languages -->
                 <div class="badges-group">
-                    <!-- UI Language Selectable Dropdown (UI Eng label to avoid overflow) -->
+                    <!-- UI Language Selectable Dropdown (UI Eng label) -->
                     <div class="badge-pill badge-ui">
                         <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
                         <select id="uiLangSelect" class="badge-select">
@@ -86,7 +86,7 @@
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
                     
-                    <!-- API Key Setup Prompt Bubble (Required API Key, Skip Removed) -->
+                    <!-- API Key Setup Prompt Bubble (Required API Key) -->
                     <div class="chat-row ai-row" id="setupBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
@@ -226,7 +226,7 @@
 
                         <!-- Pronunciation Feedback Box -->
                         <div class="pronounce-feedback-box hidden" id="pronounceFeedback">
-                            <h3>📊 Kết quả phân tích phát âm từ AI:</h3>
+                            <h3 id="txtPronounceFeedbackTitle">📊 Kết quả phân tích phát âm từ AI:</h3>
                             <div id="pronounceFeedbackText" class="feedback-text"></div>
                         </div>
                     </div>
@@ -287,7 +287,7 @@
     <div id="summaryModal" class="modal-backdrop hidden">
         <div class="modal-card modal-large">
             <div class="modal-header">
-                <h2>📊 Báo cáo & Lời khuyên tổng kết bài học</h2>
+                <h2 id="txtSummaryModalTitle">📊 Báo cáo & Lời khuyên tổng kết bài học</h2>
                 <button type="button" class="close-btn" id="closeSummaryBtn" onclick="window.LingoSummary.closeSummaryModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -300,9 +300,15 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="printSummaryBtn" class="modal-btn btn-pill-grey" onclick="window.LingoSummary.printReport()">🖨️ In báo cáo</button>
-                <button type="button" id="downloadPdfBtn" class="modal-btn btn-pill-orange" onclick="window.LingoSummary.downloadPDF()">📄 Tải PDF</button>
-                <button type="button" id="closeSummaryModalBtn" class="modal-btn btn-pill-red" onclick="window.LingoSummary.closeSummaryModal()">Đóng</button>
+                <button type="button" id="printSummaryBtn" class="modal-btn btn-pill-grey" onclick="window.LingoSummary.printReport()">
+                    <span>🖨️</span> <span id="txtPrintBtn">In báo cáo</span>
+                </button>
+                <button type="button" id="downloadPdfBtn" class="modal-btn btn-pill-orange" onclick="window.LingoSummary.downloadPDF()">
+                    <span>📄</span> <span id="txtPdfBtn">Tải PDF</span>
+                </button>
+                <button type="button" id="closeSummaryModalBtn" class="modal-btn btn-pill-red" onclick="window.LingoSummary.closeSummaryModal()">
+                    <span id="txtCloseBtn">Đóng</span>
+                </button>
             </div>
         </div>
     </div>

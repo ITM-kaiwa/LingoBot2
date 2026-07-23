@@ -33,7 +33,7 @@ window.LingoSummary = {
             { role: "model", content: "Chào bạn! Tôi luôn sẵn sàng đồng hành cùng bạn luyện giao tiếp." }
         ];
 
-        window.LingoLog.add("Đang tạo báo cáo bài học từ AI Gemini...");
+        window.LingoLog.add(`Đang tạo báo cáo bài học bằng ngôn ngữ ${userLang}...`);
 
         try {
             const response = await fetch("/api/summary", {
@@ -56,7 +56,6 @@ window.LingoSummary = {
                 window.LingoLog.add(`Tạo báo cáo thành công bằng mô hình ${data.used_model}`);
                 textContainer.innerHTML = this.markdownToHtml(data.summary);
             } else {
-                // Fallback default report rendering if backend key unavailable
                 textContainer.innerHTML = this.renderFallbackReport(userLang, targetLang, level);
                 window.LingoLog.add("Hiển thị báo cáo mẫu tổng kết hội thoại.");
             }
@@ -68,6 +67,44 @@ window.LingoSummary = {
     },
 
     renderFallbackReport(userLang, targetLang, level) {
+        if (userLang === "tiếng Nhật") {
+            return `
+                <h1>📊 LINGOBOT2 レッスン総括レポート</h1>
+                <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebdcd0;" />
+                <p><strong>学習言語:</strong> ${targetLang} | <strong>レベル:</strong> ${level}</p>
+                
+                <h2>1. レッスン総括</h2>
+                <p>対話AI LingoBot2との会話練習を完了しました。積極的な対話態度と自然な応答が見られました。</p>
+                
+                <h2>2. 良かった点</h2>
+                <ul>
+                    <li>場面に応じた基本的な挨拶や構文をしっかりと活用できています。</li>
+                    <li>発音・スピーキングへの意欲が高く、継続的な練習成果が出ています。</li>
+                </ul>
+
+                <h2>3. 改善点・アドバイス</h2>
+                <blockquote>毎日15〜20分間、LingoBot2でシャドーイングや対話練習を継続し、表現の幅をさらに広げましょう。</blockquote>
+            `;
+        } else if (userLang === "tiếng Anh") {
+            return `
+                <h1>📊 LINGOBOT2 LESSON SUMMARY REPORT</h1>
+                <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebdcd0;" />
+                <p><strong>Target Language:</strong> ${targetLang} | <strong>Level:</strong> ${level}</p>
+                
+                <h2>1. Lesson Overview</h2>
+                <p>The learner successfully completed interactive conversation practice with LingoBot2 AI assistant.</p>
+                
+                <h2>2. Strengths</h2>
+                <ul>
+                    <li>Great enthusiasm and active participation in speaking practice.</li>
+                    <li>Good command of foundational vocabulary and situational phrases.</li>
+                </ul>
+
+                <h2>3. Key Advice & Next Steps</h2>
+                <blockquote>Keep practicing daily for 15-20 minutes with LingoBot2 to continuously build confidence and fluency.</blockquote>
+            `;
+        }
+
         return `
             <h1>📊 BÁO CÁO TỔNG KẾT BÀI HỌC LINGOBOT2</h1>
             <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebdcd0;" />

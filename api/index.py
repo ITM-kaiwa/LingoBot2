@@ -31,7 +31,6 @@ def discover_available_gemini_models(api_key):
                 if "generateContent" in methods and "gemini" in name.lower():
                     if name not in PRIMARY_MODELS:
                         candidate_models.append(name)
-            # Sort candidate models preferring flash / 2.5 / 2.0
             candidate_models.sort(key=lambda x: (0 if "flash" in x else 1, 0 if "2.5" in x else 1))
             return candidate_models
     except Exception as e:
@@ -66,11 +65,12 @@ def chat():
                 "parts": [{"text": text_content}]
             })
 
+        # Increased maxOutputTokens to 4096 to prevent response truncation
         payload = {
             "contents": formatted_contents,
             "generationConfig": {
                 "temperature": 0.7,
-                "maxOutputTokens": 1200
+                "maxOutputTokens": 4096
             }
         }
         if system_instruction:
@@ -87,7 +87,7 @@ def chat():
             headers = {"Content-Type": "application/json"}
             
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=18)
+                res = requests.post(url, headers=headers, json=payload, timeout=22)
                 if res.status_code == 200:
                     res_data = res.json()
                     candidates = res_data.get("candidates", [])
@@ -106,7 +106,7 @@ def chat():
             except Exception as e:
                 logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
 
-        # 2. Dynamic Discovery & Fallback if 3.6-flash & 3.5-flash fail
+        # 2. Dynamic Discovery & Fallback
         logs.append("gemini-3.6-flash và 3.5-flash bận. Đang điều tra các mô hình Gemini khả dụng...")
         discovered_models = discover_available_gemini_models(api_key)
         
@@ -116,7 +116,7 @@ def chat():
             headers = {"Content-Type": "application/json"}
             
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=15)
+                res = requests.post(url, headers=headers, json=payload, timeout=20)
                 if res.status_code == 200:
                     res_data = res.json()
                     candidates = res_data.get("candidates", [])
@@ -147,7 +147,7 @@ def tts():
     try:
         data = request.get_json() or {}
         api_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
-        if api_key == "demo_skipped":
+        if not api_key or api_key == "demo_skipped":
             api_key = os.environ.get("GOOGLE_API_KEY", "")
 
         text = data.get("text", "").strip()
@@ -163,7 +163,6 @@ def tts():
         # Build priority list starting strictly with user-selected voice_name
         fallback_voices = [voice_name]
         
-        # Add fallback chain for language
         if "ja-JP" in lang_code:
             fallback_voices += ["ja-JP-Chirp3-HD-F", "ja-JP-Chirp3-HD-M", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
         elif "en-US" in lang_code:
@@ -179,42 +178,52 @@ def tts():
                 seen.add(v)
                 dedup_voices.append(v)
 
-        if api_key:
-            url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
-            for v_name in dedup_voices:
-                v_parts = v_name.split("-")
-                v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
-                
-                payload = {
-                    "input": {"text": text},
-                    "voice": {
-                        "languageCode": v_lang,
-                        "name": v_name
-                    },
-                    "audioConfig": {
-                        "audioEncoding": "MP3"
-                    }
+        if not api_key:
+            print("Google Cloud TTS API Error: No Google API Key provided!")
+            return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 400
+
+        url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
+        last_error = ""
+
+        for v_name in dedup_voices:
+            v_parts = v_name.split("-")
+            v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
+            
+            payload = {
+                "input": {"text": text},
+                "voice": {
+                    "languageCode": v_lang,
+                    "name": v_name
+                },
+                "audioConfig": {
+                    "audioEncoding": "MP3"
                 }
-                
-                try:
-                    res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=12)
-                    if res.status_code == 200:
-                        res_json = res.json()
-                        audio_base64 = res_json.get("audioContent", "")
-                        if audio_base64:
-                            return jsonify({
-                                "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                                "model_used": v_name
-                            })
-                except Exception as e:
-                    print(f"TTS voice {v_name} error:", e)
-                    continue
+            }
+            
+            try:
+                res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=12)
+                if res.status_code == 200:
+                    res_json = res.json()
+                    audio_base64 = res_json.get("audioContent", "")
+                    if audio_base64:
+                        return jsonify({
+                            "audio_url": f"data:audio/mp3;base64,{audio_base64}",
+                            "model_used": v_name
+                        })
+                else:
+                    last_error = f"HTTP {res.status_code}: {res.text[:150]}"
+                    print(f"TTS voice {v_name} returned error: {last_error}")
+            except Exception as e:
+                last_error = str(e)
+                print(f"TTS voice {v_name} exception:", e)
+                continue
 
         return jsonify({
+            "error": f"Không thể tổng hợp Google Cloud TTS ({last_error})",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code
-        })
+        }), 200
 
     except Exception as ex:
         return jsonify({"error": f"Lỗi TTS: {str(ex)}"}), 500
@@ -225,7 +234,7 @@ def summary():
     try:
         data = request.get_json() or {}
         api_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
-        if api_key == "demo_skipped":
+        if not api_key or api_key == "demo_skipped":
             api_key = os.environ.get("GOOGLE_API_KEY", "")
 
         messages = data.get("messages", [])
@@ -236,29 +245,34 @@ def summary():
         if not api_key:
             return jsonify({"error": "Thiếu Google API Key"}), 400
 
+        # Strict localization directive in prompt + clear concise instructions to prevent truncation
         prompt = f"""Bạn là một chuyên gia đào tạo ngôn ngữ hàng đầu.
 Hãy đánh giá buổi luyện tập thoại giữa người học và AI theo các thông tin sau:
 - Ngôn ngữ học tập: {target_lang}
 - Trình độ: {level}
-- Ngôn ngữ nhận xét: {user_lang}
+- Ngôn ngữ xuất báo cáo: {user_lang} (MỌI TIÊU ĐỀ, HẠNG MỤC, NỘI DUNG, PHÂN TÍCH, VÀ LỜI KHUYÊN BẮT BUỘC CHỈ ĐƯỢC VIẾT BẰNG {user_lang})
 
 Hội thoại:
 {json.dumps(messages, ensure_ascii=False, indent=2)}
 
-Xuất báo cáo chi tiết bằng Markdown bao gồm:
+Yêu cầu xuất báo cáo bằng Markdown (Bắt buộc 100% bằng {user_lang}):
 1. **Tổng quan buổi học**
-2. **Điểm mạnh người học**
-3. **Các lỗi ngữ pháp / từ vựng cần lưu ý** (Câu người học đã nói, cách sửa chuẩn, giải thích bằng {user_lang})
-4. **Lời khuyên nâng trình độ CEFR**"""
+2. **Điểm mạnh của người học**
+3. **Các lỗi ngữ pháp / từ vựng cần lưu ý & Cách sửa chuẩn** (Viết ngắn gọn, rõ ràng, không viết dở dang)
+4. **Lời khuyên nâng trình độ (CEFR)**
+
+QUAN TRỌNG: 
+- Tất cả nội dung phải hoàn toàn bằng {user_lang}.
+- Trình bày mạch lạc, ngắn gọn, súc tích và HOÀN TOÀN CÓ HẬU (Không ngắt câu hay ngắt đoạn giữa chừng)."""
 
         payload = {
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2000}
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 4096}
         }
 
         for model in PRIMARY_MODELS:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=25)
+            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
             if res.status_code == 200:
                 res_data = res.json()
                 parts = res_data["candidates"][0]["content"]["parts"]
