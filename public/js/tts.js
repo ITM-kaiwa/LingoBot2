@@ -1,11 +1,11 @@
-// TTS Engine Module - LingoBot2 Ver1.60 Implementation
+// TTS Engine Module - LingoBot2 Ver1.70 Implementation
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
 
     // Abbreviated TTS Model map for header badge
     ttsBadgeMap: {
-        "browser-native": "Web-Speech",
+        "browser-native": "General",
         "ja-JP-Chirp3-HD-F": "JP-Chirp(♀)",
         "ja-JP-Chirp3-HD-M": "JP-Chirp(♂)",
         "en-US-Chirp3-HD-F": "EN-Chirp(♀)",
@@ -73,10 +73,10 @@ window.LingoTTS = {
                              .replace(/【.*?】/g, '');
 
         // -------------------------------------------------------------------
-        // OPTION A: User Explicitly Selected "Browser Native (Web Speech API)"
+        // OPTION A: User Explicitly Selected "General (Web Speech API)"
         // -------------------------------------------------------------------
         if (selectedVoice === "browser-native") {
-            window.LingoLog.add(`Phát âm thanh [Voice: ブラウザ標準音声 (Web Speech API)]: "${cleanText.substring(0, 30)}..."`);
+            window.LingoLog.add(`Phát âm thanh [Voice: General (Web Speech API)]: "${cleanText.substring(0, 30)}..."`);
             this.playBrowserNativeSpeech(cleanText, playBtnElement);
             return;
         }
@@ -122,21 +122,21 @@ window.LingoTTS = {
                 };
                 
                 this.audioElement.onerror = () => {
-                    window.LingoLog.add("Lỗi phát tệp Audio HTML5 -> Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...");
+                    window.LingoLog.add("Lỗi phát tệp Audio HTML5 -> Chuyển sang General trình duyệt dự phòng...");
                     this.playBrowserNativeSpeech(cleanText, playBtnElement);
                 };
 
                 await this.audioElement.play();
                 window.LingoLog.add(`Phát âm thanh Google Cloud TTS thành công! [Model: ${data.model_used || selectedVoice}]`);
             } else if (data.fallback_browser) {
-                window.LingoLog.add(`Google Cloud TTS API (${data.error || 'Yêu cầu dự phòng'}). Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...`);
+                window.LingoLog.add(`Google Cloud TTS API (${data.error || 'Tự động dự phòng'}). Chuyển sang General trình duyệt...`);
                 this.playBrowserNativeSpeech(cleanText, playBtnElement);
             } else {
-                window.LingoLog.add(`Lỗi TTS: ${data.error}. Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...`);
+                window.LingoLog.add(`Lỗi TTS: ${data.error}. Chuyển sang General trình duyệt...`);
                 this.playBrowserNativeSpeech(cleanText, playBtnElement);
             }
         } catch (err) {
-            window.LingoLog.add(`Lỗi kết nối TTS: ${err.message}. Chuyển sang Web SpeechSynthesis trình duyệt dự phòng...`);
+            window.LingoLog.add(`Lỗi kết nối TTS: ${err.message}. Chuyển sang General trình duyệt...`);
             this.playBrowserNativeSpeech(cleanText, playBtnElement);
         }
     },

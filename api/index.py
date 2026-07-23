@@ -21,7 +21,6 @@ PUBLIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "../public"))
 app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
 CORS(app)
 
-# High-quota, lightweight models prioritized first to prevent 429 quota exhaustion
 PRIMARY_MODELS = [
     "gemini-1.5-flash",
     "gemini-2.0-flash",
@@ -63,32 +62,20 @@ DEFAULT_FALLBACK_REPLIES = [
 ]
 
 def get_smart_fallback_reply(scenario_name):
-    """Generate instant role response when Google API Quota limit (429) occurs"""
     for key, replies in SCENARIO_FALLBACK_REPLIES.items():
         if key in scenario_name or scenario_name in key:
             return random.choice(replies)
     return random.choice(DEFAULT_FALLBACK_REPLIES)
 
 def resolve_api_key(client_key):
-    """
-    Priority:
-    1. If client explicitly provided a valid key (>5 chars), use client_key.
-    2. Otherwise, read GOOGLE_API_KEY from Environment Variable if set.
-    """
     if client_key and isinstance(client_key, str) and len(client_key.strip()) > 5:
         return client_key.strip()
-    
     env_key = os.environ.get("GOOGLE_API_KEY", "").strip()
     if env_key:
         return env_key
-        
     return ""
 
 def get_gcp_oauth2_token():
-    """
-    Cleanly reads GCP_SERVICE_ACCOUNT_JSON (Base64 encoded) from Vercel Environment Variable
-    and generates Google Cloud OAuth2 access token.
-    """
     if not GOOGLE_AUTH_AVAILABLE:
         return None, "google-auth package not installed"
 
@@ -97,17 +84,14 @@ def get_gcp_oauth2_token():
     
     if env_b64 and env_b64.strip():
         try:
-            # Standard Base64 Decode
             decoded_json_str = base64.b64decode(env_b64.strip()).decode('utf-8')
             service_account_info = json.loads(decoded_json_str)
         except Exception as e:
-            # Standard JSON fallback if unencoded
             try:
                 service_account_info = json.loads(env_b64.strip())
             except Exception as e2:
                 print("JSON parse error:", e2)
 
-    # Local file fallback for dev environment
     if not service_account_info:
         possible_paths = [
             os.path.join(BASE_DIR, "gcp_key.json"),
@@ -205,7 +189,6 @@ def chat():
 
         logs = []
         
-        # 1. Try Primary Models in high-quota order
         for model in PRIMARY_MODELS:
             logs.append(f"Đang thử mô hình: {model}...")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
@@ -236,7 +219,6 @@ def chat():
             except Exception as e:
                 logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
 
-        # 2. Dynamic Discovery Fallback
         discovered_models = discover_available_gemini_models(api_key)
         for model in discovered_models:
             logs.append(f"Đang thử mô hình khám phá: {model}...")
@@ -259,8 +241,6 @@ def chat():
             except Exception as e:
                 continue
 
-        # 3. ZERO-WAIT LOCAL FALLBACK: Display "Local" tag with retry seconds
-        print("Google API Key Quota Exhausted (429). Executing Zero-Wait Local Fallback [Display Model: Local (要リトライ 15s)]...")
         smart_reply = get_smart_fallback_reply(scenario_hint)
         logs.append("API Quota quá tải -> Kích hoạt Zero-Wait Local Fallback (Hiển thị nhãn: Local - 要リトライ 15s).")
 
@@ -287,23 +267,21 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Clean Google Cloud TTS Endpoint (Ver1.65)
-    1. Decodes Base64 GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable.
-    2. Uses OAuth2 Token to synthesize Chirp 3 HD & Neural2 voices seamlessly.
-    3. Seamlessly triggers Browser Native TTS fallback when OAuth2 or API Key fails.
+    Multi-Tier Fallback TTS Endpoint (Ver1.70)
+    Order of Fallback: Chirp -> Neural -> Wavenet / Standard -> General (Browser Native)
     """
     try:
         data = request.get_json() or {}
         client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
         
         text = data.get("text", "").strip()
-        requested_voice = data.get("voice_name", "browser-native")
+        requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
 
-        # Instant return if user explicitly selected Browser Native TTS
+        # Explicit return if user chose General (browser-native)
         if requested_voice == "browser-native":
             return jsonify({
                 "fallback_browser": True,
-                "reason": "User selected Browser Native TTS",
+                "reason": "User selected General (Web Speech API)",
                 "text": text
             }), 200
 
@@ -313,18 +291,19 @@ def tts():
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
+        # Strict Multi-Tier Fallback Order: Chirp -> Neural -> WaveNet -> Standard
         candidate_voices = [requested_voice]
         
         if "ja-JP" in lang_code:
             if "M" in requested_voice or "Male" in requested_voice or "B" in requested_voice:
-                candidate_voices += ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
+                candidate_voices += ["ja-JP-Chirp3-HD-M", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
             else:
-                candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Wavenet-A", "ja-JP-Standard-A"]
+                candidate_voices += ["ja-JP-Chirp3-HD-F", "ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Wavenet-A", "ja-JP-Standard-A"]
         elif "en-US" in lang_code:
             if "M" in requested_voice or "Male" in requested_voice or "D" in requested_voice:
-                candidate_voices += ["en-US-Neural2-D", "en-US-Wavenet-D", "en-US-Standard-D"]
+                candidate_voices += ["en-US-Chirp3-HD-M", "en-US-Neural2-D", "en-US-Wavenet-D", "en-US-Standard-D"]
             else:
-                candidate_voices += ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
+                candidate_voices += ["en-US-Chirp3-HD-F", "en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
         else:
             candidate_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
@@ -335,9 +314,7 @@ def tts():
                 seen.add(v)
                 clean_candidate_voices.append(v)
 
-        last_error = ""
-
-        # METHOD 1: Primary Authentication via Base64 Decoded OAuth2 Service Account
+        # METHOD 1: OAuth2 Token (Tries Chirp -> Neural -> Wavenet -> Standard)
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
         if oauth_token:
@@ -364,19 +341,16 @@ def tts():
                         res_json = res_oauth.json()
                         audio_base64 = res_json.get("audioContent", "")
                         if audio_base64:
-                            print(f"Google Cloud TTS OAuth2 Success! Voice: {v_name}")
+                            print(f"Google Cloud TTS OAuth2 Success! Model: {v_name}")
                             return jsonify({
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name,
                                 "provider": "Google Cloud TTS (OAuth2)"
                             })
-                    else:
-                        last_error = f"OAuth2 HTTP {res_oauth.status_code}"
                 except Exception as e:
-                    last_error = str(e)
                     continue
 
-        # METHOD 2: API Key Fallback (Supports Neural2, WaveNet, Standard)
+        # METHOD 2: API Key Fallback (Tries Neural -> Wavenet -> Standard if Chirp fails)
         api_key = resolve_api_key(client_key)
 
         if api_key:
@@ -400,21 +374,18 @@ def tts():
                         res_json = res_key.json()
                         audio_base64 = res_json.get("audioContent", "")
                         if audio_base64:
-                            print(f"Google Cloud TTS API Key Fallback Success! Voice: {v_name}")
+                            print(f"Google Cloud TTS API Key Fallback Success! Model: {v_name}")
                             return jsonify({
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name,
                                 "provider": "Google Cloud TTS (API Key)"
                             })
-                    else:
-                        last_error = f"API Key HTTP {res_key.status_code}"
                 except Exception as e:
-                    last_error = str(e)
                     continue
 
-        # Clean, friendly fallback response
+        # METHOD 3: Final Fallback -> General (Web Speech API)
         return jsonify({
-            "error": "Tự động chuyển sang giọng đọc chuẩn trình duyệt Web Speech API",
+            "error": "Tự động chuyển sang giọng đọc chuẩn General (Web Speech API)",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code

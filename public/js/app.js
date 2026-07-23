@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.65 Implementation
+// Main Application Controller - LingoBot2 Ver1.70 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -257,7 +257,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.65]. Đặt mặc định Web Speech API mượt mà.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.70]. Đặt Chirp làm mặc định & General làm giọng đọc dự phòng cuối cùng.");
     },
 
     updateUiLanguage(lang) {
@@ -731,8 +731,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         const select = document.getElementById("ttsModelSelect");
         if (!select) return;
         
-        // Smart default: Browser Native TTS for instant smooth audio
-        select.value = "browser-native";
+        // Primary Default: Chirp 3 HD for Japanese and English, Neural2 for Vietnamese
+        if (lang.includes("日本語")) select.value = "ja-JP-Chirp3-HD-F";
+        else if (lang.includes("English")) select.value = "en-US-Chirp3-HD-F";
+        else select.value = "vi-VN-Neural2-A";
 
         if (window.LingoTTS) {
             window.LingoTTS.updateActiveTtsBadge(select.value);
