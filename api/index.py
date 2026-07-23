@@ -242,10 +242,9 @@ def tts():
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # 1. Check if OAuth2 token for GCP Service Account is available
+        # 1. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
-        # If OAuth2 token is valid AND user requested Chirp 3 HD, call Chirp 3 HD via Bearer token
         if "Chirp" in requested_voice and oauth_token:
             print(f"Calling Chirp 3 HD ({requested_voice}) via GCP Service Account OAuth2 Token...")
             url_oauth = "https://texttospeech.googleapis.com/v1/text:synthesize"
@@ -277,8 +276,7 @@ def tts():
             except Exception as e:
                 print("Chirp 3 HD OAuth2 request exception:", e)
 
-        # 2. Strict API-Key Fallback: ABSOLUTELY DO NOT send "Chirp" model name with API Key (prevents 401 error)!
-        # Replace requested Chirp voice with high-quality Neural2 voice prior to building API Key payload
+        # 2. Robust API Key Google Cloud TTS Synthesis (Neural2 -> WaveNet -> Standard)
         effective_voice = requested_voice
         if "Chirp" in effective_voice:
             if "ja-JP" in lang_code:
@@ -296,7 +294,6 @@ def tts():
         else:
             fallback_voices += ["vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
-        # Deduplicate
         seen = set()
         clean_fallback_voices = []
         for v in fallback_voices:
@@ -305,8 +302,8 @@ def tts():
                 clean_fallback_voices.append(v)
 
         if not api_key:
-            print("Google Cloud TTS API Error: No Google API Key provided!")
-            return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 400
+            print("Google Cloud TTS API Warning: No Google API Key provided!")
+            return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 200
 
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
         last_error = ""
@@ -327,7 +324,7 @@ def tts():
             }
             
             try:
-                res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=12)
+                res = requests.post(url, json=payload, headers={"Content-Type": "application/json; charset=utf-8"}, timeout=12)
                 if res.status_code == 200:
                     res_json = res.json()
                     audio_base64 = res_json.get("audioContent", "")

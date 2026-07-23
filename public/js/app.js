@@ -1,9 +1,9 @@
-// Main Application Controller - LingoBot2 Ver0.61 Implementation
+// Main Application Controller - LingoBot2 Ver0.70 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
     uiLang: "tiếng Việt",
-    targetLang: "us English",
+    targetLang: "jp 日本語", // Default target language: Japanese
     level: "Sơ cấp (CEFR A1, A2)",
     scenario: "自己紹介の会話",
     filterLang: "all",
@@ -325,8 +325,9 @@ window.LingoApp = {
         this.bindEvents();
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
+        this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.61].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.70].");
     },
 
     updateUiLanguage(lang) {
@@ -723,8 +724,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     startConversation() {
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
+        const langGuideRow = document.getElementById("langGuideBubbleRow");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.add("hidden");
         if (setupRow) setupRow.classList.add("hidden");
+        if (langGuideRow) langGuideRow.classList.add("hidden");
 
         window.LingoLog.add(`Bắt đầu hội thoại. Trình độ: ${this.level} | Tình huống: ${this.scenario}`);
 
@@ -738,12 +741,14 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         
         const container = document.getElementById("chatContainer");
         if (container) {
-            const rows = container.querySelectorAll(".chat-row:not(#setupBubbleRow):not(#scenarioBubbleRow)");
+            const rows = container.querySelectorAll(".chat-row:not(#langGuideBubbleRow):not(#setupBubbleRow):not(#scenarioBubbleRow)");
             rows.forEach(r => r.remove());
         }
 
+        const langGuideRow = document.getElementById("langGuideBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
+        if (langGuideRow) langGuideRow.classList.remove("hidden");
         if (setupRow) setupRow.classList.remove("hidden");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.remove("hidden");
 
@@ -782,7 +787,7 @@ Quy tắc ứng xử:
         }
 
         if (!this.getApiKey()) {
-            alert("Gemini AI を使用するには Google API Key を入力してください。");
+            alert("Gemini AI を sử dụng thì vui lòng nhập Google API Key / Gemini AIを使用するにはAPI Keyを入力してください。");
             return;
         }
 

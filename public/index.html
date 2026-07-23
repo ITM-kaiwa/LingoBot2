@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver0.61 - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBot2 Ver0.61 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
+    <title>LingoBot2 Ver0.70 - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBot2 Ver0.70 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=0.61">
-    <link rel="stylesheet" href="styles/components.css?v=0.61">
+    <link rel="stylesheet" href="styles/main.css?v=0.70">
+    <link rel="stylesheet" href="styles/components.css?v=0.70">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver0.61 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver0.70 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver0.61</span>
+                    <span class="version-badge">Ver0.70</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -33,9 +33,9 @@
                     </button>
                 </div>
 
-                <!-- Status Badges with abbreviated VN / JP / EN dropdowns -->
+                <!-- Status Badges with Default UI: VN & Default Target: JP -->
                 <div class="badges-group">
-                    <!-- UI Language Selectable Dropdown (VN / JP / EN) -->
+                    <!-- UI Language Selectable Dropdown (Default: VN) -->
                     <div class="badge-pill badge-ui">
                         <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
                         <select id="uiLangSelect" class="badge-select">
@@ -45,12 +45,12 @@
                         </select>
                     </div>
 
-                    <!-- Target Language Dropdown (VN / JP / EN) -->
+                    <!-- Target Language Dropdown (Default: JP) -->
                     <div class="badge-pill badge-target">
                         <span class="badge-prefix" id="lblTargetLang">Mục tiêu:</span>
                         <select id="targetLangSelect" class="badge-select">
-                            <option value="us English" selected>EN</option>
-                            <option value="jp 日本語">JP</option>
+                            <option value="jp 日本語" selected>JP</option>
+                            <option value="us English">EN</option>
                             <option value="vn Tiếng Việt">VN</option>
                         </select>
                     </div>
@@ -85,6 +85,24 @@
             <main class="chat-viewport">
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
+
+                    <!-- NEW: Language Setup Prompt Guide Bubble ABOVE API Key Setup Bubble -->
+                    <div class="chat-row ai-row" id="langGuideBubbleRow">
+                        <div class="chat-bubble setup-prompt-bubble" style="border-left: 4px solid #f97316;">
+                            <div class="setup-title" style="color: #ea580c;">
+                                🌐 Thiết lập Ngôn ngữ / 言語の設定:
+                            </div>
+                            <div class="setup-text-vn" style="margin-bottom: 6px;">
+                                <strong>vn</strong> Vui lòng chọn <strong>Ngôn ngữ giao diện (Sử dụng: VN/JP/EN)</strong> và <strong>Ngôn ngữ mục tiêu (Mục tiêu: JP/EN/VN)</strong> ở góc trên thanh công cụ trước khi bắt đầu.
+                            </div>
+                            <div class="setup-text-jp">
+                                <strong>jp</strong> ご利用を開始する前に、画面上部で<strong>UI使用言語（Sử dụng: VN/JP/EN）</strong>と<strong>学習目標言語（Mục tiêu: JP/EN/VN）</strong>を設定してください。
+                            </div>
+                            <div class="setup-meta">
+                                <span class="sender-tag">🤖 LingoBot2</span>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- API Key Setup Prompt Bubble (English Only Title) -->
                     <div class="chat-row ai-row" id="setupBubbleRow">
@@ -313,10 +331,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=0.61"></script>
-    <script src="js/tts.js?v=0.61"></script>
-    <script src="js/stt.js?v=0.61"></script>
-    <script src="js/summary.js?v=0.61"></script>
-    <script src="js/app.js?v=0.61"></script>
+    <script src="js/log.js?v=0.70"></script>
+    <script src="js/tts.js?v=0.70"></script>
+    <script src="js/stt.js?v=0.70"></script>
+    <script src="js/summary.js?v=0.70"></script>
+    <script src="js/app.js?v=0.70"></script>
 </body>
 </html>
