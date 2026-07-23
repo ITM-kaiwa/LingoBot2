@@ -71,7 +71,7 @@ def resolve_api_key(client_key):
     """
     Priority:
     1. If client explicitly provided a valid key (>5 chars), use client_key.
-    2. Otherwise, read GOOGLE_API_KEY from Vercel Server Environment Variable.
+    2. Otherwise, read GOOGLE_API_KEY from Environment Variable if set.
     """
     if client_key and isinstance(client_key, str) and len(client_key.strip()) > 5:
         return client_key.strip()
@@ -83,6 +83,9 @@ def resolve_api_key(client_key):
     return ""
 
 def get_gcp_oauth2_token():
+    """
+    Reads GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable and generates OAuth2 access token
+    """
     if not GOOGLE_AUTH_AVAILABLE:
         return None, "google-auth package not installed"
 
@@ -274,16 +277,14 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Path Architecture:
-    JavaScript (Browser) -> Vercel Python Server (/api/tts) -> Google Cloud TTS API -> Base64 MP3 -> JavaScript Audio Player
+    Unified Google Cloud TTS Endpoint supporting both:
+    1. GCP_SERVICE_ACCOUNT_JSON Environment Variable (OAuth2 Access Token) - Priority 1
+    2. Client User Manual Google API Key / GOOGLE_API_KEY - Priority 2
     """
     try:
         data = request.get_json() or {}
         client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
         
-        # 1. Resolve API Key from Client or Vercel Environment Variable (GOOGLE_API_KEY)
-        api_key = resolve_api_key(client_key)
-
         text = data.get("text", "").strip()
         requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
         
@@ -293,41 +294,8 @@ def tts():
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # 2. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token if configured
-        oauth_token, oauth_err = get_gcp_oauth2_token()
-
-        if "Chirp" in requested_voice and oauth_token:
-            url_oauth = "https://texttospeech.googleapis.com/v1/text:synthesize"
-            headers_oauth = {
-                "Authorization": f"Bearer {oauth_token}",
-                "Content-Type": "application/json; charset=utf-8"
-            }
-            payload_oauth = {
-                "input": {"text": text},
-                "voice": {
-                    "languageCode": lang_code,
-                    "name": requested_voice
-                },
-                "audioConfig": {"audioEncoding": "MP3"}
-            }
-            try:
-                res_chirp = requests.post(url_oauth, headers=headers_oauth, json=payload_oauth, timeout=10)
-                if res_chirp.status_code == 200:
-                    res_json = res_chirp.json()
-                    audio_base64 = res_json.get("audioContent", "")
-                    if audio_base64:
-                        return jsonify({
-                            "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": requested_voice,
-                            "provider": "Google Cloud TTS (Chirp3 OAuth2)"
-                        })
-            except Exception as e:
-                print("Chirp 3 HD OAuth2 exception:", e)
-
-        # 3. Server-side Cascading Voice List via Google Cloud API Key
-        # If Chirp 3 HD fails or API Key doesn't support OAuth2-only Chirp, fallback to Neural2 -> WaveNet -> Standard
+        # Build candidate voices list
         candidate_voices = [requested_voice]
-        
         if "ja-JP" in lang_code:
             candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-A", "ja-JP-Wavenet-B", "ja-JP-Standard-A", "ja-JP-Standard-B"]
         elif "en-US" in lang_code:
@@ -335,7 +303,6 @@ def tts():
         else:
             candidate_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
-        # Deduplicate preserving order
         seen = set()
         clean_candidate_voices = []
         for v in candidate_voices:
@@ -343,52 +310,91 @@ def tts():
                 seen.add(v)
                 clean_candidate_voices.append(v)
 
-        if not api_key:
-            return jsonify({
-                "error": "Google API Key chưa được cài đặt ở Vercel (GOOGLE_API_KEY) và chưa được nhập từ giao diện.",
-                "fallback_browser": True
-            }), 400
-
-        url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
         last_error = ""
 
-        # 4. Iterate candidate voices directly in Python backend
-        for v_name in clean_candidate_voices:
-            v_parts = v_name.split("-")
-            v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
-            
-            payload = {
-                "input": {"text": text},
-                "voice": {
-                    "languageCode": v_lang,
-                    "name": v_name
-                },
-                "audioConfig": {
-                    "audioEncoding": "MP3"
-                }
+        # -------------------------------------------------------------------
+        # METHOD 1: Primary Authentication via GCP_SERVICE_ACCOUNT_JSON (OAuth2 Token)
+        # -------------------------------------------------------------------
+        oauth_token, oauth_err = get_gcp_oauth2_token()
+
+        if oauth_token:
+            url_oauth = "https://texttospeech.googleapis.com/v1/text:synthesize"
+            headers_oauth = {
+                "Authorization": f"Bearer {oauth_token}",
+                "Content-Type": "application/json; charset=utf-8"
             }
-            
-            try:
-                res = requests.post(url, json=payload, headers={"Content-Type": "application/json; charset=utf-8"}, timeout=8)
-                if res.status_code == 200:
-                    res_json = res.json()
-                    audio_base64 = res_json.get("audioContent", "")
-                    if audio_base64:
-                        print(f"Google Cloud TTS Success! Voice: {v_name}")
-                        return jsonify({
-                            "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": v_name,
-                            "provider": "Google Cloud TTS API Key"
-                        })
-                else:
-                    last_error = f"HTTP {res.status_code}: {res.text[:100]}"
-                    print(f"Google Cloud TTS Voice {v_name} error:", last_error)
-            except Exception as e:
-                last_error = str(e)
-                continue
+
+            for v_name in clean_candidate_voices:
+                v_parts = v_name.split("-")
+                v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
+                payload_oauth = {
+                    "input": {"text": text},
+                    "voice": {
+                        "languageCode": v_lang,
+                        "name": v_name
+                    },
+                    "audioConfig": {"audioEncoding": "MP3"}
+                }
+                try:
+                    res_oauth = requests.post(url_oauth, headers=headers_oauth, json=payload_oauth, timeout=10)
+                    if res_oauth.status_code == 200:
+                        res_json = res_oauth.json()
+                        audio_base64 = res_json.get("audioContent", "")
+                        if audio_base64:
+                            print(f"Google Cloud TTS Success via GCP_SERVICE_ACCOUNT_JSON! Voice: {v_name}")
+                            return jsonify({
+                                "audio_url": f"data:audio/mp3;base64,{audio_base64}",
+                                "model_used": v_name,
+                                "provider": "Google Cloud TTS (Service Account OAuth2)"
+                            })
+                    else:
+                        last_error = f"OAuth2 HTTP {res_oauth.status_code}: {res_oauth.text[:100]}"
+                        print(f"OAuth2 TTS error ({v_name}):", last_error)
+                except Exception as e:
+                    last_error = str(e)
+                    continue
+
+        # -------------------------------------------------------------------
+        # METHOD 2: Fallback via API Key (User Manual Key or GOOGLE_API_KEY)
+        # -------------------------------------------------------------------
+        api_key = resolve_api_key(client_key)
+
+        if api_key:
+            url_key = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
+            for v_name in clean_candidate_voices:
+                # Skip Chirp for API Key method if OAuth failed
+                if "Chirp" in v_name:
+                    continue
+                v_parts = v_name.split("-")
+                v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
+                payload_key = {
+                    "input": {"text": text},
+                    "voice": {
+                        "languageCode": v_lang,
+                        "name": v_name
+                    },
+                    "audioConfig": {"audioEncoding": "MP3"}
+                }
+                try:
+                    res_key = requests.post(url_key, json=payload_key, headers={"Content-Type": "application/json; charset=utf-8"}, timeout=8)
+                    if res_key.status_code == 200:
+                        res_json = res_key.json()
+                        audio_base64 = res_json.get("audioContent", "")
+                        if audio_base64:
+                            print(f"Google Cloud TTS Success via API Key! Voice: {v_name}")
+                            return jsonify({
+                                "audio_url": f"data:audio/mp3;base64,{audio_base64}",
+                                "model_used": v_name,
+                                "provider": "Google Cloud TTS (API Key)"
+                            })
+                    else:
+                        last_error = f"API Key HTTP {res_key.status_code}: {res_key.text[:100]}"
+                except Exception as e:
+                    last_error = str(e)
+                    continue
 
         return jsonify({
-            "error": f"Không thể tổng hợp Google Cloud TTS ({last_error})",
+            "error": f"Không thể tổng hợp Google Cloud TTS ({last_error or 'Thiếu GCP_SERVICE_ACCOUNT_JSON / API Key'})",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code

@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.35 Implementation
+// Main Application Controller - LingoBot2 Ver1.40 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -245,7 +245,7 @@ window.LingoApp = {
         { id: 116, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "この問題（もんだい）について、皆様（みなさま）のご意見（いけん）をお聞（き）かせください。", translation: "Xin hãy cho tôi nghe ý kiến của mọi người về vấn đề này." },
         { id: 117, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "新（あたら）しいプロジェクトの進捗（しんちょく）状況（じょうきょう）を報告（ほうこく）します。", translation: "Tôi xin báo cáo tiến độ của dự án mới." },
         { id: 118, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "おかげさまで、無事（ぶじ）に目標（もくひょう）を達成（たっせい）することができました。", translation: "Nhờ sự hỗ trợ của bạn, chúng tôi đã đạt mục tiêu an toàn." },
-        { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "体調（たいちょう）が優（すぐ）れないため、本日は早退（そうたい）させていただきます。", translation: "Vì sức khỏe không tốt nên hôm nay tôi xin phép về sớm." },
+        { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - Trung cấp B1-B2", text: "体調（たいちょう）が優（すぐ）れないため、本日は早退（そうたい）させていただきます。", translation: "Vì sức khỏe không tốt nên hôm nay tôi xin phép về sớm." },
         { id: 120, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "今後（こんご）とも変わらぬお付き合いのほど、よろしくお願（ねが）い申し上げます。", translation: "Rất mong tiếp tục duy trì mối quan hệ tốt đẹp trong tương lai." },
 
         { id: 121, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "多角的な視点から市場の動向を分析し、中長期的な戦略を策定する必要があります。", translation: "Cần phân tích xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.35]. Cấu hình máy chủ Python /api/tts tự động ưu tiên Vercel GOOGLE_API_KEY.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.40]. Cấu hình GCP_SERVICE_ACCOUNT_JSON làm phương thức xác thực OAuth2 chính cho TTS.");
     },
 
     updateUiLanguage(lang) {
