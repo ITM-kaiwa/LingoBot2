@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.00 Implementation
+// Main Application Controller - LingoBot2 Ver1.05 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.00]. Tách biệt 100% ô nhập hội thoại và ô nhập API Key.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.05]. Đã cập nhật nhãn Local cho định hình câu定型文.");
     },
 
     updateUiLanguage(lang) {
@@ -780,7 +780,6 @@ Quy tắc ứng xử:
         const chatInput = document.getElementById("chatInput");
         const text = chatInput ? chatInput.value.trim() : "";
 
-        // Chat Input is 100% DEDICATED to conversation messages ONLY! No Key interceptions!
         if (!text) return;
         chatInput.value = "";
 
@@ -810,7 +809,11 @@ Quy tắc ứng xử:
 
             if (data.reply) {
                 const reply = data.reply;
-                const modelUsed = data.display_model || data.used_model || "Gemini-Other";
+                let modelUsed = data.display_model || data.used_model || "Gemini-Other";
+                if (modelUsed === "Local" || data.used_model === "local-fallback" || data.is_smart_fallback) {
+                    modelUsed = "Local";
+                }
+
                 window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}]`);
                 
                 const aiBubbleEl = this.appendMessage("model", reply, modelUsed);
@@ -862,7 +865,9 @@ Quy tắc ứng xử:
 
         let formattedModelTag = usedModel;
         if (usedModel) {
-            if (usedModel.includes("Gemini-Other") || (usedModel !== "gemini-3.6-flash" && usedModel !== "gemini-3.5-flash")) {
+            if (usedModel === "Local" || usedModel.includes("local")) {
+                formattedModelTag = "Local";
+            } else if (usedModel.includes("Gemini-Other") || (usedModel !== "gemini-3.6-flash" && usedModel !== "gemini-3.5-flash")) {
                 formattedModelTag = "Gemini-Other";
             }
         }

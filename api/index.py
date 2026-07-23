@@ -29,7 +29,7 @@ PRIMARY_MODELS = [
     "gemini-1.5-pro"
 ]
 
-# Smart Instant Fallback Role Responses by Scenario if 429 Rate Limit hits all models
+# Local Fallback Role Responses by Scenario if 429 Quota limit hits all Google API models
 SCENARIO_FALLBACK_REPLIES = {
     "空港のチェックイン会話": [
         "かしこまりました。パスポートとお手荷物を確認させていただきますね。ご搭乗券を発行いたします。",
@@ -62,24 +62,11 @@ DEFAULT_FALLBACK_REPLIES = [
 ]
 
 def get_smart_fallback_reply(scenario_name):
-    """Generate instant role response when Google API Quota limit (429) occurs so the user is NEVER forced to wait"""
+    """Generate instant role response when Google API Quota limit (429) occurs"""
     for key, replies in SCENARIO_FALLBACK_REPLIES.items():
         if key in scenario_name or scenario_name in key:
             return random.choice(replies)
     return random.choice(DEFAULT_FALLBACK_REPLIES)
-
-def parse_retry_seconds(error_text):
-    if not error_text:
-        return None
-    match = re.search(r'retry\s+after\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
-    if not match:
-        match = re.search(r'retry\s+in\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
-    if match:
-        try:
-            return int(round(float(match.group(1))))
-        except ValueError:
-            pass
-    return None
 
 def resolve_api_key(client_key):
     if client_key and client_key != "demo_skipped" and len(client_key.strip()) > 5:
@@ -250,26 +237,26 @@ def chat():
             except Exception as e:
                 continue
 
-        # 3. ZERO-WAIT SMART FALLBACK when API Key quota is exhausted (429 Rate Limit)
-        print("Google API Key Quota Exhausted (429). Executing Zero-Wait Smart Role Fallback...")
+        # 3. ZERO-WAIT LOCAL FALLBACK: Display "Local" tag as requested by user
+        print("Google API Key Quota Exhausted (429). Executing Zero-Wait Local Fallback [Display Model: Local]...")
         smart_reply = get_smart_fallback_reply(scenario_hint)
-        logs.append("API Quota quá tải -> Kích hoạt Zero-Wait Smart Fallback (Không bắt người dùng chờ).")
+        logs.append("API Quota quá tải -> Kích hoạt Zero-Wait Local Fallback (Hiển thị nhãn: Local).")
 
         return jsonify({
             "reply": smart_reply,
-            "used_model": "gemini-smart-fallback",
-            "display_model": "Gemini-Other",
+            "used_model": "local-fallback",
+            "display_model": "Local",
             "is_smart_fallback": True,
             "logs": logs
         }), 200
 
     except Exception as ex:
-        # Emergency safety fallback
+        # Emergency safety fallback with "Local" label
         smart_reply = get_smart_fallback_reply("")
         return jsonify({
             "reply": smart_reply,
-            "used_model": "gemini-smart-fallback",
-            "display_model": "Gemini-Other",
+            "used_model": "local-fallback",
+            "display_model": "Local",
             "is_smart_fallback": True
         }), 200
 
@@ -444,7 +431,7 @@ QUAN TRỌNG:
             except Exception:
                 continue
 
-        # Smart Fallback summary if quota exceeded
+        # Local Fallback summary if quota exceeded
         fallback_summary = f"""# 📊 Báo cáo bài học ({user_lang})
 
 ## 1. Tổng quan buổi học
@@ -460,7 +447,7 @@ QUAN TRỌNG:
 - Tiếp tục mở rộng vốn từ vựng chuyên sâu và chú ý nối âm.
 - Luyện tập phát âm thường xuyên qua tính năng Luyện Phát Âm."""
 
-        return jsonify({"summary": fallback_summary, "used_model": "Gemini-Smart"})
+        return jsonify({"summary": fallback_summary, "used_model": "Local"})
 
     except Exception as ex:
         return jsonify({"error": f"Lỗi summary: {str(ex)}"}), 500
