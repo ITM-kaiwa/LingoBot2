@@ -84,7 +84,8 @@ def resolve_api_key(client_key):
 
 def get_gcp_oauth2_token():
     """
-    Reads GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable and generates OAuth2 access token
+    Robustly reads GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable or local files
+    and generates OAuth2 access token.
     """
     if not GOOGLE_AUTH_AVAILABLE:
         return None, "google-auth package not installed"
@@ -93,10 +94,19 @@ def get_gcp_oauth2_token():
     env_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
     
     if env_json:
+        cleaned_json = env_json.strip()
+        if (cleaned_json.startswith("'") and cleaned_json.endswith("'")) or (cleaned_json.startswith('"') and cleaned_json.endswith('"')):
+            cleaned_json = cleaned_json[1:-1].strip()
+
         try:
-            service_account_info = json.loads(env_json)
-        except Exception as e:
-            print("Error parsing GCP_SERVICE_ACCOUNT_JSON env:", e)
+            service_account_info = json.loads(cleaned_json)
+        except Exception as e1:
+            try:
+                # Attempt unescaping newlines in private_key if needed
+                fixed_str = cleaned_json.replace('\\n', '\n')
+                service_account_info = json.loads(fixed_str)
+            except Exception as e2:
+                print("Error parsing GCP_SERVICE_ACCOUNT_JSON env:", e1, e2)
 
     if not service_account_info:
         possible_paths = [
@@ -126,6 +136,7 @@ def get_gcp_oauth2_token():
         credentials.refresh(auth_req)
         return credentials.token, None
     except Exception as e:
+        print("OAuth2 Token generation exception:", e)
         return None, str(e)
 
 
@@ -277,9 +288,9 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Unified Google Cloud TTS Endpoint supporting both:
-    1. GCP_SERVICE_ACCOUNT_JSON Environment Variable (OAuth2 Access Token) - Priority 1
-    2. Client User Manual Google API Key / GOOGLE_API_KEY - Priority 2
+    Robust Google Cloud TTS Endpoint (Ver1.45)
+    1. Attempts OAuth2 Token (GCP_SERVICE_ACCOUNT_JSON) for Chirp 3 HD & Neural2 voices.
+    2. If OAuth2 token is unavailable or Chirp fails, automatically falls back to API Key with Neural2/WaveNet voices.
     """
     try:
         data = request.get_json() or {}
@@ -294,12 +305,19 @@ def tts():
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # Build candidate voices list
+        # Build prioritized voice list based on requested voice gender/style
         candidate_voices = [requested_voice]
+        
         if "ja-JP" in lang_code:
-            candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-A", "ja-JP-Wavenet-B", "ja-JP-Standard-A", "ja-JP-Standard-B"]
+            if "M" in requested_voice or "Male" in requested_voice or "B" in requested_voice:
+                candidate_voices += ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Wavenet-D", "ja-JP-Standard-B"]
+            else:
+                candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Wavenet-A", "ja-JP-Wavenet-C", "ja-JP-Standard-A"]
         elif "en-US" in lang_code:
-            candidate_voices += ["en-US-Neural2-F", "en-US-Neural2-C", "en-US-Wavenet-F", "en-US-Standard-F"]
+            if "M" in requested_voice or "Male" in requested_voice or "D" in requested_voice:
+                candidate_voices += ["en-US-Neural2-D", "en-US-Neural2-J", "en-US-Wavenet-D", "en-US-Standard-D"]
+            else:
+                candidate_voices += ["en-US-Neural2-F", "en-US-Neural2-C", "en-US-Wavenet-F", "en-US-Standard-F"]
         else:
             candidate_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
@@ -313,7 +331,7 @@ def tts():
         last_error = ""
 
         # -------------------------------------------------------------------
-        # METHOD 1: Primary Authentication via GCP_SERVICE_ACCOUNT_JSON (OAuth2 Token)
+        # METHOD 1: Try OAuth2 Service Account Access Token (Supports Chirp 3 HD & Neural2)
         # -------------------------------------------------------------------
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
@@ -341,7 +359,7 @@ def tts():
                         res_json = res_oauth.json()
                         audio_base64 = res_json.get("audioContent", "")
                         if audio_base64:
-                            print(f"Google Cloud TTS Success via GCP_SERVICE_ACCOUNT_JSON! Voice: {v_name}")
+                            print(f"Google Cloud TTS OAuth2 Success! Voice: {v_name}")
                             return jsonify({
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name,
@@ -349,20 +367,20 @@ def tts():
                             })
                     else:
                         last_error = f"OAuth2 HTTP {res_oauth.status_code}: {res_oauth.text[:100]}"
-                        print(f"OAuth2 TTS error ({v_name}):", last_error)
+                        print(f"OAuth2 TTS voice {v_name} failed:", last_error)
                 except Exception as e:
                     last_error = str(e)
                     continue
 
         # -------------------------------------------------------------------
-        # METHOD 2: Fallback via API Key (User Manual Key or GOOGLE_API_KEY)
+        # METHOD 2: API Key Fallback (Supports Neural2, WaveNet, Standard)
         # -------------------------------------------------------------------
         api_key = resolve_api_key(client_key)
 
         if api_key:
             url_key = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
             for v_name in clean_candidate_voices:
-                # Skip Chirp for API Key method if OAuth failed
+                # Crucial: Chirp 3 HD doesn't support API Keys. Skip Chirp and use Neural2/WaveNet with API Key.
                 if "Chirp" in v_name:
                     continue
                 v_parts = v_name.split("-")
@@ -381,7 +399,7 @@ def tts():
                         res_json = res_key.json()
                         audio_base64 = res_json.get("audioContent", "")
                         if audio_base64:
-                            print(f"Google Cloud TTS Success via API Key! Voice: {v_name}")
+                            print(f"Google Cloud TTS API Key Fallback Success! Voice: {v_name}")
                             return jsonify({
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name,
@@ -389,12 +407,13 @@ def tts():
                             })
                     else:
                         last_error = f"API Key HTTP {res_key.status_code}: {res_key.text[:100]}"
+                        print(f"API Key TTS voice {v_name} failed:", last_error)
                 except Exception as e:
                     last_error = str(e)
                     continue
 
         return jsonify({
-            "error": f"Không thể tổng hợp Google Cloud TTS ({last_error or 'Thiếu GCP_SERVICE_ACCOUNT_JSON / API Key'})",
+            "error": f"Google Cloud TTS ({last_error or 'Cần GCP_SERVICE_ACCOUNT_JSON cho Chirp 3 HD hoặc API Key cho Neural2'})",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code
