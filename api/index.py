@@ -6,6 +6,13 @@ import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
+try:
+    import google.auth.transport.requests
+    from google.oauth2 import service_account
+    GOOGLE_AUTH_AVAILABLE = True
+except ImportError:
+    GOOGLE_AUTH_AVAILABLE = False
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "../public"))
 
@@ -35,6 +42,54 @@ def parse_retry_seconds(error_text):
         except ValueError:
             pass
     return None
+
+def get_gcp_oauth2_token():
+    """dynamically load GCP Service Account JSON from Env or local file and generate OAuth2 Bearer token"""
+    if not GOOGLE_AUTH_AVAILABLE:
+        return None, "google-auth package not installed"
+
+    service_account_info = None
+    env_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
+    
+    if env_json:
+        try:
+            service_account_info = json.loads(env_json)
+        except Exception as e:
+            print("Error parsing GCP_SERVICE_ACCOUNT_JSON env:", e)
+
+    if not service_account_info:
+        # Check local files e.g. gcp_key.json or service_account.json
+        possible_paths = [
+            os.path.join(BASE_DIR, "gcp_key.json"),
+            os.path.join(BASE_DIR, "../gcp_key.json"),
+            os.path.join(BASE_DIR, "service_account.json"),
+            os.path.join(BASE_DIR, "../service_account.json")
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        service_account_info = json.load(f)
+                    print(f"Loaded GCP Service Account JSON from file: {path}")
+                    break
+                except Exception as e:
+                    print(f"Error reading file {path}:", e)
+
+    if not service_account_info:
+        return None, "GCP Service Account JSON not configured"
+
+    try:
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        auth_req = google.auth.transport.requests.Request()
+        credentials.refresh(auth_req)
+        return credentials.token, None
+    except Exception as e:
+        print("Error refreshing GCP OAuth2 token:", e)
+        return None, str(e)
+
 
 def discover_available_gemini_models(api_key):
     """Dynamically discover available Gemini models if primary models are busy/unavailable"""
@@ -187,34 +242,57 @@ def tts():
         parts = voice_name.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # Build priority list starting strictly with user-selected voice_name
-        fallback_voices = [voice_name]
-        
-        # Note: Chirp 3 HD requires OAuth2 tokens and returns 401 with API Key.
-        # Fall back immediately to Neural2 / WaveNet / Standard which support API Key authentication!
-        if "ja-JP" in lang_code:
-            fallback_voices += ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
-        elif "en-US" in lang_code:
-            fallback_voices += ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
-        else:
-            fallback_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
+        # 1. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token if requested & token available
+        oauth_token, oauth_err = get_gcp_oauth2_token()
 
-        # Deduplicate preserving strict priority
-        seen = set()
-        dedup_voices = []
-        for v in fallback_voices:
-            if v not in seen:
-                seen.add(v)
-                dedup_voices.append(v)
+        if "Chirp" in voice_name and oauth_token:
+            print(f"Calling Chirp 3 HD ({voice_name}) via GCP Service Account OAuth2 Token...")
+            url_oauth = "https://texttospeech.googleapis.com/v1/text:synthesize"
+            headers_oauth = {
+                "Authorization": f"Bearer {oauth_token}",
+                "Content-Type": "application/json; charset=utf-8"
+            }
+            payload_oauth = {
+                "input": {"text": text},
+                "voice": {
+                    "languageCode": lang_code,
+                    "name": voice_name
+                },
+                "audioConfig": {"audioEncoding": "MP3"}
+            }
+            try:
+                res_chirp = requests.post(url_oauth, headers=headers_oauth, json=payload_oauth, timeout=12)
+                if res_chirp.status_code == 200:
+                    res_json = res_chirp.json()
+                    audio_base64 = res_json.get("audioContent", "")
+                    if audio_base64:
+                        print(f"Successfully synthesized Chirp 3 HD voice: {voice_name}")
+                        return jsonify({
+                            "audio_url": f"data:audio/mp3;base64,{audio_base64}",
+                            "model_used": voice_name
+                        })
+                else:
+                    print(f"Chirp 3 HD OAuth2 request failed ({res_chirp.status_code}): {res_chirp.text[:150]}")
+            except Exception as e:
+                print("Chirp 3 HD OAuth2 request exception:", e)
+
+        # 2. Fallback to API Key TTS using Neural2 -> WaveNet -> Standard
+        fallback_voices = []
+        if "ja-JP" in lang_code:
+            fallback_voices = ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
+        elif "en-US" in lang_code:
+            fallback_voices = ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
+        else:
+            fallback_voices = ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
         if not api_key:
             print("Google Cloud TTS API Error: No Google API Key provided!")
             return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 400
 
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
-        last_error = ""
+        last_error = oauth_err or ""
 
-        for v_name in dedup_voices:
+        for v_name in fallback_voices:
             v_parts = v_name.split("-")
             v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
             
@@ -235,22 +313,17 @@ def tts():
                     res_json = res.json()
                     audio_base64 = res_json.get("audioContent", "")
                     if audio_base64:
+                        print(f"Successfully synthesized fallback TTS voice: {v_name}")
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                             "model_used": v_name
                         })
                 else:
-                    err_msg = res.text[:180]
-                    # If 401 occurs (Chirp3-HD requiring OAuth2 instead of API Key), log and smoothly continue to Neural2
-                    if res.status_code == 401 and "Chirp" in v_name:
-                        print(f"TTS Note: {v_name} requires OAuth2 token. Falling back to Neural2...")
-                        last_error = "Chirp 3 HD requires OAuth2, fallback to Neural2"
-                    else:
-                        last_error = f"HTTP {res.status_code}: {err_msg}"
-                        print(f"TTS voice {v_name} error: {last_error}")
+                    last_error = f"HTTP {res.status_code}: {res.text[:150]}"
+                    print(f"TTS fallback voice {v_name} error: {last_error}")
             except Exception as e:
                 last_error = str(e)
-                print(f"TTS voice {v_name} exception:", e)
+                print(f"TTS fallback voice {v_name} exception:", e)
                 continue
 
         return jsonify({

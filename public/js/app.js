@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.41 Implementation
+// Main Application Controller - LingoBot2 Ver0.50 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -326,7 +326,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.41].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.50].");
     },
 
     updateUiLanguage(lang) {
