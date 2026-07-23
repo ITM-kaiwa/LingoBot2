@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.80 Implementation
+// Main Application Controller - LingoBot2 Ver0.85 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -11,6 +11,7 @@ window.LingoApp = {
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
     messages: [],
     isProcessing: false,
+    retryTimerId: null,
 
     // I18N Dictionary translating 100% of UI elements
     i18n: {
@@ -69,7 +70,8 @@ window.LingoApp = {
             filterAll: "Tất cả",
             aiThinking: "AI đang suy nghĩ...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
-            apiRetryWait: (sec) => `⚠️ Hệ thống API đang bận. Vui lòng đợi ${sec} giây trước khi nhập lại.`,
+            apiRetryWait: (sec) => `⏳ Hệ thống API đang bận. Vui lòng đợi ${sec} giây trước khi nhập lại.`,
+            apiReadyNow: "✨ Bạn có thể tiếp tục gửi tin nhắn ngay bây giờ!",
 
             // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ Phát",
@@ -139,7 +141,8 @@ window.LingoApp = {
             filterAll: "すべて",
             aiThinking: "AIが思考中です...",
             aiSummarizing: "AIがまとめています...",
-            apiRetryWait: (sec) => `⚠️ APIが混雑しています。${sec}秒待ってから再度入力してください。`,
+            apiRetryWait: (sec) => `⏳ APIが混雑しています。${sec}秒待ってから再度入力してください。`,
+            apiReadyNow: "✨ 送信準備が整いました。メッセージを入力できます！",
 
             // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ 再生",
@@ -209,7 +212,8 @@ window.LingoApp = {
             filterAll: "All",
             aiThinking: "AI is thinking...",
             aiSummarizing: "AI is summarizing...",
-            apiRetryWait: (sec) => `⚠️ API is currently busy. Please wait ${sec} seconds before trying again.`,
+            apiRetryWait: (sec) => `⏳ API is currently busy. Please wait ${sec} seconds before trying again.`,
+            apiReadyNow: "✨ Ready! You can send your message now.",
 
             // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ Play",
@@ -260,7 +264,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -294,7 +298,7 @@ window.LingoApp = {
         { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi ưu tiên nâng cao trải nghiệm khách hàng." },
         { id: 228, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We remain committed to optimizing resource allocation while enforcing strict cost discipline.", translation: "Chúng tôi cam kết tối ưu phân bổ nguồn lực đồng thời kỷ luật chi phí nghiêm ngặt." },
         { id: 229, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Fostering a culture of transparent communication empowers employees to take initiative.", translation: "Nuôi dưỡng văn hóa giao tiếp minh bạch giúp nhân viên chủ động hơn." },
-        { id: 230, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Adopting a prudent yet agile approach will allow us to navigate volatile market dynamics.", translation: "Áp dụng phương pháp thận trọng nhưng linh hoạt giúp vượt biến động thị trường." },
+        { id: 300, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Adopting a prudent yet agile approach will allow us to navigate volatile market dynamics.", translation: "Áp dụng phương pháp thận trọng nhưng linh hoạt giúp vượt biến động thị trường." },
 
         // --- VIETNAMESE (20 Sentences) ---
         { id: 301, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Xin chào! Rất vui được làm quen với bạn ngày hôm nay.", translation: "Hello! Nice to meet you today." },
@@ -326,9 +330,8 @@ window.LingoApp = {
         this.updateUiLanguage(this.uiLang);
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
-        // Always show scenario card so user can start practicing instantly using Vercel environment API key!
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.80]. Tự động ưu tiên Key môi trường Vercel.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.85]. Cấu hình chuỗi Cascade 6 mô hình AI chống bận 429.");
     },
 
     updateUiLanguage(lang) {
@@ -739,6 +742,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     resetConversation() {
         this.messages = [];
         window.LingoTTS.stop();
+        if (this.retryTimerId) clearInterval(this.retryTimerId);
         
         const container = document.getElementById("chatContainer");
         if (container) {
@@ -777,7 +781,6 @@ Quy tắc ứng xử:
         const chatInput = document.getElementById("chatInput");
         const text = chatInput ? chatInput.value.trim() : "";
 
-        // If user manually pastes an API Key starting with AIzaSy
         if (text.startsWith("AIzaSy") || text.length > 20) {
             this.setApiKey(text);
             chatInput.value = "";
@@ -828,10 +831,10 @@ Quy tắc ứng xử:
                     this.showSetupPromptRow();
                     this.appendMessage("model", `🔑 ${data.error}`);
                     window.LingoLog.add("Cần bổ sung Google API Key.");
-                } else if (data.retry_seconds) {
-                    const waitMsg = dict.apiRetryWait ? dict.apiRetryWait(data.retry_seconds) : `⚠️ ${data.error}`;
-                    this.appendMessage("model", waitMsg);
-                    window.LingoLog.add(`API Busy (Wait ${data.retry_seconds}s): ${data.error}`);
+                } else if (data.retry_seconds || response.status === 429) {
+                    const sec = data.retry_seconds || 15;
+                    this.showCountdownWarningBubble(sec);
+                    window.LingoLog.add(`API Busy (Wait ${sec}s): Tất cả mô hình Gemini bận.`);
                 } else {
                     const errText = data.error || "Không thể kết nối tới Gemini AI.";
                     this.appendMessage("model", `⚠️ ${errText}`);
@@ -845,6 +848,46 @@ Quy tắc ứng xử:
         } finally {
             this.isProcessing = false;
         }
+    },
+
+    showCountdownWarningBubble(initialSeconds) {
+        if (this.retryTimerId) clearInterval(this.retryTimerId);
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+
+        const container = document.getElementById("chatContainer");
+        const row = document.createElement("div");
+        row.className = "chat-row ai-row warning-countdown-row";
+
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble";
+        bubble.style.background = "#fff7ed";
+        bubble.style.border = "1px solid #ffedd5";
+        bubble.style.color = "#c2410c";
+
+        const textDiv = document.createElement("div");
+        textDiv.className = "bubble-text";
+        textDiv.style.fontWeight = "600";
+        textDiv.style.fontSize = "0.9rem";
+
+        let remaining = initialSeconds;
+        textDiv.textContent = dict.apiRetryWait(remaining);
+
+        bubble.appendChild(textDiv);
+        row.appendChild(bubble);
+        container.appendChild(row);
+        container.scrollTop = container.scrollHeight;
+
+        this.retryTimerId = setInterval(() => {
+            remaining -= 1;
+            if (remaining > 0) {
+                textDiv.textContent = dict.apiRetryWait(remaining);
+            } else {
+                clearInterval(this.retryTimerId);
+                this.retryTimerId = null;
+                textDiv.style.color = "#15803d";
+                textDiv.textContent = dict.apiReadyNow || "✨ Ready!";
+            }
+        }, 1000);
     },
 
     appendMessage(role, content, usedModel = null) {

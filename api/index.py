@@ -19,10 +19,14 @@ PUBLIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "../public"))
 app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
 CORS(app)
 
-# Priority fallback models: 3.6-flash -> 3.5-flash
+# Priority model cascade for avoiding 429 Rate Limits
 PRIMARY_MODELS = [
     "gemini-3.6-flash",
-    "gemini-3.5-flash"
+    "gemini-3.5-flash",
+    "gemini-1.5-flash",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-pro"
 ]
 
 def parse_retry_seconds(error_text):
@@ -64,7 +68,6 @@ def get_gcp_oauth2_token():
             print("Error parsing GCP_SERVICE_ACCOUNT_JSON env:", e)
 
     if not service_account_info:
-        # Check local files e.g. gcp_key.json or service_account.json
         possible_paths = [
             os.path.join(BASE_DIR, "gcp_key.json"),
             os.path.join(BASE_DIR, "../gcp_key.json"),
@@ -101,7 +104,7 @@ def discover_available_gemini_models(api_key):
     """Dynamically discover available Gemini models if primary models are busy/unavailable"""
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, timeout=8)
         if res.status_code == 200:
             models_data = res.json().get("models", [])
             candidate_models = []
@@ -111,11 +114,11 @@ def discover_available_gemini_models(api_key):
                 if "generateContent" in methods and "gemini" in name.lower():
                     if name not in PRIMARY_MODELS:
                         candidate_models.append(name)
-            candidate_models.sort(key=lambda x: (0 if "flash" in x else 1, 0 if "2.5" in x else 1))
+            candidate_models.sort(key=lambda x: (0 if "flash" in x else 1, 0 if "2." in x else 1))
             return candidate_models
     except Exception as e:
         print("Model discovery error:", e)
-    return ["gemini-2.5-flash", "gemini-2.0-flash"]
+    return ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
 
 
 @app.route("/api/chat", methods=["POST"])
@@ -160,14 +163,14 @@ def chat():
         logs = []
         extracted_retry_sec = None
         
-        # 1. Try Primary Models: 3.6-flash -> 3.5-flash
+        # 1. Broad Primary Model Cascade: 3.6-flash -> 3.5-flash -> 1.5-flash -> 2.5-flash -> 2.0-flash -> 1.5-pro
         for model in PRIMARY_MODELS:
             logs.append(f"Đang thử mô hình: {model}...")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             headers = {"Content-Type": "application/json"}
             
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=22)
+                res = requests.post(url, headers=headers, json=payload, timeout=18)
                 if res.status_code == 200:
                     res_data = res.json()
                     candidates = res_data.get("candidates", [])
@@ -175,10 +178,15 @@ def chat():
                         parts = candidates[0]["content"].get("parts", [])
                         reply_text = "".join([p.get("text", "") for p in parts])
                         logs.append(f"Thành công với mô hình: {model}")
+                        
+                        display_name = model
+                        if model not in ["gemini-3.6-flash", "gemini-3.5-flash"]:
+                            display_name = "Gemini-Other"
+
                         return jsonify({
                             "reply": reply_text,
                             "used_model": model,
-                            "display_model": model,
+                            "display_model": display_name,
                             "logs": logs
                         })
                 else:
@@ -186,12 +194,12 @@ def chat():
                     sec = parse_retry_seconds(err_msg)
                     if sec and not extracted_retry_sec:
                         extracted_retry_sec = sec
-                    logs.append(f"Mô hình {model} bận ({res.status_code}): {err_msg[:150]}")
+                    logs.append(f"Mô hình {model} bận ({res.status_code}): {err_msg[:100]}")
             except Exception as e:
                 logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
 
         # 2. Dynamic Discovery & Fallback
-        logs.append("gemini-3.6-flash và 3.5-flash bận. Đang điều tra các mô hình Gemini khả dụng...")
+        logs.append("Tất cả mô hình chính bận. Đang điều tra các mô hình Gemini khả dụng khác...")
         discovered_models = discover_available_gemini_models(api_key)
         
         for model in discovered_models:
@@ -200,7 +208,7 @@ def chat():
             headers = {"Content-Type": "application/json"}
             
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=20)
+                res = requests.post(url, headers=headers, json=payload, timeout=15)
                 if res.status_code == 200:
                     res_data = res.json()
                     candidates = res_data.get("candidates", [])
@@ -222,7 +230,7 @@ def chat():
                 logs.append(f"Lỗi mô hình {model}: {str(e)}")
 
         return jsonify({
-            "error": "Tất cả mô hình Gemini đều đang bận hoặc quá tải.",
+            "error": "Tất cả mô hình Gemini đều đang bận hoặc quá tải do quá nhiều lượt truy cập.",
             "retry_seconds": extracted_retry_sec or 15,
             "logs": logs
         }), 429
@@ -276,8 +284,6 @@ def tts():
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                             "model_used": requested_voice
                         })
-                else:
-                    print(f"Chirp 3 HD OAuth2 request failed ({res_chirp.status_code}): {res_chirp.text[:150]}")
             except Exception as e:
                 print("Chirp 3 HD OAuth2 request exception:", e)
 
@@ -307,7 +313,6 @@ def tts():
                 clean_fallback_voices.append(v)
 
         if not api_key:
-            print("Google Cloud TTS API Warning: No Google API Key provided in Env or Client!")
             return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 200
 
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
@@ -341,10 +346,8 @@ def tts():
                         })
                 else:
                     last_error = f"HTTP {res.status_code}: {res.text[:150]}"
-                    print(f"TTS voice {v_name} error: {last_error}")
             except Exception as e:
                 last_error = str(e)
-                print(f"TTS voice {v_name} exception:", e)
                 continue
 
         return jsonify({
