@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LingoBotWebApp - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBotWebApp - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash & Google Cloud Speech.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="app-viewport">
+        <div class="app-card">
+            <!-- Header matching screenshot -->
+            <header class="app-header-bar">
+                <div class="brand-group">
+                    <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
+                    <span class="brand-title">LingoBotWebApp</span>
+                </div>
+
+                <!-- Navigation Mode Tabs -->
+                <div class="nav-tabs-group">
+                    <button type="button" class="nav-tab active" id="tabGiaoTiep" onclick="window.LingoApp.switchMode('GiaoTiep')">
+                        <span class="tab-icon">💭</span> <span id="txtTabGiaoTiep">Giao tiếp</span>
+                    </button>
+                    <button type="button" class="nav-tab" id="tabPhatAm" onclick="window.LingoApp.switchMode('PhatAm')">
+                        <span class="tab-icon">🎯</span> <span id="txtTabPhatAm">Phát âm</span>
+                    </button>
+                </div>
+
+                <!-- Status Badges with selectable UI & Target Languages -->
+                <div class="badges-group">
+                    <!-- UI Language Selectable Dropdown -->
+                    <div class="badge-pill badge-ui">
+                        <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
+                        <select id="uiLangSelect" class="badge-select">
+                            <option value="tiếng Việt" selected>vn Tiếng Việt</option>
+                            <option value="tiếng Nhật">jp 日本語</option>
+                            <option value="tiếng Anh">us English</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Language Dropdown -->
+                    <div class="badge-pill badge-target">
+                        <span class="badge-prefix" id="lblTargetLang">Mục tiêu:</span>
+                        <select id="targetLangSelect" class="badge-select">
+                            <option value="us English" selected>us English</option>
+                            <option value="jp 日本語">jp 日本語</option>
+                            <option value="vn Tiếng Việt">vn Tiếng Việt</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Header Action Buttons -->
+                <div class="header-btns-group">
+                    <select id="ttsModelSelect" class="header-select" title="Chọn mô hình giọng đọc TTS">
+                        <option value="en-US-Neural2-F">TTS: en-US-Neural2-F (Nữ Mỹ)</option>
+                        <option value="en-US-Journey-F">TTS: en-US-Journey-F (Tự nhiên)</option>
+                        <option value="ja-JP-Neural2-B">TTS: ja-JP-Neural2-B (Nam Nhật)</option>
+                        <option value="ja-JP-Neural2-C">TTS: ja-JP-Neural2-C (Nữ Nhật)</option>
+                        <option value="vi-VN-Neural2-A">TTS: vi-VN-Neural2-A (Nữ Việt)</option>
+                    </select>
+
+                    <button type="button" id="headerResetBtn" class="action-btn btn-orange" title="Đặt lại cuộc trò chuyện" onclick="window.LingoApp.resetConversation()">
+                        <span>🔄</span> <span id="txtResetBtn">Đặt lại</span>
+                    </button>
+
+                    <button type="button" id="headerEndBtn" class="action-btn btn-red" title="Kết thúc buổi học" onclick="window.LingoApp.endSession()">
+                        <span>🛑</span> <span id="txtEndBtn">Kết thúc</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Viewport for Conversation Mode & Pronunciation Mode -->
+            <main class="chat-viewport">
+                <!-- 1. CONVERSATION MODE VIEW -->
+                <div class="chat-scroll-area" id="chatContainer">
+                    
+                    <!-- API Key Setup Prompt Bubble -->
+                    <div class="chat-row ai-row" id="setupBubbleRow">
+                        <div class="chat-bubble setup-prompt-bubble">
+                            <div class="setup-title">
+                                🔑 Google Gemini API Key Setup / Google Gemini APIキーの設定:
+                            </div>
+                            <div class="setup-text-vn" id="setupTextVn">
+                                <strong>vn</strong> Chào bạn! Vui lòng nhập Google Gemini API Key (ví dụ: AIzaSy...) vào khung chat bên dưới để bắt đầu:
+                            </div>
+                            <div class="setup-text-jp" id="setupTextJp">
+                                <strong>jp</strong> こんにちは！ご使用前に Google Gemini APIキー（例: AIzaSy...）を下のチャット入力欄に入力してください：
+                            </div>
+                            
+                            <div class="setup-meta">
+                                <span class="sender-tag">🤖 LingoBot</span>
+                                <span class="time-tag" id="setupTimestamp">07:37</span>
+                            </div>
+
+                            <div class="setup-actions">
+                                <button type="button" id="skipApiKeyBtn" class="skip-btn" onclick="window.LingoApp.skipApiKey()">
+                                    ⏭️ Bỏ qua / スキップ (Skip API Key)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scenario Selection Card INSIDE CHAT BUBBLE with 20 Categorized Scenarios -->
+                    <div class="chat-row ai-row hidden" id="scenarioBubbleRow">
+                        <div class="chat-bubble scenario-prompt-bubble">
+                            <div class="scenario-title" id="txtScenarioTitle">🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:</div>
+                            
+                            <!-- Level Selection -->
+                            <div class="selection-group">
+                                <div class="selection-label" id="txtLevelLabel">Trình độ:</div>
+                                <div class="pill-options" id="levelOptions">
+                                    <button type="button" id="optLevel1" class="pill-opt active" data-level="Sơ cấp (CEFR A1, A2)">Sơ cấp A1-A2</button>
+                                    <button type="button" id="optLevel2" class="pill-opt" data-level="Trung cấp (CEFR B1, B2)">Trung cấp B1-B2</button>
+                                    <button type="button" id="optLevel3" class="pill-opt" data-level="Cao cấp (CEFR C1, C2)">Cao cấp C1-C2</button>
+                                </div>
+                            </div>
+
+                            <!-- 20 Categorized Scenarios -->
+                            <div class="selection-group">
+                                <div class="selection-label" id="txtScenarioLabel">Tình huống:</div>
+                                <div class="scenario-categories-container" id="scenarioOptions">
+                                    
+                                    <!-- 1. Daily Conversation -->
+                                    <div class="cat-block">
+                                        <div class="cat-title" id="catDaily">💬 日常会話</div>
+                                        <div class="pill-options">
+                                            <button type="button" id="scenSelfIntro" class="pill-opt active" data-scenario="自己紹介の会話">👋 自己紹介</button>
+                                            <button type="button" id="scenDirections" class="pill-opt" data-scenario="道案内の会話">🗺️ 道案内</button>
+                                            <button type="button" id="scenSmallTalk" class="pill-opt" data-scenario="天気・世間話の会話">☀️ 天気・世間話</button>
+                                            <button type="button" id="scenShopping" class="pill-opt" data-scenario="買い物の会話">🛍️ 買い物</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Travel & Transit -->
+                                    <div class="cat-block">
+                                        <div class="cat-title" id="catTravel">✈️ 旅行・移動</div>
+                                        <div class="pill-options">
+                                            <button type="button" id="scenAirport" class="pill-opt" data-scenario="空港のチェックイン会話">✈️ 空港チェックイン</button>
+                                            <button type="button" id="scenHotel" class="pill-opt" data-scenario="ホテルの宿泊手続き会話">🏨 ホテル手続き</button>
+                                            <button type="button" id="scenTrainBus" class="pill-opt" data-scenario="電車・バスの乗り換え会話">🚃 電車・バス乗り換え</button>
+                                            <button type="button" id="scenTaxi" class="pill-opt" data-scenario="タクシーでの会話">🚖 タクシー</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Dining & Food -->
+                                    <div class="cat-block">
+                                        <div class="cat-title" id="catDining">🍽️ グルメ・飲食</div>
+                                        <div class="pill-options">
+                                            <button type="button" id="scenCafe" class="pill-opt" data-scenario="カフェでの注文会話">☕ カフェ注文</button>
+                                            <button type="button" id="scenReserve" class="pill-opt" data-scenario="レストランの予約会話">📅 レストラン予約</button>
+                                            <button type="button" id="scenIzakaya" class="pill-opt" data-scenario="居酒屋での注文会話">🍶 居酒屋注文</button>
+                                            <button type="button" id="scenPayment" class="pill-opt" data-scenario="会計・支払い時の会話">💳 会計・支払い</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4. Business -->
+                                    <div class="cat-block">
+                                        <div class="cat-title" id="catBusiness">💼 ビジネス</div>
+                                        <div class="pill-options">
+                                            <button type="button" id="scenPhone" class="pill-opt" data-scenario="電話対応の会話">📞 電話対応</button>
+                                            <button type="button" id="scenCard" class="pill-opt" data-scenario="名刺交換・挨拶の会話">📇 名刺交換・挨拶</button>
+                                            <button type="button" id="scenMeeting" class="pill-opt" data-scenario="会議での意見表明会話">🗣️ 会議での意見表明</button>
+                                            <button type="button" id="scenComplaint" class="pill-opt" data-scenario="クレーム対応の会話">⚠️ クレーム対応</button>
+                                            <button type="button" id="scenInterview" class="pill-opt" data-scenario="採用面接の会話">💼 採用面接</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 5. Emergency & Trouble -->
+                                    <div class="cat-block">
+                                        <div class="cat-title" id="catTrouble">🚨 トラブル・緊急</div>
+                                        <div class="pill-options">
+                                            <button type="button" id="scenHospital" class="pill-opt" data-scenario="病院・薬局での会話">🏥 病院・薬局</button>
+                                            <button type="button" id="scenPolice" class="pill-opt" data-scenario="警察・紛失物の届出会話">👮 警察・紛失物</button>
+                                            <button type="button" id="scenLost" class="pill-opt" data-scenario="道に迷ったときの会話">❓ 道に迷ったとき</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="scenario-action-row">
+                                <button type="button" id="startChatBtn" class="btn-start-chat" onclick="window.LingoApp.startConversation()">🚀 Bắt đầu hội thoại ngay</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conversation messages dynamic append -->
+                </div>
+
+                <!-- 2. PRONUNCIATION PRACTICE MODE VIEW (Phát âm) -->
+                <div class="pronounce-viewport" id="pronounceContainer" style="display: none;">
+                    <div class="pronounce-card">
+                        <div class="pronounce-header">
+                            <h2 id="txtPronounceTitle">🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)</h2>
+                            <p id="txtPronounceSub">Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI Gemini 3.6 Flash phân tích phát âm.</p>
+                            
+                            <!-- Filters for Pronunciation Sentences -->
+                            <div class="pronounce-filter-bar">
+                                <div class="filter-group">
+                                    <span id="lblFilterLang">Ngôn ngữ:</span>
+                                    <button type="button" id="chipLangAll" class="filter-chip active" data-lang="all">Tất cả</button>
+                                    <button type="button" class="filter-chip" data-lang="jp 日本語">jp 日本語</button>
+                                    <button type="button" class="filter-chip" data-lang="us English">us English</button>
+                                    <button type="button" class="filter-chip" data-lang="vn Tiếng Việt">vn Tiếng Việt</button>
+                                </div>
+
+                                <div class="filter-group">
+                                    <span id="lblFilterLevel">Trình độ:</span>
+                                    <button type="button" id="chipLevelAll" class="filter-chip active" data-level="all">Tất cả</button>
+                                    <button type="button" id="chipLevel1" class="filter-chip" data-level="Sơ cấp">Sơ cấp (A1-A2)</button>
+                                    <button type="button" id="chipLevel2" class="filter-chip" data-level="Trung cấp">Trung cấp (B1-B2)</button>
+                                    <button type="button" id="chipLevel3" class="filter-chip" data-level="Cao cấp">Cao cấp (C1-C2)</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sample-sentences-list" id="sampleSentencesList">
+                            <!-- 80 Sample Sentences inserted dynamically -->
+                        </div>
+
+                        <!-- Pronunciation Feedback Box -->
+                        <div class="pronounce-feedback-box hidden" id="pronounceFeedback">
+                            <h3>📊 Kết quả phân tích phát âm từ AI:</h3>
+                            <div id="pronounceFeedbackText" class="feedback-text"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer Controls matching screenshot -->
+            <footer class="app-footer-bar">
+                <div class="footer-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        class="footer-chat-input" 
+                        placeholder="Nhập tin nhắn hoặc nói bằng micro..." 
+                        autocomplete="off"
+                    />
+                </div>
+
+                <div class="footer-btns-wrapper">
+                    <!-- Send Button in Orange Gradient Pill -->
+                    <button type="button" id="sendBtn" class="footer-btn btn-send" onclick="window.LingoApp.handleSendMessage()">
+                        <span>🚀</span> <span id="txtSendBtn">Gửi</span>
+                    </button>
+
+                    <!-- Circular Mic Button with Recording Status Animation -->
+                    <button type="button" id="micBtn" class="footer-btn btn-mic" title="Nói bằng Micro">
+                        <span id="micIconSymbol">🎙️</span>
+                    </button>
+
+                    <!-- Red End Button -->
+                    <button type="button" id="footerEndBtn" class="footer-btn btn-red" onclick="window.LingoApp.endSession()">
+                        <span>🛑</span> <span id="txtFooterEndBtn">Kết thúc</span>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- System Log Modal -->
+    <div id="logModal" class="modal-backdrop hidden">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h2>📜 Nhật ký hệ thống (System Execution Logs)</h2>
+                <button type="button" class="close-btn" id="closeLogBtn" onclick="window.LingoLog.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="logOutput" class="log-console"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="copyLogBtn" class="modal-btn btn-pill-grey" onclick="window.LingoLog.copy()">📋 Sao chép</button>
+                <button type="button" id="downloadLogBtn" class="modal-btn btn-pill-orange" onclick="window.LingoLog.download()">📥 Tải xuống (.txt)</button>
+                <button type="button" id="closeLogModalBtn" class="modal-btn btn-pill-red" onclick="window.LingoLog.closeModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesson Summary Report Modal -->
+    <div id="summaryModal" class="modal-backdrop hidden">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h2>📊 Báo cáo & Lời khuyên tổng kết bài học</h2>
+                <button type="button" class="close-btn" id="closeSummaryBtn" onclick="window.LingoSummary.closeSummaryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="summaryReportContent" class="summary-report-paper">
+                    <div class="loader-spinner" id="summaryLoader">
+                        <div class="spinner"></div>
+                        <p>AI Gemini 3.6 Flash đang phân tích và lập báo cáo tổng kết bài học cho bạn...</p>
+                    </div>
+                    <div id="summaryTextContainer" class="summary-markdown"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="printSummaryBtn" class="modal-btn btn-pill-grey" onclick="window.LingoSummary.printReport()">🖨️ In báo cáo</button>
+                <button type="button" id="downloadPdfBtn" class="modal-btn btn-pill-orange" onclick="window.LingoSummary.downloadPDF()">📄 Tải PDF</button>
+                <button type="button" id="closeSummaryModalBtn" class="modal-btn btn-pill-red" onclick="window.LingoSummary.closeSummaryModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/log.js"></script>
+    <script src="js/tts.js"></script>
+    <script src="js/stt.js"></script>
+    <script src="js/summary.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

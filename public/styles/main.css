@@ -1,0 +1,339 @@
+/* Main Design System - Screenshot Matched Styling with Emerald User Bubbles */
+:root {
+    --bg-page: #f9f3ec;
+    --card-bg: #ffffff;
+    --card-border: #e8ded4;
+
+    --brand-orange: #ea580c;
+    --btn-orange-grad: linear-gradient(135deg, #f97316, #ea580c);
+    
+    --btn-red-grad: linear-gradient(135deg, #ef4444, #dc2626);
+    --btn-red-hover: #b91c1c;
+
+    /* User Bubble Color: Emerald Green (#059669 / #10b981) per user requirement */
+    --bubble-user-bg: #059669;
+    --bubble-user-text: #ffffff;
+
+    --bubble-ai-bg: #1d4ed8;
+    --bubble-ai-text: #ffffff;
+
+    --text-main: #292524;
+    --text-muted: #66605b;
+
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+}
+
+.app-viewport {
+    width: 100%;
+    max-width: 1180px;
+    height: 98vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-card {
+    background: #ffffff;
+    border: 2px solid var(--card-border);
+    border-radius: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(160, 100, 50, 0.08);
+    overflow: hidden;
+}
+
+/* Header Bar */
+.app-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #fff9f3;
+    border-bottom: 1px solid #f0e4d8;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.brand-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-badge-btn {
+    font-size: 1.5rem;
+    background: #ffedd5;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.logo-badge-btn:hover {
+    background: #fed7aa;
+    transform: scale(1.08) rotate(-4deg);
+}
+
+.logo-badge-btn:active {
+    transform: translateY(2px) scale(0.95);
+}
+
+.brand-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1c1917;
+    letter-spacing: -0.3px;
+}
+
+/* Nav Mode Tabs */
+.nav-tabs-group {
+    display: flex;
+    background: #f7ebe1;
+    padding: 4px;
+    border-radius: 16px;
+    gap: 4px;
+}
+
+.nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #66605b;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.nav-tab.active {
+    background: #ffffff;
+    color: #ea580c;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Status Badges */
+.badges-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-ui {
+    background: #fff3e0;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
+}
+
+.badge-target {
+    background: #e6f4ea;
+    color: #137333;
+    border: 1px solid #ceebd6;
+}
+
+.badge-select {
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: inherit;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Header Buttons */
+.header-btns-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-select {
+    padding: 6px 10px;
+    border-radius: 12px;
+    border: 1px solid #fed7aa;
+    background: #fffaf5;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 20px;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+.action-btn:active {
+    transform: translateY(2px) scale(0.97);
+}
+
+.btn-orange {
+    background: #f97316;
+}
+.btn-red {
+    background: #dc2626;
+}
+
+/* Main Chat Viewport */
+.chat-viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: #fffcf8;
+}
+
+.chat-scroll-area {
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+}
+
+/* Footer Section */
+.app-footer-bar {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    background: #ffffff;
+    border-top: 1px solid #f0e4d8;
+    gap: 12px;
+}
+
+.footer-input-wrapper {
+    flex: 1;
+}
+
+.footer-chat-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid #fdba74;
+    border-radius: 30px;
+    font-family: var(--font-body);
+    font-size: 0.96rem;
+    color: #1c1917;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.footer-chat-input::placeholder {
+    color: #94a3b8;
+}
+
+.footer-chat-input:focus {
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.footer-btns-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 25px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.footer-btn:hover {
+    transform: translateY(-1px);
+}
+
+.footer-btn:active {
+    transform: translateY(2px) scale(0.96);
+}
+
+.btn-send {
+    background: var(--btn-orange-grad);
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+}
+
+.btn-mic {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: #ffedd5;
+    color: #ea580c;
+    font-size: 1.2rem;
+}
+
+.btn-mic:hover {
+    background: #fed7aa;
+}
+
+.btn-mic.recording {
+    background: #fee2e2;
+    color: #dc2626;
+    animation: micPulse 1.2s infinite alternate;
+}
+
+@keyframes micPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.2); }
+}
