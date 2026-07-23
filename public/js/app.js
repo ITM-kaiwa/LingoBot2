@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.51 Implementation
+// Main Application Controller - LingoBot2 Ver0.52 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -326,7 +326,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.51].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.52].");
     },
 
     updateUiLanguage(lang) {
@@ -826,6 +826,7 @@ Quy tắc ứng xử:
             } else {
                 if (data.retry_seconds) {
                     const waitMsg = dict.apiRetryWait ? dict.apiRetryWait(data.retry_seconds) : `⚠️ ${data.error}`;
+                    // Skip auto-TTS playback for warning bubbles
                     this.appendMessage("model", waitMsg);
                     window.LingoLog.add(`API Busy (Wait ${data.retry_seconds}s): ${data.error}`);
                 } else {

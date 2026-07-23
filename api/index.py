@@ -276,8 +276,7 @@ def tts():
             except Exception as e:
                 print("Chirp 3 HD OAuth2 request exception:", e)
 
-        # 2. Fallback to API Key TTS using Neural2 -> WaveNet -> Standard (Fully robust)
-        # Note: Do NOT attempt API Key with Chirp3-HD because Google returns 401 API keys not supported.
+        # 2. Prevent sending Chirp voice with API Key (which causes 401). Immediately substitute with Neural2
         fallback_voices = []
         if "ja-JP" in lang_code:
             fallback_voices = ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
@@ -286,7 +285,7 @@ def tts():
         else:
             fallback_voices = ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
-        # If user explicitly picked a non-Chirp voice that supports API Keys (e.g. Neural2), prioritize it
+        # If user selected a non-Chirp voice that supports API Keys directly, prioritize it
         if "Chirp" not in voice_name and voice_name not in fallback_voices:
             fallback_voices.insert(0, voice_name)
 
@@ -318,11 +317,11 @@ def tts():
                     res_json = res.json()
                     audio_base64 = res_json.get("audioContent", "")
                     if audio_base64:
-                        print(f"Successfully synthesized fallback TTS voice: {v_name}")
+                        print(f"Successfully synthesized Google Cloud TTS: {v_name}")
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                             "model_used": v_name,
-                            "note": "Switched to Neural2 due to missing Service Account for Chirp 3 HD"
+                            "note": "Serving Neural2 Google Cloud TTS"
                         })
                 else:
                     last_error = f"HTTP {res.status_code}: {res.text[:150]}"
