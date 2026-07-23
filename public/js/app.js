@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.50 Implementation
+// Main Application Controller - LingoBot2 Ver0.51 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -291,7 +291,7 @@ window.LingoApp = {
         { id: 224, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
         { id: 225, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Rapid technological advancement necessitates a comprehensive overhaul of traditional business paradigms.", translation: "Tiến bộ công nghệ nhanh đòi hỏi đại tu toàn diện mô hình kinh doanh truyền thống." },
         { id: 226, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Swift and decisive leadership is pivotal in navigating unprecedented organizational crises.", translation: "Lãnh đạo nhanh nhạy và quyết đoán là then chốt để vượt qua khủng hoảng." },
-        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để thúc đẩy khác biệt cạnh tranh, chúng tôi ưu tiên nâng cao trải nghiệm khách hàng." },
+        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi ưu tiên nâng cao trải nghiệm khách hàng." },
         { id: 228, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We remain committed to optimizing resource allocation while enforcing strict cost discipline.", translation: "Chúng tôi cam kết tối ưu phân bổ nguồn lực đồng thời kỷ luật chi phí nghiêm ngặt." },
         { id: 229, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Fostering a culture of transparent communication empowers employees to take initiative.", translation: "Nuôi dưỡng văn hóa giao tiếp minh bạch giúp nhân viên chủ động hơn." },
         { id: 230, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Adopting a prudent yet agile approach will allow us to navigate volatile market dynamics.", translation: "Áp dụng phương pháp thận trọng nhưng linh hoạt giúp vượt biến động thị trường." },
@@ -326,7 +326,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.50].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.51].");
     },
 
     updateUiLanguage(lang) {

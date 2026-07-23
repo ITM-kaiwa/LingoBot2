@@ -156,7 +156,12 @@ window.LingoTTS = {
                 
                 const usedModel = data.model_used || voiceName;
                 this.updateActiveTtsBadge(usedModel);
-                window.LingoLog.add(`Phát thành công giọng Google Cloud TTS: (${usedModel})`);
+                
+                if (data.note) {
+                    window.LingoLog.add(`Phát thành công giọng Google Cloud TTS: ${usedModel} (${data.note})`);
+                } else {
+                    window.LingoLog.add(`Phát thành công giọng Google Cloud TTS: (${usedModel})`);
+                }
             } else {
                 this.updateActiveTtsBadge("Web-Speech");
                 window.LingoLog.add(`Google Cloud TTS API Error (${data.error || 'Thiếu API Key'}). Chuyển sang Web SpeechSynthesis trình duyệt...`);

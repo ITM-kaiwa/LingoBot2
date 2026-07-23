@@ -242,7 +242,7 @@ def tts():
         parts = voice_name.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # 1. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token if requested & token available
+        # 1. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
         if "Chirp" in voice_name and oauth_token:
@@ -276,7 +276,8 @@ def tts():
             except Exception as e:
                 print("Chirp 3 HD OAuth2 request exception:", e)
 
-        # 2. Fallback to API Key TTS using Neural2 -> WaveNet -> Standard
+        # 2. Fallback to API Key TTS using Neural2 -> WaveNet -> Standard (Fully robust)
+        # Note: Do NOT attempt API Key with Chirp3-HD because Google returns 401 API keys not supported.
         fallback_voices = []
         if "ja-JP" in lang_code:
             fallback_voices = ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
@@ -285,12 +286,16 @@ def tts():
         else:
             fallback_voices = ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
+        # If user explicitly picked a non-Chirp voice that supports API Keys (e.g. Neural2), prioritize it
+        if "Chirp" not in voice_name and voice_name not in fallback_voices:
+            fallback_voices.insert(0, voice_name)
+
         if not api_key:
             print("Google Cloud TTS API Error: No Google API Key provided!")
             return jsonify({"error": "Google API Key missing for TTS", "fallback_browser": True}), 400
 
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
-        last_error = oauth_err or ""
+        last_error = ""
 
         for v_name in fallback_voices:
             v_parts = v_name.split("-")
@@ -316,7 +321,8 @@ def tts():
                         print(f"Successfully synthesized fallback TTS voice: {v_name}")
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": v_name
+                            "model_used": v_name,
+                            "note": "Switched to Neural2 due to missing Service Account for Chirp 3 HD"
                         })
                 else:
                     last_error = f"HTTP {res.status_code}: {res.text[:150]}"
