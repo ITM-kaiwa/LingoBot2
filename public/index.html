@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver1.60 - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBot2 Ver1.60 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
+    <title>LingoBot2 Ver1.65 - Đối thoại AI & Luyện phát âm</title>
+    <meta name="description" content="LingoBot2 Ver1.65 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=1.60">
-    <link rel="stylesheet" href="styles/components.css?v=1.60">
+    <link rel="stylesheet" href="styles/main.css?v=1.65">
+    <link rel="stylesheet" href="styles/components.css?v=1.65">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver1.60 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver1.65 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver1.60</span>
+                    <span class="version-badge">Ver1.65</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -59,8 +59,8 @@
                 <!-- Header Action Buttons & Active TTS Abbreviation Badge -->
                 <div class="header-btns-group">
                     <select id="ttsModelSelect" class="header-select" title="Chọn mô hình giọng đọc TTS">
-                        <option value="browser-native">TTS: ブラウザ標準音声 (Web Speech API)</option>
-                        <option value="ja-JP-Chirp3-HD-F" selected>TTS: Chirp 3 HD (ja-JP-F Nữ)</option>
+                        <option value="browser-native" selected>TTS: ブラウザ標準音声 (Web Speech API)</option>
+                        <option value="ja-JP-Chirp3-HD-F">TTS: Chirp 3 HD (ja-JP-F Nữ)</option>
                         <option value="ja-JP-Chirp3-HD-M">TTS: Chirp 3 HD (ja-JP-M Nam)</option>
                         <option value="en-US-Chirp3-HD-F">TTS: Chirp 3 HD (en-US-F Nữ)</option>
                         <option value="en-US-Chirp3-HD-M">TTS: Chirp 3 HD (en-US-M Nam)</option>
@@ -70,7 +70,7 @@
                     </select>
 
                     <!-- Abbreviated Active Running TTS Model Badge -->
-                    <span id="activeTtsBadge" class="active-tts-badge" title="Mô hình giọng đọc TTS đang hoạt động (Active Running TTS Model)">JP-Chirp(♀)</span>
+                    <span id="activeTtsBadge" class="active-tts-badge" title="Mô hình giọng đọc TTS đang hoạt động (Active Running TTS Model)">Web-Speech</span>
 
                     <!-- Compact API Key Input Group in Header (between TTS Model & Reset button) -->
                     <div class="header-key-group">
@@ -358,10 +358,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=1.60"></script>
-    <script src="js/tts.js?v=1.60"></script>
-    <script src="js/stt.js?v=1.60"></script>
-    <script src="js/summary.js?v=1.60"></script>
-    <script src="js/app.js?v=1.60"></script>
+    <script src="js/log.js?v=1.65"></script>
+    <script src="js/tts.js?v=1.65"></script>
+    <script src="js/stt.js?v=1.65"></script>
+    <script src="js/summary.js?v=1.65"></script>
+    <script src="js/app.js?v=1.65"></script>
 </body>
 </html>

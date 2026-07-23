@@ -100,14 +100,12 @@ def get_gcp_oauth2_token():
             # Standard Base64 Decode
             decoded_json_str = base64.b64decode(env_b64.strip()).decode('utf-8')
             service_account_info = json.loads(decoded_json_str)
-            print("Successfully decoded Base64 GCP_SERVICE_ACCOUNT_JSON!")
         except Exception as e:
-            print("Base64 decode error for GCP_SERVICE_ACCOUNT_JSON:", e)
             # Standard JSON fallback if unencoded
             try:
                 service_account_info = json.loads(env_b64.strip())
             except Exception as e2:
-                print("Standard JSON parse fallback error:", e2)
+                print("JSON parse error:", e2)
 
     # Local file fallback for dev environment
     if not service_account_info:
@@ -138,7 +136,6 @@ def get_gcp_oauth2_token():
         credentials.refresh(auth_req)
         return credentials.token, None
     except Exception as e:
-        print("OAuth2 Token generation failed:", e)
         return None, str(e)
 
 
@@ -290,17 +287,17 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Clean Google Cloud TTS Endpoint (Ver1.55)
+    Clean Google Cloud TTS Endpoint (Ver1.65)
     1. Decodes Base64 GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable.
     2. Uses OAuth2 Token to synthesize Chirp 3 HD & Neural2 voices seamlessly.
-    3. Supports Browser Native TTS fallback option.
+    3. Seamlessly triggers Browser Native TTS fallback when OAuth2 or API Key fails.
     """
     try:
         data = request.get_json() or {}
         client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
         
         text = data.get("text", "").strip()
-        requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
+        requested_voice = data.get("voice_name", "browser-native")
 
         # Instant return if user explicitly selected Browser Native TTS
         if requested_voice == "browser-native":
@@ -320,14 +317,14 @@ def tts():
         
         if "ja-JP" in lang_code:
             if "M" in requested_voice or "Male" in requested_voice or "B" in requested_voice:
-                candidate_voices += ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Wavenet-D", "ja-JP-Standard-B"]
+                candidate_voices += ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
             else:
-                candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Wavenet-A", "ja-JP-Wavenet-C", "ja-JP-Standard-A"]
+                candidate_voices += ["ja-JP-Neural2-F", "ja-JP-Neural2-B", "ja-JP-Wavenet-A", "ja-JP-Standard-A"]
         elif "en-US" in lang_code:
             if "M" in requested_voice or "Male" in requested_voice or "D" in requested_voice:
-                candidate_voices += ["en-US-Neural2-D", "en-US-Neural2-J", "en-US-Wavenet-D", "en-US-Standard-D"]
+                candidate_voices += ["en-US-Neural2-D", "en-US-Wavenet-D", "en-US-Standard-D"]
             else:
-                candidate_voices += ["en-US-Neural2-F", "en-US-Neural2-C", "en-US-Wavenet-F", "en-US-Standard-F"]
+                candidate_voices += ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
         else:
             candidate_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
@@ -367,14 +364,14 @@ def tts():
                         res_json = res_oauth.json()
                         audio_base64 = res_json.get("audioContent", "")
                         if audio_base64:
-                            print(f"Google Cloud TTS OAuth2 Success via Base64 Service Account! Voice: {v_name}")
+                            print(f"Google Cloud TTS OAuth2 Success! Voice: {v_name}")
                             return jsonify({
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name,
-                                "provider": "Google Cloud TTS (Base64 Service Account OAuth2)"
+                                "provider": "Google Cloud TTS (OAuth2)"
                             })
                     else:
-                        last_error = f"OAuth2 HTTP {res_oauth.status_code}: {res_oauth.text[:100]}"
+                        last_error = f"OAuth2 HTTP {res_oauth.status_code}"
                 except Exception as e:
                     last_error = str(e)
                     continue
@@ -410,14 +407,14 @@ def tts():
                                 "provider": "Google Cloud TTS (API Key)"
                             })
                     else:
-                        last_error = f"API Key HTTP {res_key.status_code}: {res_key.text[:100]}"
+                        last_error = f"API Key HTTP {res_key.status_code}"
                 except Exception as e:
                     last_error = str(e)
                     continue
 
-        # Controlled return triggering Browser Native Fallback without throwing 500
+        # Clean, friendly fallback response
         return jsonify({
-            "error": f"Google Cloud TTS ({last_error or 'Cần Base64 GCP_SERVICE_ACCOUNT_JSON hoặc API Key'})",
+            "error": "Tự động chuyển sang giọng đọc chuẩn trình duyệt Web Speech API",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code
