@@ -1,4 +1,4 @@
-// Google Cloud Text-To-Speech Manager with Furigana Stripping
+// Google Cloud Text-To-Speech Manager (Chirp 3 HD -> Neural2 -> WaveNet -> Standard + Audio Download)
 window.LingoTTS = {
     audioPlayer: null,
     currentActiveBtn: null,
@@ -21,7 +21,7 @@ window.LingoTTS = {
         });
     },
 
-    // Clean Japanese furigana annotations (parentheses, brackets, ruby tags) before TTS playback
+    // Clean Japanese furigana annotations before TTS playback or download
     stripFurigana(text) {
         if (!text) return "";
         let cleaned = text;
@@ -49,7 +49,7 @@ window.LingoTTS = {
 
     getSelectedVoiceModel() {
         const select = document.getElementById("ttsModelSelect");
-        return (select && select.value) ? select.value : "ja-JP-Neural2-B";
+        return (select && select.value) ? select.value : "ja-JP-Chirp3-HD-F";
     },
 
     stop() {
@@ -73,7 +73,6 @@ window.LingoTTS = {
     },
 
     async playText(text, btnElement = null, customVoiceModel = null) {
-        // Strip Japanese furigana readings before TTS reading out
         const cleanSpeechText = this.stripFurigana(text);
 
         if (btnElement && this.currentActiveBtn === btnElement && this.audioPlayer && !this.audioPlayer.paused) {
@@ -92,7 +91,7 @@ window.LingoTTS = {
         const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
         const voiceName = customVoiceModel || this.getSelectedVoiceModel();
 
-        window.LingoLog.add(`Phát TTS [Đã loại bỏ furigana]: "${cleanSpeechText.substring(0, 35)}..." [Giọng: ${voiceName}]`);
+        window.LingoLog.add(`Phát TTS [Google Cloud: ${voiceName}]: "${cleanSpeechText.substring(0, 35)}..."`);
 
         try {
             const response = await fetch("/api/tts", {
@@ -109,8 +108,9 @@ window.LingoTTS = {
 
             if (response.ok && data.audio_url) {
                 this.audioPlayer.src = data.audio_url;
+                if (btnElement) btnElement._cachedAudioUrl = data.audio_url;
                 await this.audioPlayer.play();
-                window.LingoLog.add(`Đang phát audio thành công bằng giọng đọc (${voiceName}).`);
+                window.LingoLog.add(`Đang phát audio thành công bằng giọng đọc (${data.model_used || voiceName}).`);
             } else {
                 window.LingoLog.add(`TTS Backend: Chuyển sang Web SpeechSynthesis trình duyệt (${voiceName})...`, data.error || "");
                 this.fallbackBrowserTTS(cleanSpeechText, voiceName);
@@ -119,6 +119,53 @@ window.LingoTTS = {
             window.LingoLog.add("Lỗi kết nối TTS API, chuyển dự phòng Web Speech", err.message);
             this.fallbackBrowserTTS(cleanSpeechText, voiceName);
         }
+    },
+
+    // Download synthesized MP3 audio file
+    async downloadAudio(text, cachedUrl = null) {
+        if (cachedUrl && cachedUrl.startsWith("data:audio")) {
+            this.triggerFileDownload(cachedUrl, "lingobot_ai_speech.mp3");
+            window.LingoLog.add("Đã tải xuống tệp âm thanh MP3 từ bộ nhớ đệm.");
+            return;
+        }
+
+        const cleanSpeechText = this.stripFurigana(text);
+        const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
+        const voiceName = this.getSelectedVoiceModel();
+
+        window.LingoLog.add(`Tải xuống MP3 [Giọng: ${voiceName}]...`);
+
+        try {
+            const response = await fetch("/api/tts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    api_key: apiKey,
+                    text: cleanSpeechText,
+                    voice_name: voiceName
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.audio_url) {
+                this.triggerFileDownload(data.audio_url, "lingobot_ai_speech.mp3");
+                window.LingoLog.add(`Đã tải xuống MP3 thành công (${data.model_used || voiceName}).`);
+            } else {
+                alert("Không thể tạo tệp âm thanh để tải xuống. Vui lòng kiểm tra API Key.");
+            }
+        } catch (err) {
+            window.LingoLog.add("Lỗi tải xuống audio", err.message);
+            alert("Lỗi tải xuống tệp âm thanh: " + err.message);
+        }
+    },
+
+    triggerFileDownload(url, filename) {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     },
 
     fallbackBrowserTTS(text, voiceName) {

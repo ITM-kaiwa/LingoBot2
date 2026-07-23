@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LingoBotWebApp - Đối thoại AI & Luyện phát âm</title>
-    <meta name="description" content="LingoBotWebApp - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash & Google Cloud Speech.">
+    <meta name="description" content="LingoBotWebApp - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini 3.6 Flash, Chirp 3 HD & Google Cloud Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -57,11 +57,13 @@
 
                 <!-- Header Action Buttons -->
                 <div class="header-btns-group">
-                    <select id="ttsModelSelect" class="header-select" title="Chọn mô hình giọng đọc TTS">
-                        <option value="en-US-Neural2-F">TTS: en-US-Neural2-F (Nữ Mỹ)</option>
-                        <option value="en-US-Journey-F">TTS: en-US-Journey-F (Tự nhiên)</option>
+                    <select id="ttsModelSelect" class="header-select" title="Chọn mô hình giọng đọc Google Cloud TTS">
+                        <option value="ja-JP-Chirp3-HD-F" selected>TTS: Chirp 3 HD (ja-JP-F Nữ)</option>
+                        <option value="ja-JP-Chirp3-HD-M">TTS: Chirp 3 HD (ja-JP-M Nam)</option>
+                        <option value="en-US-Chirp3-HD-F">TTS: Chirp 3 HD (en-US-F Nữ)</option>
+                        <option value="en-US-Chirp3-HD-M">TTS: Chirp 3 HD (en-US-M Nam)</option>
                         <option value="ja-JP-Neural2-B">TTS: ja-JP-Neural2-B (Nam Nhật)</option>
-                        <option value="ja-JP-Neural2-C">TTS: ja-JP-Neural2-C (Nữ Nhật)</option>
+                        <option value="en-US-Neural2-F">TTS: en-US-Neural2-F (Nữ Mỹ)</option>
                         <option value="vi-VN-Neural2-A">TTS: vi-VN-Neural2-A (Nữ Việt)</option>
                     </select>
 

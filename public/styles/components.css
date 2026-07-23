@@ -1,4 +1,4 @@
-/* Components CSS - Setup Bubble, Chat Rows, Pronunciation Mode Filters, Categorized Scenarios */
+/* Components CSS - Setup Bubble, Chat Rows, Audio Download Button, Universal Buttons */
 
 /* Universal Button Styling */
 button {
@@ -296,6 +296,14 @@ button:active {
 
 .audio-btn.btn-stop:hover {
     background: #dc2626;
+}
+
+.audio-btn.btn-download {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.audio-btn.btn-download:hover {
+    background: #0284c7;
 }
 
 /* Pronunciation Practice View (Phát âm) */

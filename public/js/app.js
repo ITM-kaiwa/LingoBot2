@@ -1,4 +1,4 @@
-// Main Application Controller - Complete 20 Scenarios & I18N
+// Main Application Controller - Complete Chirp 3 HD TTS & Audio Download
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -174,7 +174,7 @@ window.LingoApp = {
         }
     },
 
-    // 80 Complete Sample Sentences (JP 30, US 30, VN 20)
+    // 80 Complete Sample Sentences
     sampleSentences: [
         // --- JAPANESE (30 Sentences) ---
         { id: 101, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "すみません、荷物（にもつ）を預（あず）けたいのですが。", translation: "Xin lỗi, tôi muốn gửi hành lý ạ." },
@@ -274,7 +274,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [Gemini 3.6 Flash & 20 chủ đề会話].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [Gemini 3.6 Flash & Chirp 3 HD TTS].");
     },
 
     // Update 100% of UI elements including all 20 scenario option buttons
@@ -348,7 +348,7 @@ window.LingoApp = {
         const chatInput = document.getElementById("chatInput");
         if (chatInput) chatInput.placeholder = dict.placeholder;
 
-        window.LingoLog.add(`Cập nhật 100% văn bản & 20 tình huống giao tiếp sang: ${lang}`);
+        window.LingoLog.add(`Cập nhật 100% văn bản giao diện sang: ${lang}`);
     },
 
     openLogModal() {
@@ -480,7 +480,6 @@ window.LingoApp = {
             });
         });
 
-        // Scenario selection binding for all 20 option buttons
         const scenarioOpts = document.querySelectorAll("#scenarioOptions .pill-opt");
         scenarioOpts.forEach(btn => {
             btn.addEventListener("click", (e) => {
@@ -634,8 +633,8 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     updateTtsModelForLanguage(lang) {
         const select = document.getElementById("ttsModelSelect");
         if (!select) return;
-        if (lang.includes("日本語")) select.value = "ja-JP-Neural2-B";
-        else if (lang.includes("English")) select.value = "en-US-Neural2-F";
+        if (lang.includes("日本語")) select.value = "ja-JP-Chirp3-HD-F";
+        else if (lang.includes("English")) select.value = "en-US-Chirp3-HD-F";
         else select.value = "vi-VN-Neural2-A";
     },
 
@@ -793,8 +792,16 @@ Quy tắc ứng xử:
             stopBtn.textContent = "⏹ Dừng";
             stopBtn.addEventListener("click", () => window.LingoTTS.stop());
 
+            const downloadBtn = document.createElement("button");
+            downloadBtn.type = "button";
+            downloadBtn.className = "audio-btn btn-download";
+            downloadBtn.textContent = "⬇ Tải MP3";
+            downloadBtn.title = "Tải tệp âm thanh MP3 về máy";
+            downloadBtn.addEventListener("click", () => window.LingoTTS.downloadAudio(content, playBtn._cachedAudioUrl));
+
             controlsDiv.appendChild(playBtn);
             controlsDiv.appendChild(stopBtn);
+            controlsDiv.appendChild(downloadBtn);
             metaDiv.appendChild(controlsDiv);
         }
 

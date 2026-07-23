@@ -109,35 +109,59 @@ def tts():
             api_key = os.environ.get("GOOGLE_API_KEY", "")
 
         text = data.get("text", "").strip()
-        voice_name = data.get("voice_name", "ja-JP-Neural2-B")
+        voice_name = data.get("voice_name", "ja-JP-Chirp3-HD-F")
         
         if not text:
             return jsonify({"error": "Nội dung văn bản trống"}), 400
 
         lang_code = voice_name.split("-")[0] + "-" + voice_name.split("-")[1] if len(voice_name.split("-")) >= 2 else "ja-JP"
         
+        # Build Fallback Chain: Requested (Chirp 3 HD) -> Neural2 -> WaveNet -> Standard
+        fallback_voices = [voice_name]
+        if "ja-JP" in lang_code:
+            fallback_voices += ["ja-JP-Chirp3-HD-F", "ja-JP-Chirp3-HD-M", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
+        elif "en-US" in lang_code:
+            fallback_voices += ["en-US-Chirp3-HD-F", "en-US-Chirp3-HD-M", "en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
+        else:
+            fallback_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
+
+        # Deduplicate preserving priority order
+        seen = set()
+        dedup_voices = []
+        for v in fallback_voices:
+            if v not in seen:
+                seen.add(v)
+                dedup_voices.append(v)
+
         if api_key:
             url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
-            payload = {
-                "input": {"text": text},
-                "voice": {
-                    "languageCode": lang_code,
-                    "name": voice_name
-                },
-                "audioConfig": {
-                    "audioEncoding": "MP3",
-                    "speakingRate": 1.0,
-                    "pitch": 0
+            for v_name in dedup_voices:
+                v_lang = v_name.split("-")[0] + "-" + v_name.split("-")[1] if len(v_name.split("-")) >= 2 else lang_code
+                
+                # Plain text input for Chirp 3 HD compatibility (SSML speed/pitch tags omitted for Chirp)
+                payload = {
+                    "input": {"text": text},
+                    "voice": {
+                        "languageCode": v_lang,
+                        "name": v_name
+                    },
+                    "audioConfig": {
+                        "audioEncoding": "MP3"
+                    }
                 }
-            }
-            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
-            if res.status_code == 200:
-                res_json = res.json()
-                audio_base64 = res_json.get("audioContent", "")
-                return jsonify({
-                    "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                    "model_used": voice_name
-                })
+                
+                try:
+                    res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=12)
+                    if res.status_code == 200:
+                        res_json = res.json()
+                        audio_base64 = res_json.get("audioContent", "")
+                        if audio_base64:
+                            return jsonify({
+                                "audio_url": f"data:audio/mp3;base64,{audio_base64}",
+                                "model_used": v_name
+                            })
+                except Exception:
+                    continue
 
         return jsonify({
             "fallback_browser": True,
