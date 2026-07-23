@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import time
 import random
 import requests
 from flask import Flask, request, jsonify, send_from_directory
@@ -84,12 +85,9 @@ def resolve_api_key(client_key):
 
 def get_gcp_oauth2_token():
     """
-    Robustly reads GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable or local files
-    and generates OAuth2 access token.
+    Robustly parses GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable
+    and generates OAuth2 access token using google-auth library.
     """
-    if not GOOGLE_AUTH_AVAILABLE:
-        return None, "google-auth package not installed"
-
     service_account_info = None
     env_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
     
@@ -102,7 +100,6 @@ def get_gcp_oauth2_token():
             service_account_info = json.loads(cleaned_json)
         except Exception as e1:
             try:
-                # Attempt unescaping newlines in private_key if needed
                 fixed_str = cleaned_json.replace('\\n', '\n')
                 service_account_info = json.loads(fixed_str)
             except Exception as e2:
@@ -127,17 +124,19 @@ def get_gcp_oauth2_token():
     if not service_account_info:
         return None, "GCP Service Account JSON not configured"
 
-    try:
-        credentials = service_account.Credentials.from_service_account_info(
-            service_account_info,
-            scopes=["https://www.googleapis.com/auth/cloud-platform"]
-        )
-        auth_req = google.auth.transport.requests.Request()
-        credentials.refresh(auth_req)
-        return credentials.token, None
-    except Exception as e:
-        print("OAuth2 Token generation exception:", e)
-        return None, str(e)
+    if GOOGLE_AUTH_AVAILABLE:
+        try:
+            credentials = service_account.Credentials.from_service_account_info(
+                service_account_info,
+                scopes=["https://www.googleapis.com/auth/cloud-platform"]
+            )
+            auth_req = google.auth.transport.requests.Request()
+            credentials.refresh(auth_req)
+            return credentials.token, None
+        except Exception as e:
+            print("OAuth2 Token generation via google-auth failed:", e)
+
+    return None, "Unable to refresh OAuth2 token"
 
 
 def discover_available_gemini_models(api_key):
@@ -288,9 +287,11 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Robust Google Cloud TTS Endpoint (Ver1.45)
-    1. Attempts OAuth2 Token (GCP_SERVICE_ACCOUNT_JSON) for Chirp 3 HD & Neural2 voices.
-    2. If OAuth2 token is unavailable or Chirp fails, automatically falls back to API Key with Neural2/WaveNet voices.
+    Robust Google Cloud TTS Endpoint (Ver1.50)
+    Supports:
+    1. Browser Native Fallback signal if requested or if cloud synthesis fails
+    2. OAuth2 Token (GCP_SERVICE_ACCOUNT_JSON) for Chirp 3 HD & Neural2 voices.
+    3. API Key fallback for Neural2, WaveNet, Standard voices.
     """
     try:
         data = request.get_json() or {}
@@ -298,14 +299,21 @@ def tts():
         
         text = data.get("text", "").strip()
         requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
-        
+
+        # Instant return if user explicitly selected Browser Native TTS
+        if requested_voice == "browser-native":
+            return jsonify({
+                "fallback_browser": True,
+                "reason": "User selected Browser Native TTS",
+                "text": text
+            }), 200
+
         if not text:
             return jsonify({"error": "Nội dung văn bản trống"}), 400
 
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # Build prioritized voice list based on requested voice gender/style
         candidate_voices = [requested_voice]
         
         if "ja-JP" in lang_code:
@@ -330,9 +338,7 @@ def tts():
 
         last_error = ""
 
-        # -------------------------------------------------------------------
-        # METHOD 1: Try OAuth2 Service Account Access Token (Supports Chirp 3 HD & Neural2)
-        # -------------------------------------------------------------------
+        # METHOD 1: Try OAuth2 Token (GCP_SERVICE_ACCOUNT_JSON)
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
         if oauth_token:
@@ -367,20 +373,16 @@ def tts():
                             })
                     else:
                         last_error = f"OAuth2 HTTP {res_oauth.status_code}: {res_oauth.text[:100]}"
-                        print(f"OAuth2 TTS voice {v_name} failed:", last_error)
                 except Exception as e:
                     last_error = str(e)
                     continue
 
-        # -------------------------------------------------------------------
         # METHOD 2: API Key Fallback (Supports Neural2, WaveNet, Standard)
-        # -------------------------------------------------------------------
         api_key = resolve_api_key(client_key)
 
         if api_key:
             url_key = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
             for v_name in clean_candidate_voices:
-                # Crucial: Chirp 3 HD doesn't support API Keys. Skip Chirp and use Neural2/WaveNet with API Key.
                 if "Chirp" in v_name:
                     continue
                 v_parts = v_name.split("-")
@@ -407,20 +409,23 @@ def tts():
                             })
                     else:
                         last_error = f"API Key HTTP {res_key.status_code}: {res_key.text[:100]}"
-                        print(f"API Key TTS voice {v_name} failed:", last_error)
                 except Exception as e:
                     last_error = str(e)
                     continue
 
+        # Controlled return triggering Browser Native Fallback without throwing 500
         return jsonify({
-            "error": f"Google Cloud TTS ({last_error or 'Cần GCP_SERVICE_ACCOUNT_JSON cho Chirp 3 HD hoặc API Key cho Neural2'})",
+            "error": f"Google Cloud TTS ({last_error or 'Cần OAuth2/API Key'})",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code
         }), 200
 
     except Exception as ex:
-        return jsonify({"error": f"Lỗi TTS: {str(ex)}"}), 500
+        return jsonify({
+            "fallback_browser": True,
+            "error": f"Lỗi TTS: {str(ex)}"
+        }), 200
 
 
 @app.route("/api/summary", methods=["POST"])

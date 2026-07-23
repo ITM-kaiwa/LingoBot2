@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.45 Implementation
+// Main Application Controller - LingoBot2 Ver1.50 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -235,7 +235,7 @@ window.LingoApp = {
         { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "水（みず）を一杯（いっぱい）ください。", translation: "Cho tôi xin một ly nước lọc." },
         { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "これを試着（しちゃく）してもいいですか。", translation: "Tôi có thể thử cái này được không?" },
         { id: 109, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "免税（めんぜい）の手続（てつづ）きはできますか。", translation: "Có thể làm thủ tục miễn thuế ở đây không?" },
-        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ね가）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
+        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ねが）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
 
         { id: 111, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "飛行機（ひこうき）の出発（しゅっぱつ）時間（じかん）が変更（へんこう）になったようです。", translation: "Hình như giờ xuất phát chuyến bay đã bị thay đổi." },
         { id: 112, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "来週（らいしゅう）の会議（かいぎ）のスケジュールを調整（ちょうせい）していただけますか。", translation: "Bạn có thể điều chỉnh lịch họp tuần sau giúp tôi không?" },
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.45]. Khắc phục lỗi 401 OAuth2 & Tự động chuyển đổi giọng đọc Google Cloud TTS.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.50]. Bổ sung tùy chọn TTS [ブラウザ標準音声 (Web Speech API)] chính thức.");
     },
 
     updateUiLanguage(lang) {
@@ -718,7 +718,6 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
 
     updateTtsModelForLanguage(lang) {
         if (this.userSelectedTtsModel) {
-            // Respect explicitly chosen TTS model
             const select = document.getElementById("ttsModelSelect");
             if (select && select.value !== this.userSelectedTtsModel) {
                 select.value = this.userSelectedTtsModel;
