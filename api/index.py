@@ -237,26 +237,28 @@ def chat():
             except Exception as e:
                 continue
 
-        # 3. ZERO-WAIT LOCAL FALLBACK: Display "Local" tag as requested by user
-        print("Google API Key Quota Exhausted (429). Executing Zero-Wait Local Fallback [Display Model: Local]...")
+        # 3. ZERO-WAIT LOCAL FALLBACK: Display "Local" tag with retry seconds
+        print("Google API Key Quota Exhausted (429). Executing Zero-Wait Local Fallback [Display Model: Local (要リトライ 15s)]...")
         smart_reply = get_smart_fallback_reply(scenario_hint)
-        logs.append("API Quota quá tải -> Kích hoạt Zero-Wait Local Fallback (Hiển thị nhãn: Local).")
+        logs.append("API Quota quá tải -> Kích hoạt Zero-Wait Local Fallback (Hiển thị nhãn: Local - 要リトライ 15s).")
 
         return jsonify({
             "reply": smart_reply,
             "used_model": "local-fallback",
             "display_model": "Local",
+            "retry_after_seconds": 15,
             "is_smart_fallback": True,
             "logs": logs
         }), 200
 
     except Exception as ex:
-        # Emergency safety fallback with "Local" label
+        # Emergency safety fallback with "Local" label & 15s retry hint
         smart_reply = get_smart_fallback_reply("")
         return jsonify({
             "reply": smart_reply,
             "used_model": "local-fallback",
             "display_model": "Local",
+            "retry_after_seconds": 15,
             "is_smart_fallback": True
         }), 200
 

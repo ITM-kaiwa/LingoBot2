@@ -1,4 +1,4 @@
-/* Main Design System - Screenshot Matched Styling with Mobile Responsive Layout Optimization (Ver1.05) */
+/* Main Design System - Screenshot Matched Styling with Mobile Responsive Layout Optimization (Ver1.10) */
 :root {
     --bg-page: #f9f3ec;
     --card-bg: #ffffff;
@@ -375,6 +375,18 @@ body {
 @keyframes micPulse {
     0% { transform: scale(1); }
     100% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.2); }
+}
+
+/* Retry Countdown Badge Styling */
+.retry-countdown-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ea580c;
+    background: #fff7ed;
+    border: 1px solid #ffedd5;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
 }
 
 /* ==========================================
