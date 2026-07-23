@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+
+gcp_key.json
+service_account.json
+

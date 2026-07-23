@@ -3,6 +3,7 @@ import json
 import re
 import time
 import random
+import base64
 import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -85,26 +86,30 @@ def resolve_api_key(client_key):
 
 def get_gcp_oauth2_token():
     """
-    Robustly parses GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable
-    and generates OAuth2 access token using google-auth library.
+    Cleanly reads GCP_SERVICE_ACCOUNT_JSON (Base64 encoded) from Vercel Environment Variable
+    and generates Google Cloud OAuth2 access token.
     """
+    if not GOOGLE_AUTH_AVAILABLE:
+        return None, "google-auth package not installed"
+
     service_account_info = None
-    env_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
+    env_b64 = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
     
-    if env_json:
-        cleaned_json = env_json.strip()
-        if (cleaned_json.startswith("'") and cleaned_json.endswith("'")) or (cleaned_json.startswith('"') and cleaned_json.endswith('"')):
-            cleaned_json = cleaned_json[1:-1].strip()
-
+    if env_b64 and env_b64.strip():
         try:
-            service_account_info = json.loads(cleaned_json)
-        except Exception as e1:
+            # Standard Base64 Decode
+            decoded_json_str = base64.b64decode(env_b64.strip()).decode('utf-8')
+            service_account_info = json.loads(decoded_json_str)
+            print("Successfully decoded Base64 GCP_SERVICE_ACCOUNT_JSON!")
+        except Exception as e:
+            print("Base64 decode error for GCP_SERVICE_ACCOUNT_JSON:", e)
+            # Standard JSON fallback if unencoded
             try:
-                fixed_str = cleaned_json.replace('\\n', '\n')
-                service_account_info = json.loads(fixed_str)
+                service_account_info = json.loads(env_b64.strip())
             except Exception as e2:
-                print("Error parsing GCP_SERVICE_ACCOUNT_JSON env:", e1, e2)
+                print("Standard JSON parse fallback error:", e2)
 
+    # Local file fallback for dev environment
     if not service_account_info:
         possible_paths = [
             os.path.join(BASE_DIR, "gcp_key.json"),
@@ -124,19 +129,17 @@ def get_gcp_oauth2_token():
     if not service_account_info:
         return None, "GCP Service Account JSON not configured"
 
-    if GOOGLE_AUTH_AVAILABLE:
-        try:
-            credentials = service_account.Credentials.from_service_account_info(
-                service_account_info,
-                scopes=["https://www.googleapis.com/auth/cloud-platform"]
-            )
-            auth_req = google.auth.transport.requests.Request()
-            credentials.refresh(auth_req)
-            return credentials.token, None
-        except Exception as e:
-            print("OAuth2 Token generation via google-auth failed:", e)
-
-    return None, "Unable to refresh OAuth2 token"
+    try:
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        auth_req = google.auth.transport.requests.Request()
+        credentials.refresh(auth_req)
+        return credentials.token, None
+    except Exception as e:
+        print("OAuth2 Token generation failed:", e)
+        return None, str(e)
 
 
 def discover_available_gemini_models(api_key):
@@ -287,11 +290,10 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Robust Google Cloud TTS Endpoint (Ver1.50)
-    Supports:
-    1. Browser Native Fallback signal if requested or if cloud synthesis fails
-    2. OAuth2 Token (GCP_SERVICE_ACCOUNT_JSON) for Chirp 3 HD & Neural2 voices.
-    3. API Key fallback for Neural2, WaveNet, Standard voices.
+    Clean Google Cloud TTS Endpoint (Ver1.55)
+    1. Decodes Base64 GCP_SERVICE_ACCOUNT_JSON from Vercel Environment Variable.
+    2. Uses OAuth2 Token to synthesize Chirp 3 HD & Neural2 voices seamlessly.
+    3. Supports Browser Native TTS fallback option.
     """
     try:
         data = request.get_json() or {}
@@ -338,7 +340,7 @@ def tts():
 
         last_error = ""
 
-        # METHOD 1: Try OAuth2 Token (GCP_SERVICE_ACCOUNT_JSON)
+        # METHOD 1: Primary Authentication via Base64 Decoded OAuth2 Service Account
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
         if oauth_token:
@@ -365,11 +367,11 @@ def tts():
                         res_json = res_oauth.json()
                         audio_base64 = res_json.get("audioContent", "")
                         if audio_base64:
-                            print(f"Google Cloud TTS OAuth2 Success! Voice: {v_name}")
+                            print(f"Google Cloud TTS OAuth2 Success via Base64 Service Account! Voice: {v_name}")
                             return jsonify({
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name,
-                                "provider": "Google Cloud TTS (Service Account OAuth2)"
+                                "provider": "Google Cloud TTS (Base64 Service Account OAuth2)"
                             })
                     else:
                         last_error = f"OAuth2 HTTP {res_oauth.status_code}: {res_oauth.text[:100]}"
@@ -415,7 +417,7 @@ def tts():
 
         # Controlled return triggering Browser Native Fallback without throwing 500
         return jsonify({
-            "error": f"Google Cloud TTS ({last_error or 'Cần OAuth2/API Key'})",
+            "error": f"Google Cloud TTS ({last_error or 'Cần Base64 GCP_SERVICE_ACCOUNT_JSON hoặc API Key'})",
             "fallback_browser": True,
             "text": text,
             "lang": lang_code

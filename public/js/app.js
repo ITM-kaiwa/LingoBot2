@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver1.50 Implementation
+// Main Application Controller - LingoBot2 Ver1.55 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.50]. Bổ sung tùy chọn TTS [ブラウザ標準音声 (Web Speech API)] chính thức.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.55]. Đọc mã hóa Base64 GCP_SERVICE_ACCOUNT_JSON từ môi trường Vercel.");
     },
 
     updateUiLanguage(lang) {
