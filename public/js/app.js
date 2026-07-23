@@ -1,4 +1,4 @@
-// Main Application Controller - Ver0.20 Version Badge & Active TTS Model Abbreviation
+// Main Application Controller - LingoBot2 Ver0.30 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -8,10 +8,11 @@ window.LingoApp = {
     scenario: "自己紹介の会話",
     filterLang: "all",
     filterLevel: "all",
+    userSelectedTtsModel: null, // Tracks user explicit TTS choice
     messages: [],
     isProcessing: false,
 
-    // I18N Dictionary for all 20 Scenarios across 3 UI Languages
+    // I18N Dictionary translating 100% of UI elements
     i18n: {
         "tiếng Việt": {
             tabGiaoTiep: "Giao tiếp",
@@ -61,10 +62,12 @@ window.LingoApp = {
 
             startBtn: "🚀 Bắt đầu hội thoại ngay",
             pronounceTitle: "🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)",
-            pronounceSub: "Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI Gemini 3.6 Flash phân tích phát âm.",
+            pronounceSub: "Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.",
             filterLang: "Ngôn ngữ:",
             filterLevel: "Trình độ:",
-            filterAll: "Tất cả"
+            filterAll: "Tất cả",
+            aiThinking: "AI đang suy nghĩ...",
+            aiSummarizing: "AI đang tổng hợp báo cáo bài học..."
         },
         "tiếng Nhật": {
             tabGiaoTiep: "対話練習",
@@ -114,15 +117,17 @@ window.LingoApp = {
 
             startBtn: "🚀 会話を開始する",
             pronounceTitle: "🎯 発音・シャドーイング練習",
-            pronounceSub: "下の例文（初級・中級・上級の計80文）を選択するかマイクで話して、Gemini 3.6 Flashによる発音指導を受けましょう。",
+            pronounceSub: "下の例文（初級・中級・上級の計80文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
             filterLang: "言語:",
             filterLevel: "レベル:",
-            filterAll: "すべて"
+            filterAll: "すべて",
+            aiThinking: "AIが思考中です...",
+            aiSummarizing: "AIがまとめています..."
         },
         "tiếng Anh": {
             tabGiaoTiep: "Conversation",
             tabPhatAm: "Pronunciation",
-            lblUiLang: "UI Lang:",
+            lblUiLang: "UI Eng:",
             lblTargetLang: "Target Lang:",
             resetBtn: "Reset",
             endBtn: "End",
@@ -170,7 +175,9 @@ window.LingoApp = {
             pronounceSub: "Select from 80 sample sentences (Beginner/Intermediate/Advanced) or speak into mic for AI pronunciation feedback.",
             filterLang: "Language:",
             filterLevel: "Level:",
-            filterAll: "All"
+            filterAll: "All",
+            aiThinking: "AI is thinking...",
+            aiSummarizing: "AI is summarizing..."
         }
     },
 
@@ -186,7 +193,7 @@ window.LingoApp = {
         { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "水（みず）を一杯（いっぱい）ください。", translation: "Cho tôi xin một ly nước lọc." },
         { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "これを試着（しちゃく）してもいいですか。", translation: "Tôi có thể thử cái này được không?" },
         { id: 109, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "免税（めんぜい）の手続（てつづ）きはできますか。", translation: "Có thể làm thủ tục miễn thuế ở đây không?" },
-        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ねが）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
+        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ね가）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
 
         { id: 111, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "飛行機（ひこうき）の出発（しゅっぱつ）時間（じかん）が変更（へんこう）になったようです。", translation: "Hình như giờ xuất phát chuyến bay đã bị thay đổi." },
         { id: 112, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "来週（らいしゅう）の会議（かいぎ）のスケジュールを調整（ちょうせい）していただけますか。", translation: "Bạn có thể điều chỉnh lịch họp tuần sau giúp tôi không?" },
@@ -274,7 +281,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [Ver0.20 & Chirp 3 HD TTS].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.30].");
     },
 
     updateUiLanguage(lang) {
@@ -343,6 +350,7 @@ window.LingoApp = {
         setTxt("lblFilterLevel", dict.filterLevel);
         setTxt("chipLangAll", dict.filterAll);
         setTxt("chipLevelAll", dict.filterAll);
+        setTxt("txtSummaryLoading", dict.aiSummarizing);
 
         const chatInput = document.getElementById("chatInput");
         if (chatInput) chatInput.placeholder = dict.placeholder;
@@ -434,16 +442,10 @@ window.LingoApp = {
 
     checkApiKey() {
         const storedKey = localStorage.getItem("lingobot_api_key");
-        if (storedKey) {
+        if (storedKey && storedKey !== "demo_skipped") {
             this.apiKey = storedKey;
             this.showScenarioCard();
         }
-    },
-
-    skipApiKey() {
-        this.apiKey = "demo_skipped";
-        window.LingoLog.add("Người dùng chọn: Bỏ qua / スキップ (Skip API Key)");
-        this.showScenarioCard();
     },
 
     bindEvents() {
@@ -466,8 +468,9 @@ window.LingoApp = {
         const ttsSelect = document.getElementById("ttsModelSelect");
         if (ttsSelect) {
             ttsSelect.addEventListener("change", (e) => {
+                this.userSelectedTtsModel = e.target.value; // Store user explicit selection
                 window.LingoTTS.updateActiveTtsBadge(e.target.value);
-                window.LingoLog.add(`Thay đổi giọng đọc TTS: ${e.target.value}`);
+                window.LingoLog.add(`Thay đổi giọng đọc TTS thủ công: ${e.target.value}`);
             });
         }
 
@@ -594,7 +597,8 @@ window.LingoApp = {
         const feedbackText = document.getElementById("pronounceFeedbackText");
         
         if (feedbackBox) feedbackBox.classList.remove("hidden");
-        if (feedbackText) feedbackText.innerHTML = "<em>Đang phân tích phát âm qua AI Gemini 3.6 Flash...</em>";
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+        if (feedbackText) feedbackText.innerHTML = `<em>${dict.aiThinking}</em>`;
 
         window.LingoLog.add(`Phân tích phát âm cho câu: "${targetText}"`);
 
@@ -631,6 +635,9 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     updateTtsModelForLanguage(lang) {
+        // Do NOT overwrite if user explicitly selected a voice model!
+        if (this.userSelectedTtsModel) return;
+
         const select = document.getElementById("ttsModelSelect");
         if (!select) return;
         if (lang.includes("日本語")) select.value = "ja-JP-Chirp3-HD-F";
@@ -678,7 +685,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     buildSystemPrompt() {
-        return `Bạn là LingoBotWebApp - Trợ lý luyện ngôn ngữ AI thông minh, ưu tiên phản hồi nhanh với gemini-3.6-flash.
+        return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh, ưu tiên phản hồi nhanh với gemini-3.6-flash.
 
 Cấu hình hội thoại:
 - Chế độ: ${this.mode}
@@ -704,7 +711,12 @@ Quy tắc ứng xử:
             this.setApiKey(text);
             chatInput.value = "";
             this.showScenarioCard();
-            alert("Đã nhận Google API Key thành công!");
+            alert("Google API Key を設定しました！");
+            return;
+        }
+
+        if (!this.getApiKey()) {
+            alert("Gemini AI を使用するには Google API Key を入力してください。");
             return;
         }
 
@@ -737,9 +749,10 @@ Quy tắc ứng xử:
 
             if (response.ok && data.reply) {
                 const reply = data.reply;
-                window.LingoLog.add(`AI phản hồi thành công [Model: ${data.used_model}]`);
+                const modelUsed = data.display_model || data.used_model || "gemini-3.6-flash";
+                window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}]`);
                 
-                const aiBubbleEl = this.appendMessage("model", reply, data.used_model);
+                const aiBubbleEl = this.appendMessage("model", reply, modelUsed);
 
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
                 window.LingoTTS.playText(reply, playBtn);
@@ -777,7 +790,16 @@ Quy tắc ứng xử:
         const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         const timeSpan = document.createElement("span");
         timeSpan.className = "msg-time";
-        timeSpan.textContent = `${timeStr} ${usedModel ? '• ' + usedModel : ''}`;
+
+        // Display "Gemini-Other" if used model is not 3.6-flash or 3.5-flash
+        let formattedModelTag = usedModel;
+        if (usedModel) {
+            if (usedModel.includes("Gemini-Other") || (usedModel !== "gemini-3.6-flash" && usedModel !== "gemini-3.5-flash")) {
+                formattedModelTag = "Gemini-Other";
+            }
+        }
+
+        timeSpan.textContent = `${timeStr} ${formattedModelTag ? '• ' + formattedModelTag : ''}`;
         metaDiv.appendChild(timeSpan);
 
         if (role !== "user") {
@@ -823,11 +845,15 @@ Quy tắc ứng xử:
         const container = document.getElementById("chatContainer");
         const row = document.createElement("div");
         row.className = "chat-row ai-row typing-row";
+        
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+        const thinkingMsg = dict.aiThinking || "AI đang suy nghĩ...";
+
         row.innerHTML = `
             <div class="chat-bubble" style="background:#1d4ed8; color:#fff;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <div class="spinner" style="width:16px; height:16px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                    <span style="font-size:0.85rem;">Gemini-3.6-flash đang phản hồi...</span>
+                    <span style="font-size:0.85rem;">${thinkingMsg}</span>
                 </div>
             </div>
         `;

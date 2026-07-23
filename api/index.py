@@ -11,13 +11,33 @@ PUBLIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "../public"))
 app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
 CORS(app)
 
-# Model Fallback Chain prioritizing gemini-3.6-flash followed by gemini-3.5-flash and modern models
-FALLBACK_MODELS = [
+# Priority fallback models: 3.6-flash -> 3.5-flash
+PRIMARY_MODELS = [
     "gemini-3.6-flash",
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash"
+    "gemini-3.5-flash"
 ]
+
+def discover_available_gemini_models(api_key):
+    """Dynamically discover available Gemini models if primary models are busy/unavailable"""
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+        res = requests.get(url, timeout=10)
+        if res.status_code == 200:
+            models_data = res.json().get("models", [])
+            candidate_models = []
+            for m in models_data:
+                name = m.get("name", "").replace("models/", "")
+                methods = m.get("supportedGenerationMethods", [])
+                if "generateContent" in methods and "gemini" in name.lower():
+                    if name not in PRIMARY_MODELS:
+                        candidate_models.append(name)
+            # Sort candidate models preferring flash / 2.5 / 2.0
+            candidate_models.sort(key=lambda x: (0 if "flash" in x else 1, 0 if "2.5" in x else 1))
+            return candidate_models
+    except Exception as e:
+        print("Model discovery error:", e)
+    return ["gemini-2.5-flash", "gemini-2.0-flash"]
+
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
@@ -30,7 +50,7 @@ def chat():
 
         if not api_key:
             return jsonify({
-                "error": "Lỗi: Chưa cung cấp Google API Key. Vui lòng nhập API Key hoặc cài đặt khóa để sử dụng Gemini.",
+                "error": "Google API Keyが設定されていません。Gemini AIを使用するにはAPI Keyを入力してください。",
                 "logs": ["API Key missing"]
             }), 400
 
@@ -59,15 +79,15 @@ def chat():
             }
 
         logs = []
-        last_error = None
-
-        for model in FALLBACK_MODELS:
+        
+        # 1. Try Primary Models: 3.6-flash -> 3.5-flash
+        for model in PRIMARY_MODELS:
             logs.append(f"Đang thử mô hình: {model}...")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             headers = {"Content-Type": "application/json"}
             
             try:
-                res = requests.post(url, headers=headers, json=payload, timeout=20)
+                res = requests.post(url, headers=headers, json=payload, timeout=18)
                 if res.status_code == 200:
                     res_data = res.json()
                     candidates = res_data.get("candidates", [])
@@ -78,22 +98,44 @@ def chat():
                         return jsonify({
                             "reply": reply_text,
                             "used_model": model,
+                            "display_model": model,
                             "logs": logs
                         })
-                    else:
-                        logs.append(f"Mô hình {model} không trả về phản hồi hợp lệ.")
                 else:
-                    err_msg = res.text[:200]
-                    logs.append(f"Mô hình {model} báo lỗi ({res.status_code}): {err_msg}")
-                    last_error = f"HTTP {res.status_code}: {err_msg}"
+                    logs.append(f"Mô hình {model} bận/báo lỗi ({res.status_code}): {res.text[:150]}")
             except Exception as e:
                 logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
-                last_error = str(e)
+
+        # 2. Dynamic Discovery & Fallback if 3.6-flash & 3.5-flash fail
+        logs.append("gemini-3.6-flash và 3.5-flash bận. Đang điều tra các mô hình Gemini khả dụng...")
+        discovered_models = discover_available_gemini_models(api_key)
+        
+        for model in discovered_models:
+            logs.append(f"Đang thử mô hình khám phá: {model}...")
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            headers = {"Content-Type": "application/json"}
+            
+            try:
+                res = requests.post(url, headers=headers, json=payload, timeout=15)
+                if res.status_code == 200:
+                    res_data = res.json()
+                    candidates = res_data.get("candidates", [])
+                    if candidates and "content" in candidates[0]:
+                        parts = candidates[0]["content"].get("parts", [])
+                        reply_text = "".join([p.get("text", "") for p in parts])
+                        logs.append(f"Thành công với mô hình khám phá: {model} (Gemini-Other)")
+                        return jsonify({
+                            "reply": reply_text,
+                            "used_model": model,
+                            "display_model": "Gemini-Other",
+                            "logs": logs
+                        })
+            except Exception as e:
+                logs.append(f"Lỗi mô hình {model}: {str(e)}")
 
         return jsonify({
-            "error": "Tất cả mô hình AI (bao gồm gemini-3.6-flash & gemini-3.5-flash) đều không phản hồi. Vui lòng kiểm tra Google API Key.",
-            "logs": logs,
-            "details": last_error
+            "error": "Tất cả mô hình Gemini đều không thể phản hồi. Vui lòng kiểm tra lại Google API Key.",
+            "logs": logs
         }), 502
 
     except Exception as ex:
@@ -114,10 +156,14 @@ def tts():
         if not text:
             return jsonify({"error": "Nội dung văn bản trống"}), 400
 
-        lang_code = voice_name.split("-")[0] + "-" + voice_name.split("-")[1] if len(voice_name.split("-")) >= 2 else "ja-JP"
+        # Extract language code e.g., ja-JP, en-US, vi-VN
+        parts = voice_name.split("-")
+        lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # Build Fallback Chain: Requested (Chirp 3 HD) -> Neural2 -> WaveNet -> Standard
+        # Build priority list starting strictly with user-selected voice_name
         fallback_voices = [voice_name]
+        
+        # Add fallback chain for language
         if "ja-JP" in lang_code:
             fallback_voices += ["ja-JP-Chirp3-HD-F", "ja-JP-Chirp3-HD-M", "ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
         elif "en-US" in lang_code:
@@ -125,7 +171,7 @@ def tts():
         else:
             fallback_voices += ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
 
-        # Deduplicate preserving priority order
+        # Deduplicate preserving strict user selection priority
         seen = set()
         dedup_voices = []
         for v in fallback_voices:
@@ -136,9 +182,9 @@ def tts():
         if api_key:
             url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
             for v_name in dedup_voices:
-                v_lang = v_name.split("-")[0] + "-" + v_name.split("-")[1] if len(v_name.split("-")) >= 2 else lang_code
+                v_parts = v_name.split("-")
+                v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
                 
-                # Plain text input for Chirp 3 HD compatibility (SSML speed/pitch tags omitted for Chirp)
                 payload = {
                     "input": {"text": text},
                     "voice": {
@@ -160,7 +206,8 @@ def tts():
                                 "audio_url": f"data:audio/mp3;base64,{audio_base64}",
                                 "model_used": v_name
                             })
-                except Exception:
+                except Exception as e:
+                    print(f"TTS voice {v_name} error:", e)
                     continue
 
         return jsonify({
@@ -209,7 +256,7 @@ Xuất báo cáo chi tiết bằng Markdown bao gồm:
             "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2000}
         }
 
-        for model in FALLBACK_MODELS:
+        for model in PRIMARY_MODELS:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=25)
             if res.status_code == 200:

@@ -1,4 +1,4 @@
-// Lesson Session Summary & PDF Export Manager
+// Lesson Session Summary & PDF Export Manager - LingoBot2
 window.LingoSummary = {
     openSummaryModal() {
         const modal = document.getElementById("summaryModal");
@@ -15,6 +15,12 @@ window.LingoSummary = {
 
         const summaryLoader = document.getElementById("summaryLoader");
         const textContainer = document.getElementById("summaryTextContainer");
+        const txtSummaryLoading = document.getElementById("txtSummaryLoading");
+
+        if (window.LingoApp && window.LingoApp.i18n) {
+            const dict = window.LingoApp.i18n[userLang] || window.LingoApp.i18n["tiếng Việt"];
+            if (txtSummaryLoading) txtSummaryLoading.textContent = dict.aiSummarizing || "AI đang tổng hợp báo cáo bài học...";
+        }
 
         if (summaryLoader) summaryLoader.style.display = "flex";
         if (textContainer) textContainer.innerHTML = "";
@@ -23,11 +29,11 @@ window.LingoSummary = {
 
         // If messages array is empty, create default practice context entry
         const exportMessages = (messages && messages.length > 0) ? messages : [
-            { role: "user", content: "Chào LingoBot, tôi muốn bắt đầu bài học thoại cơ bản." },
+            { role: "user", content: "Chào LingoBot2, tôi muốn bắt đầu bài học thoại cơ bản." },
             { role: "model", content: "Chào bạn! Tôi luôn sẵn sàng đồng hành cùng bạn luyện giao tiếp." }
         ];
 
-        window.LingoLog.add("Đang tạo báo cáo bài học từ AI Gemini 3.6 Flash...");
+        window.LingoLog.add("Đang tạo báo cáo bài học từ AI Gemini...");
 
         try {
             const response = await fetch("/api/summary", {
@@ -63,12 +69,12 @@ window.LingoSummary = {
 
     renderFallbackReport(userLang, targetLang, level) {
         return `
-            <h1>📊 BÁO CÁO TỔNG KẾT BÀI HỌC LINGOBOT</h1>
+            <h1>📊 BÁO CÁO TỔNG KẾT BÀI HỌC LINGOBOT2</h1>
             <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebdcd0;" />
             <p><strong>Ngôn ngữ học:</strong> ${targetLang} | <strong>Trình độ:</strong> ${level}</p>
             
             <h2>1. Tổng quan buổi học</h2>
-            <p>Người học đã hoàn thành lượt tương tác hội thoại với trợ lý AI LingoBotWebApp. Phản xạ ban đầu tốt, ngữ điệu tự nhiên.</p>
+            <p>Người học đã hoàn thành lượt tương tác hội thoại với trợ lý AI LingoBot2. Phản xạ ban đầu tốt, ngữ điệu tự nhiên.</p>
             
             <h2>2. Điểm mạnh</h2>
             <ul>
@@ -77,7 +83,7 @@ window.LingoSummary = {
             </ul>
 
             <h2>3. Lời khuyên & Định hướng nâng trình độ (CEFR)</h2>
-            <blockquote>Luyện tập đều đặn hàng ngày từ 15-20 phút với LingoBot để cải thiện vốn từ vựng và tự tin phản xạ tốt hơn.</blockquote>
+            <blockquote>Luyện tập đều đặn hàng ngày từ 15-20 phút với LingoBot2 để cải thiện vốn từ vựng và tự tin phản xạ tốt hơn.</blockquote>
         `;
     },
 
@@ -106,7 +112,7 @@ window.LingoSummary = {
 
         const opt = {
             margin:       0.5,
-            filename:     `LingoBot_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+            filename:     `LingoBot2_Report_${new Date().toISOString().slice(0,10)}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2 },
             jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
