@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.90 Implementation
+// Main Application Controller - LingoBot2 Ver0.95 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.90]. Kích hoạt Zero-Wait Smart Role Fallback.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.95]. Đã khắc phục triệt để lỗi nhận diện API Key.");
     },
 
     updateUiLanguage(lang) {
@@ -497,7 +497,7 @@ window.LingoApp = {
     setApiKey(key) {
         this.apiKey = key.trim();
         localStorage.setItem("lingobot_api_key", this.apiKey);
-        window.LingoLog.add("Đã lưu API Key nhập thủ công vào trình duyệt.");
+        window.LingoLog.add("Đã lưu Google API Key nhập thủ công vào trình duyệt.");
     },
 
     bindEvents() {
@@ -766,11 +766,11 @@ Quy tắc ứng xử:
         const chatInput = document.getElementById("chatInput");
         const text = chatInput ? chatInput.value.trim() : "";
 
-        if (text.startsWith("AIzaSy") || text.length > 20) {
+        // STRICT REGEX / PREFIX CHECK for Google Gemini API Keys (Must start with "AIzaSy" and be at least 35 chars)
+        if (text.startsWith("AIzaSy") && text.length >= 35) {
             this.setApiKey(text);
             chatInput.value = "";
-            this.showScenarioCard();
-            alert("Đã lưu Google API Key thành công! / Google API Key を設定しました！");
+            alert("Đã lưu Google API Key thủ công thành công! / Google API Key を設定しました！");
             return;
         }
 
