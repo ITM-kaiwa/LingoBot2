@@ -1,57 +1,98 @@
-// System Log Manager - Records execution events, fallback models, TTS status
+// System Execution & Environment Diagnostic Logger - LingoBot2 Ver1.30 Implementation
 window.LingoLog = {
     logs: [],
-    
+
     init() {
-        this.logOutput = document.getElementById("logOutput");
+        this.captureSystemDiagnostics();
         this.add("Khởi tạo hệ thống LingoBotWebApp thành công.");
     },
 
-    add(msg, data = null) {
-        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-        let logLine = `[${timeStr}] ${msg}`;
-        if (data) {
-            logLine += ` | Details: ${typeof data === 'object' ? JSON.stringify(data) : data}`;
+    captureSystemDiagnostics() {
+        try {
+            const ua = navigator.userAgent || "Unknown UA";
+            const platform = navigator.platform || "Unknown Platform";
+            const lang = navigator.language || "Unknown Lang";
+            const languages = (navigator.languages || [lang]).join(", ");
+            const screenRes = `${window.screen.width}x${window.screen.height} (Color: ${window.screen.colorDepth}-bit)`;
+            const viewportSize = `${window.innerWidth}x${window.innerHeight}`;
+            const isOnline = navigator.onLine ? "Online" : "Offline";
+            const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : "Unknown Cores";
+            const memory = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : "Unknown Memory";
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown TZ";
+
+            let connectionInfo = "Standard Network";
+            if (navigator.connection || navigator.mozConnection || navigator.webkitConnection) {
+                const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                connectionInfo = `Type: ${conn.effectiveType || "N/A"}, RTT: ${conn.rtt || "N/A"}ms, Downlink: ${conn.downlink || "N/A"}Mbps`;
+            }
+
+            const sysInfoBlock = [
+                "==================================================",
+                "🖥️ CLIENT SYSTEM & BROWSER DIAGNOSTICS:",
+                `- User-Agent: ${ua}`,
+                `- Platform / OS: ${platform}`,
+                `- Browser Language: ${lang} (Preferred: ${languages})`,
+                `- Screen Resolution: ${screenRes}`,
+                `- Viewport Size: ${viewportSize}`,
+                `- Hardware: ${cores} | Memory: ${memory}`,
+                `- Network Status: ${isOnline} (${connectionInfo})`,
+                `- Timezone: ${tz}`,
+                "=================================================="
+            ].join("\n");
+
+            this.logs.push(sysInfoBlock);
+        } catch (e) {
+            console.error("Error capturing system diagnostics:", e);
         }
-        this.logs.push(logLine);
-        console.log(logLine);
-        this.render();
     },
 
-    render() {
-        if (this.logOutput) {
-            this.logOutput.textContent = this.logs.join("\n");
-            this.logOutput.scrollTop = this.logOutput.scrollHeight;
+    add(message) {
+        const timestamp = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+        const logLine = `[${timestamp}] ${message}`;
+        this.logs.push(logLine);
+        console.log(logLine);
+
+        const logOutput = document.getElementById("logOutput");
+        if (logOutput) {
+            logOutput.textContent = this.logs.join("\n");
+            logOutput.scrollTop = logOutput.scrollHeight;
         }
     },
 
     openModal() {
-        const logModal = document.getElementById("logModal");
-        if (logModal) {
-            logModal.classList.remove("hidden");
+        const modal = document.getElementById("logModal");
+        const logOutput = document.getElementById("logOutput");
+        if (logOutput) {
+            logOutput.textContent = this.logs.join("\n");
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        if (modal) {
+            modal.classList.remove("hidden");
             this.add("Đã mở Cửa sổ Nhật ký hệ thống (System Logs Modal).");
         }
     },
 
     closeModal() {
-        const logModal = document.getElementById("logModal");
-        if (logModal) {
-            logModal.classList.add("hidden");
-        }
+        const modal = document.getElementById("logModal");
+        if (modal) modal.classList.add("hidden");
     },
 
     copy() {
-        navigator.clipboard.writeText(this.logs.join("\n"))
-            .then(() => alert("Đã sao chép toàn bộ nhật ký vào Clipboard!"))
-            .catch(err => alert("Không thể sao chép: " + err));
+        const text = this.logs.join("\n");
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Đã sao chép toàn bộ Nhật ký hệ thống vào bộ nhớ tạm! / システムログをクリップボードにコピーしました！");
+        }).catch(err => {
+            alert("Lỗi sao chép log: " + err);
+        });
     },
 
     download() {
-        const blob = new Blob([this.logs.join("\n")], { type: "text/plain;charset=utf-8" });
+        const text = this.logs.join("\n");
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `LingoBot_Log_${new Date().toISOString().slice(0, 10)}.txt`;
+        a.download = `LingoBot2_System_Log_${new Date().toISOString().slice(0,10)}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -61,18 +102,4 @@ window.LingoLog = {
 
 document.addEventListener("DOMContentLoaded", () => {
     window.LingoLog.init();
-    
-    const robotLogBtn = document.getElementById("robotLogBtn");
-    const openLogBtn = document.getElementById("openLogBtn");
-    const closeLogBtn = document.getElementById("closeLogBtn");
-    const closeLogModalBtn = document.getElementById("closeLogModalBtn");
-    const copyLogBtn = document.getElementById("copyLogBtn");
-    const downloadLogBtn = document.getElementById("downloadLogBtn");
-
-    if (robotLogBtn) robotLogBtn.addEventListener("click", () => window.LingoLog.openModal());
-    if (openLogBtn) openLogBtn.addEventListener("click", () => window.LingoLog.openModal());
-    if (closeLogBtn) closeLogBtn.addEventListener("click", () => window.LingoLog.closeModal());
-    if (closeLogModalBtn) closeLogModalBtn.addEventListener("click", () => window.LingoLog.closeModal());
-    if (copyLogBtn) copyLogBtn.addEventListener("click", () => window.LingoLog.copy());
-    if (downloadLogBtn) downloadLogBtn.addEventListener("click", () => window.LingoLog.download());
 });
