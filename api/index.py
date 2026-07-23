@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import base64
 import requests
 from flask import Flask, request, jsonify, send_from_directory
@@ -16,6 +17,25 @@ PRIMARY_MODELS = [
     "gemini-3.6-flash",
     "gemini-3.5-flash"
 ]
+
+def parse_retry_seconds(error_text):
+    """Extract retry seconds from Google API error text e.g., 'Please retry after 15.2s' or 'retry in 20 seconds'"""
+    if not error_text:
+        return None
+    # Match patterns like "retry after 15.2s", "retry after 15 seconds", "Please wait 10s"
+    match = re.search(r'retry\s+after\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
+    if not match:
+        match = re.search(r'retry\s+in\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
+    if not match:
+        match = re.search(r'wait\s+([\d\.]+)\s*s?', error_text, re.IGNORECASE)
+    
+    if match:
+        try:
+            val = float(match.group(1))
+            return int(round(val))
+        except ValueError:
+            pass
+    return None
 
 def discover_available_gemini_models(api_key):
     """Dynamically discover available Gemini models if primary models are busy/unavailable"""
@@ -65,7 +85,6 @@ def chat():
                 "parts": [{"text": text_content}]
             })
 
-        # Increased maxOutputTokens to 4096 to prevent response truncation
         payload = {
             "contents": formatted_contents,
             "generationConfig": {
@@ -79,6 +98,7 @@ def chat():
             }
 
         logs = []
+        extracted_retry_sec = None
         
         # 1. Try Primary Models: 3.6-flash -> 3.5-flash
         for model in PRIMARY_MODELS:
@@ -102,7 +122,11 @@ def chat():
                             "logs": logs
                         })
                 else:
-                    logs.append(f"Mô hình {model} bận/báo lỗi ({res.status_code}): {res.text[:150]}")
+                    err_msg = res.text
+                    sec = parse_retry_seconds(err_msg)
+                    if sec and not extracted_retry_sec:
+                        extracted_retry_sec = sec
+                    logs.append(f"Mô hình {model} bận ({res.status_code}): {err_msg[:150]}")
             except Exception as e:
                 logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
 
@@ -130,13 +154,18 @@ def chat():
                             "display_model": "Gemini-Other",
                             "logs": logs
                         })
+                else:
+                    sec = parse_retry_seconds(res.text)
+                    if sec and not extracted_retry_sec:
+                        extracted_retry_sec = sec
             except Exception as e:
                 logs.append(f"Lỗi mô hình {model}: {str(e)}")
 
         return jsonify({
-            "error": "Tất cả mô hình Gemini đều không thể phản hồi. Vui lòng kiểm tra lại Google API Key.",
+            "error": "Tất cả mô hình Gemini đều đang bận hoặc quá tải.",
+            "retry_seconds": extracted_retry_sec or 15,
             "logs": logs
-        }), 502
+        }), 429
 
     except Exception as ex:
         return jsonify({"error": f"Lỗi máy chủ: {str(ex)}"}), 500
@@ -245,7 +274,6 @@ def summary():
         if not api_key:
             return jsonify({"error": "Thiếu Google API Key"}), 400
 
-        # Strict localization directive in prompt + clear concise instructions to prevent truncation
         prompt = f"""Bạn là một chuyên gia đào tạo ngôn ngữ hàng đầu.
 Hãy đánh giá buổi luyện tập thoại giữa người học và AI theo các thông tin sau:
 - Ngôn ngữ học tập: {target_lang}

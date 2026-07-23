@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.31 Implementation
+// Main Application Controller - LingoBot2 Ver0.40 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -12,7 +12,7 @@ window.LingoApp = {
     messages: [],
     isProcessing: false,
 
-    // I18N Dictionary translating 100% of UI elements including all inner buttons
+    // I18N Dictionary translating 100% of UI elements including API Retry-After messages
     i18n: {
         "tiếng Việt": {
             tabGiaoTiep: "Giao tiếp",
@@ -69,6 +69,7 @@ window.LingoApp = {
             filterAll: "Tất cả",
             aiThinking: "AI đang suy nghĩ...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
+            apiRetryWait: (sec) => `⚠️ Hệ thống API đang bận. Vui lòng đợi ${sec} giây trước khi nhập lại.`,
 
             // Inner Chat & Pronunciation Buttons
             btnPlay: "▶ Phát",
@@ -138,6 +139,7 @@ window.LingoApp = {
             filterAll: "すべて",
             aiThinking: "AIが思考中です...",
             aiSummarizing: "AIがまとめています...",
+            apiRetryWait: (sec) => `⚠️ APIが混雑しています。${sec}秒待ってから再度入力してください。`,
 
             // Inner Chat & Pronunciation Buttons
             btnPlay: "▶ 再生",
@@ -207,6 +209,7 @@ window.LingoApp = {
             filterAll: "All",
             aiThinking: "AI is thinking...",
             aiSummarizing: "AI is summarizing...",
+            apiRetryWait: (sec) => `⚠️ API is currently busy. Please wait ${sec} seconds before trying again.`,
 
             // Inner Chat & Pronunciation Buttons
             btnPlay: "▶ Play",
@@ -282,7 +285,7 @@ window.LingoApp = {
         { id: 219, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I am feeling a bit under the weather today, so I will take a sick leave.", translation: "Hôm nay tôi thấy mệt nên xin phép nghỉ bệnh." },
         { id: 220, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We look forward to continuing our fruitful cooperation in the upcoming year.", translation: "Chúng tôi mong tiếp tục hợp tác hiệu quả trong năm tới." },
 
-        { id: 221, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ để lập chiến lược trung - dài hạn." },
+        { id: 221, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
         { id: 222, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "In light of prevailing economic uncertainties, we decided to postpone the product launch.", translation: "Căn cứ tình hình kinh tế bất ổn, chúng tôi quyết định hoãn ra mắt sản phẩm." },
         { id: 223, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Implementing structural reforms is imperative to securing sustainable corporate growth.", translation: "Thực hiện cải cách cơ cấu là bắt buộc để đảm bảo tăng trưởng bền vững." },
         { id: 224, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
@@ -323,7 +326,7 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.31].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.40].");
     },
 
     updateUiLanguage(lang) {
@@ -687,7 +690,11 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
                 feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
                 window.LingoTTS.playText(targetText);
             } else {
-                feedbackText.innerHTML = `<span style="color:red">Lỗi: ${data.error}</span>`;
+                if (data.retry_seconds) {
+                    feedbackText.innerHTML = `<span style="color:#c2410c">${dict.apiRetryWait(data.retry_seconds)}</span>`;
+                } else {
+                    feedbackText.innerHTML = `<span style="color:red">Lỗi: ${data.error}</span>`;
+                }
             }
         } catch (e) {
             if (feedbackText) feedbackText.innerHTML = `<span style="color:red">Lỗi kết nối: ${e.message}</span>`;
@@ -791,6 +798,7 @@ Quy tắc ứng xử:
     async fetchAiResponse(historyMessages, systemPrompt) {
         this.isProcessing = true;
         const typingBubble = this.showTypingIndicator();
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
 
         try {
             const response = await fetch("/api/chat", {
@@ -816,9 +824,15 @@ Quy tắc ứng xử:
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
                 window.LingoTTS.playText(reply, playBtn);
             } else {
-                const errText = data.error || "Không thể kết nối tới Gemini AI.";
-                this.appendMessage("model", `⚠️ ${errText}`);
-                window.LingoLog.add("Lỗi AI Chat: " + errText);
+                if (data.retry_seconds) {
+                    const waitMsg = dict.apiRetryWait ? dict.apiRetryWait(data.retry_seconds) : `⚠️ ${data.error}`;
+                    this.appendMessage("model", waitMsg);
+                    window.LingoLog.add(`API Busy (Wait ${data.retry_seconds}s): ${data.error}`);
+                } else {
+                    const errText = data.error || "Không thể kết nối tới Gemini AI.";
+                    this.appendMessage("model", `⚠️ ${errText}`);
+                    window.LingoLog.add("Lỗi AI Chat: " + errText);
+                }
             }
         } catch (err) {
             this.removeTypingIndicator(typingBubble);
