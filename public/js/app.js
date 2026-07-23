@@ -1,4 +1,4 @@
-// Main Application Controller - Complete Chirp 3 HD TTS & Audio Download
+// Main Application Controller - Ver0.20 Version Badge & Active TTS Model Abbreviation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -274,10 +274,9 @@ window.LingoApp = {
         this.setupTimestamp();
         this.updateUiLanguage(this.uiLang);
         this.renderPronounceSamples();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [Gemini 3.6 Flash & Chirp 3 HD TTS].");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [Ver0.20 & Chirp 3 HD TTS].");
     },
 
-    // Update 100% of UI elements including all 20 scenario option buttons
     updateUiLanguage(lang) {
         this.uiLang = lang;
         const dict = this.i18n[lang] || this.i18n["tiếng Việt"];
@@ -467,6 +466,7 @@ window.LingoApp = {
         const ttsSelect = document.getElementById("ttsModelSelect");
         if (ttsSelect) {
             ttsSelect.addEventListener("change", (e) => {
+                window.LingoTTS.updateActiveTtsBadge(e.target.value);
                 window.LingoLog.add(`Thay đổi giọng đọc TTS: ${e.target.value}`);
             });
         }
@@ -636,6 +636,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         if (lang.includes("日本語")) select.value = "ja-JP-Chirp3-HD-F";
         else if (lang.includes("English")) select.value = "en-US-Chirp3-HD-F";
         else select.value = "vi-VN-Neural2-A";
+
+        if (window.LingoTTS) {
+            window.LingoTTS.updateActiveTtsBadge(select.value);
+        }
     },
 
     showScenarioCard() {

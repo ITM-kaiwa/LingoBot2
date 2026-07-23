@@ -1,4 +1,4 @@
-// Google Cloud Text-To-Speech Manager (Chirp 3 HD -> Neural2 -> WaveNet -> Standard + Audio Download)
+// Google Cloud Text-To-Speech Manager (Chirp 3 HD -> Neural2 -> WaveNet -> Standard + Audio Download + Short Model Badge)
 window.LingoTTS = {
     audioPlayer: null,
     currentActiveBtn: null,
@@ -19,6 +19,47 @@ window.LingoTTS = {
             window.LingoLog.add("Lỗi phát Audio Player", e);
             this.resetActiveButton();
         });
+
+        // Initialize active badge with currently selected dropdown option
+        this.updateActiveTtsBadge(this.getSelectedVoiceModel());
+    },
+
+    // Convert full voice model ID into short abbreviation e.g. "JP-Chirp", "US-Chirp", "JP-Neural2"
+    formatShortVoiceName(voiceName) {
+        if (!voiceName) return "JP-Chirp";
+        if (voiceName.includes("Chirp3-HD") || voiceName.includes("Chirp")) {
+            if (voiceName.startsWith("ja")) return "JP-Chirp";
+            if (voiceName.startsWith("en")) return "US-Chirp";
+            return "Chirp-3D";
+        }
+        if (voiceName.includes("Neural2")) {
+            if (voiceName.startsWith("ja")) return "JP-Neural2";
+            if (voiceName.startsWith("en")) return "US-Neural2";
+            if (voiceName.startsWith("vi")) return "VN-Neural2";
+            return "Neural2";
+        }
+        if (voiceName.includes("Wavenet") || voiceName.includes("WaveNet")) {
+            if (voiceName.startsWith("ja")) return "JP-Wavenet";
+            if (voiceName.startsWith("en")) return "US-Wavenet";
+            if (voiceName.startsWith("vi")) return "VN-Wavenet";
+            return "Wavenet";
+        }
+        if (voiceName.includes("Standard")) {
+            if (voiceName.startsWith("ja")) return "JP-Standard";
+            if (voiceName.startsWith("en")) return "US-Standard";
+            if (voiceName.startsWith("vi")) return "VN-Standard";
+            return "Standard";
+        }
+        if (voiceName === "browser" || voiceName.includes("Web")) return "Web-Speech";
+        return voiceName;
+    },
+
+    updateActiveTtsBadge(modelName) {
+        const badge = document.getElementById("activeTtsBadge");
+        if (badge) {
+            const shortName = this.formatShortVoiceName(modelName);
+            badge.textContent = shortName;
+        }
     },
 
     // Clean Japanese furigana annotations before TTS playback or download
@@ -110,12 +151,18 @@ window.LingoTTS = {
                 this.audioPlayer.src = data.audio_url;
                 if (btnElement) btnElement._cachedAudioUrl = data.audio_url;
                 await this.audioPlayer.play();
-                window.LingoLog.add(`Đang phát audio thành công bằng giọng đọc (${data.model_used || voiceName}).`);
+                
+                // Update live active running model badge in header
+                const usedModel = data.model_used || voiceName;
+                this.updateActiveTtsBadge(usedModel);
+                window.LingoLog.add(`Đang phát audio thành công bằng giọng đọc (${usedModel}).`);
             } else {
+                this.updateActiveTtsBadge("Web-Speech");
                 window.LingoLog.add(`TTS Backend: Chuyển sang Web SpeechSynthesis trình duyệt (${voiceName})...`, data.error || "");
                 this.fallbackBrowserTTS(cleanSpeechText, voiceName);
             }
         } catch (err) {
+            this.updateActiveTtsBadge("Web-Speech");
             window.LingoLog.add("Lỗi kết nối TTS API, chuyển dự phòng Web Speech", err.message);
             this.fallbackBrowserTTS(cleanSpeechText, voiceName);
         }
@@ -149,7 +196,9 @@ window.LingoTTS = {
             const data = await response.json();
             if (response.ok && data.audio_url) {
                 this.triggerFileDownload(data.audio_url, "lingobot_ai_speech.mp3");
-                window.LingoLog.add(`Đã tải xuống MP3 thành công (${data.model_used || voiceName}).`);
+                const usedModel = data.model_used || voiceName;
+                this.updateActiveTtsBadge(usedModel);
+                window.LingoLog.add(`Đã tải xuống MP3 thành công (${usedModel}).`);
             } else {
                 alert("Không thể tạo tệp âm thanh để tải xuống. Vui lòng kiểm tra API Key.");
             }

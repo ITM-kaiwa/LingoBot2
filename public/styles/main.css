@@ -1,4 +1,4 @@
-/* Main Design System - Screenshot Matched Styling with Emerald User Bubbles */
+/* Main Design System - Screenshot Matched Styling with Version Badge & Active TTS Badge */
 :root {
     --bg-page: #f9f3ec;
     --card-bg: #ffffff;
@@ -10,7 +10,7 @@
     --btn-red-grad: linear-gradient(135deg, #ef4444, #dc2626);
     --btn-red-hover: #b91c1c;
 
-    /* User Bubble Color: Emerald Green (#059669 / #10b981) per user requirement */
+    /* User Bubble Color: Emerald Green */
     --bubble-user-bg: #059669;
     --bubble-user-text: #ffffff;
 
@@ -104,6 +104,18 @@ body {
     letter-spacing: -0.3px;
 }
 
+/* Version Badge */
+.version-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #ea580c;
+    background: #ffedd5;
+    border: 1px solid #fed7aa;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.2px;
+}
+
 /* Nav Mode Tabs */
 .nav-tabs-group {
     display: flex;
@@ -175,7 +187,7 @@ body {
     cursor: pointer;
 }
 
-/* Header Buttons */
+/* Header Buttons & Active TTS Badge */
 .header-btns-group {
     display: flex;
     align-items: center;
@@ -191,6 +203,21 @@ body {
     font-size: 0.8rem;
     outline: none;
     cursor: pointer;
+}
+
+.active-tts-badge {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #0284c7;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .action-btn {
