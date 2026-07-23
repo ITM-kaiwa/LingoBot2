@@ -234,19 +234,20 @@ def tts():
             api_key = os.environ.get("GOOGLE_API_KEY", "")
 
         text = data.get("text", "").strip()
-        voice_name = data.get("voice_name", "ja-JP-Chirp3-HD-F")
+        requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
         
         if not text:
             return jsonify({"error": "Nội dung văn bản trống"}), 400
 
-        parts = voice_name.split("-")
+        parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # 1. Attempt Chirp 3 HD via GCP OAuth2 Service Account Token
+        # 1. Check if OAuth2 token for GCP Service Account is available
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
-        if "Chirp" in voice_name and oauth_token:
-            print(f"Calling Chirp 3 HD ({voice_name}) via GCP Service Account OAuth2 Token...")
+        # If OAuth2 token is valid AND user requested Chirp 3 HD, call Chirp 3 HD via Bearer token
+        if "Chirp" in requested_voice and oauth_token:
+            print(f"Calling Chirp 3 HD ({requested_voice}) via GCP Service Account OAuth2 Token...")
             url_oauth = "https://texttospeech.googleapis.com/v1/text:synthesize"
             headers_oauth = {
                 "Authorization": f"Bearer {oauth_token}",
@@ -256,7 +257,7 @@ def tts():
                 "input": {"text": text},
                 "voice": {
                     "languageCode": lang_code,
-                    "name": voice_name
+                    "name": requested_voice
                 },
                 "audioConfig": {"audioEncoding": "MP3"}
             }
@@ -266,28 +267,42 @@ def tts():
                     res_json = res_chirp.json()
                     audio_base64 = res_json.get("audioContent", "")
                     if audio_base64:
-                        print(f"Successfully synthesized Chirp 3 HD voice: {voice_name}")
+                        print(f"Successfully synthesized Chirp 3 HD voice: {requested_voice}")
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": voice_name
+                            "model_used": requested_voice
                         })
                 else:
                     print(f"Chirp 3 HD OAuth2 request failed ({res_chirp.status_code}): {res_chirp.text[:150]}")
             except Exception as e:
                 print("Chirp 3 HD OAuth2 request exception:", e)
 
-        # 2. Prevent sending Chirp voice with API Key (which causes 401). Immediately substitute with Neural2
-        fallback_voices = []
-        if "ja-JP" in lang_code:
-            fallback_voices = ["ja-JP-Neural2-B", "ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
-        elif "en-US" in lang_code:
-            fallback_voices = ["en-US-Neural2-F", "en-US-Wavenet-F", "en-US-Standard-F"]
-        else:
-            fallback_voices = ["vi-VN-Neural2-A", "vi-VN-Wavenet-A", "vi-VN-Standard-A"]
+        # 2. Strict API-Key Fallback: ABSOLUTELY DO NOT send "Chirp" model name with API Key (prevents 401 error)!
+        # Replace requested Chirp voice with high-quality Neural2 voice prior to building API Key payload
+        effective_voice = requested_voice
+        if "Chirp" in effective_voice:
+            if "ja-JP" in lang_code:
+                effective_voice = "ja-JP-Neural2-B"
+            elif "en-US" in lang_code:
+                effective_voice = "en-US-Neural2-F"
+            else:
+                effective_voice = "vi-VN-Neural2-A"
 
-        # If user selected a non-Chirp voice that supports API Keys directly, prioritize it
-        if "Chirp" not in voice_name and voice_name not in fallback_voices:
-            fallback_voices.insert(0, voice_name)
+        fallback_voices = [effective_voice]
+        if "ja-JP" in lang_code:
+            fallback_voices += ["ja-JP-Neural2-C", "ja-JP-Wavenet-B", "ja-JP-Standard-B"]
+        elif "en-US" in lang_code:
+            fallback_voices += ["en-US-Neural2-C", "en-US-Wavenet-F", "en-US-Standard-F"]
+        else:
+            fallback_voices += ["vi-VN-Wavenet-A", "vi-VN-Standard-A"]
+
+        # Deduplicate
+        seen = set()
+        clean_fallback_voices = []
+        for v in fallback_voices:
+            if v not in seen and "Chirp" not in v:
+                seen.add(v)
+                clean_fallback_voices.append(v)
 
         if not api_key:
             print("Google Cloud TTS API Error: No Google API Key provided!")
@@ -296,7 +311,7 @@ def tts():
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
         last_error = ""
 
-        for v_name in fallback_voices:
+        for v_name in clean_fallback_voices:
             v_parts = v_name.split("-")
             v_lang = f"{v_parts[0]}-{v_parts[1]}" if len(v_parts) >= 2 else lang_code
             
@@ -317,18 +332,17 @@ def tts():
                     res_json = res.json()
                     audio_base64 = res_json.get("audioContent", "")
                     if audio_base64:
-                        print(f"Successfully synthesized Google Cloud TTS: {v_name}")
+                        print(f"Successfully synthesized Google Cloud TTS using {v_name}")
                         return jsonify({
                             "audio_url": f"data:audio/mp3;base64,{audio_base64}",
-                            "model_used": v_name,
-                            "note": "Serving Neural2 Google Cloud TTS"
+                            "model_used": v_name
                         })
                 else:
                     last_error = f"HTTP {res.status_code}: {res.text[:150]}"
-                    print(f"TTS fallback voice {v_name} error: {last_error}")
+                    print(f"TTS voice {v_name} error: {last_error}")
             except Exception as e:
                 last_error = str(e)
-                print(f"TTS fallback voice {v_name} exception:", e)
+                print(f"TTS voice {v_name} exception:", e)
                 continue
 
         return jsonify({
