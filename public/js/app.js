@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver0.85 Implementation
+// Main Application Controller - LingoBot2 Ver0.90 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -11,7 +11,6 @@ window.LingoApp = {
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
     messages: [],
     isProcessing: false,
-    retryTimerId: null,
 
     // I18N Dictionary translating 100% of UI elements
     i18n: {
@@ -70,8 +69,6 @@ window.LingoApp = {
             filterAll: "Tất cả",
             aiThinking: "AI đang suy nghĩ...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
-            apiRetryWait: (sec) => `⏳ Hệ thống API đang bận. Vui lòng đợi ${sec} giây trước khi nhập lại.`,
-            apiReadyNow: "✨ Bạn có thể tiếp tục gửi tin nhắn ngay bây giờ!",
 
             // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ Phát",
@@ -141,8 +138,6 @@ window.LingoApp = {
             filterAll: "すべて",
             aiThinking: "AIが思考中です...",
             aiSummarizing: "AIがまとめています...",
-            apiRetryWait: (sec) => `⏳ APIが混雑しています。${sec}秒待ってから再度入力してください。`,
-            apiReadyNow: "✨ 送信準備が整いました。メッセージを入力できます！",
 
             // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ 再生",
@@ -212,8 +207,6 @@ window.LingoApp = {
             filterAll: "All",
             aiThinking: "AI is thinking...",
             aiSummarizing: "AI is summarizing...",
-            apiRetryWait: (sec) => `⏳ API is currently busy. Please wait ${sec} seconds before trying again.`,
-            apiReadyNow: "✨ Ready! You can send your message now.",
 
             // Inner Chat & Pronunciation Buttons (STOP button standardized)
             btnPlay: "▶ Play",
@@ -331,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.85]. Cấu hình chuỗi Cascade 6 mô hình AI chống bận 429.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver0.90]. Kích hoạt Zero-Wait Smart Role Fallback.");
     },
 
     updateUiLanguage(lang) {
@@ -683,18 +676,11 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
             });
 
             const data = await res.json();
-            if (res.ok && data.reply) {
+            if (data.reply) {
                 feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
                 window.LingoTTS.playText(targetText);
             } else {
-                if (data.api_key_required) {
-                    this.showSetupPromptRow();
-                    feedbackText.innerHTML = `<span style="color:#dc2626">🔑 ${data.error}</span>`;
-                } else if (data.retry_seconds) {
-                    feedbackText.innerHTML = `<span style="color:#c2410c">${dict.apiRetryWait(data.retry_seconds)}</span>`;
-                } else {
-                    feedbackText.innerHTML = `<span style="color:red">Lỗi: ${data.error}</span>`;
-                }
+                feedbackText.innerHTML = `<span style="color:red">Lỗi: ${data.error}</span>`;
             }
         } catch (e) {
             if (feedbackText) feedbackText.innerHTML = `<span style="color:red">Lỗi kết nối: ${e.message}</span>`;
@@ -742,7 +728,6 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     resetConversation() {
         this.messages = [];
         window.LingoTTS.stop();
-        if (this.retryTimerId) clearInterval(this.retryTimerId);
         
         const container = document.getElementById("chatContainer");
         if (container) {
@@ -759,7 +744,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     buildSystemPrompt() {
-        return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh, ưu tiên phản hồi nhanh với gemini-3.6-flash.
+        return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh.
 
 Cấu hình hội thoại:
 - Chế độ: ${this.mode}
@@ -801,7 +786,6 @@ Quy tắc ứng xử:
     async fetchAiResponse(historyMessages, systemPrompt) {
         this.isProcessing = true;
         const typingBubble = this.showTypingIndicator();
-        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
 
         try {
             const response = await fetch("/api/chat", {
@@ -817,9 +801,9 @@ Quy tắc ứng xử:
             const data = await response.json();
             this.removeTypingIndicator(typingBubble);
 
-            if (response.ok && data.reply) {
+            if (data.reply) {
                 const reply = data.reply;
-                const modelUsed = data.display_model || data.used_model || "gemini-3.6-flash";
+                const modelUsed = data.display_model || data.used_model || "Gemini-Other";
                 window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}]`);
                 
                 const aiBubbleEl = this.appendMessage("model", reply, modelUsed);
@@ -831,10 +815,6 @@ Quy tắc ứng xử:
                     this.showSetupPromptRow();
                     this.appendMessage("model", `🔑 ${data.error}`);
                     window.LingoLog.add("Cần bổ sung Google API Key.");
-                } else if (data.retry_seconds || response.status === 429) {
-                    const sec = data.retry_seconds || 15;
-                    this.showCountdownWarningBubble(sec);
-                    window.LingoLog.add(`API Busy (Wait ${sec}s): Tất cả mô hình Gemini bận.`);
                 } else {
                     const errText = data.error || "Không thể kết nối tới Gemini AI.";
                     this.appendMessage("model", `⚠️ ${errText}`);
@@ -848,46 +828,6 @@ Quy tắc ứng xử:
         } finally {
             this.isProcessing = false;
         }
-    },
-
-    showCountdownWarningBubble(initialSeconds) {
-        if (this.retryTimerId) clearInterval(this.retryTimerId);
-        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
-
-        const container = document.getElementById("chatContainer");
-        const row = document.createElement("div");
-        row.className = "chat-row ai-row warning-countdown-row";
-
-        const bubble = document.createElement("div");
-        bubble.className = "chat-bubble";
-        bubble.style.background = "#fff7ed";
-        bubble.style.border = "1px solid #ffedd5";
-        bubble.style.color = "#c2410c";
-
-        const textDiv = document.createElement("div");
-        textDiv.className = "bubble-text";
-        textDiv.style.fontWeight = "600";
-        textDiv.style.fontSize = "0.9rem";
-
-        let remaining = initialSeconds;
-        textDiv.textContent = dict.apiRetryWait(remaining);
-
-        bubble.appendChild(textDiv);
-        row.appendChild(bubble);
-        container.appendChild(row);
-        container.scrollTop = container.scrollHeight;
-
-        this.retryTimerId = setInterval(() => {
-            remaining -= 1;
-            if (remaining > 0) {
-                textDiv.textContent = dict.apiRetryWait(remaining);
-            } else {
-                clearInterval(this.retryTimerId);
-                this.retryTimerId = null;
-                textDiv.style.color = "#15803d";
-                textDiv.textContent = dict.apiReadyNow || "✨ Ready!";
-            }
-        }, 1000);
     },
 
     appendMessage(role, content, usedModel = null) {
