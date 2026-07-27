@@ -281,7 +281,7 @@ def tts():
     try:
         data = request.get_json() or {}
         text = data.get("text", "").strip()
-        requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
+        requested_voice = data.get("voice") or data.get("voice_name") or "ja-JP-Chirp3-HD-F"
 
         if requested_voice == "browser-native":
             return jsonify({

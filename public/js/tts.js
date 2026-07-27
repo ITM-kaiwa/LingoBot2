@@ -1,4 +1,4 @@
-// Text-to-Speech (TTS) Module - LingoBot2 Ver5.5 Stable Rollback
+// Text-to-Speech (TTS) Module - LingoBot2 Ver5.5β Implementation (Fixed JSON Audio URL Handling)
 window.LingoTTS = {
     audio: null,
     activePlayBtn: null,
@@ -50,53 +50,76 @@ window.LingoTTS = {
         const ttsSelect = document.getElementById("ttsModelSelect");
         const voiceModel = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
 
-        let audioUrl = this.cachedAudioUrls[cleanText];
+        const cacheKey = `${voiceModel}_${cleanText}`;
+        let audioUrl = this.cachedAudioUrls[cacheKey];
 
         if (audioUrl) {
+            if (window.LingoLog) window.LingoLog.add(`Phát âm thanh từ bộ nhớ đệm Cache.`);
             this.audio = new Audio(audioUrl);
             this.audio.onended = () => this.resetPlayButtons();
             this.audio.onerror = () => this.resetPlayButtons();
             this.audio.play().catch(e => {
                 console.warn("Play cached audio error:", e);
-                this.resetPlayButtons();
+                this.speakWebSpeechFallback(cleanText);
             });
             return;
         }
 
         const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
+        
         fetch("/api/tts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 text: cleanText,
                 voice: voiceModel,
+                voice_name: voiceModel,
                 api_key: apiKey
             })
         })
-        .then(res => res.blob())
-        .then(blob => {
-            if (blob.size < 300) throw new Error("TTS Blob payload too small");
-            audioUrl = URL.createObjectURL(blob);
-            this.cachedAudioUrls[cleanText] = audioUrl;
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (data.audio_url) {
+                audioUrl = data.audio_url;
+                this.cachedAudioUrls[cacheKey] = audioUrl;
 
-            if (playBtn) playBtn._cachedAudioUrl = audioUrl;
+                if (playBtn) playBtn._cachedAudioUrl = audioUrl;
 
-            this.audio = new Audio(audioUrl);
-            this.audio.onended = () => this.resetPlayButtons();
-            this.audio.onerror = () => this.resetPlayButtons();
-            this.audio.play().catch(e => {
-                console.warn("Play audio blob error:", e);
-                this.resetPlayButtons();
-            });
+                if (window.LingoLog) window.LingoLog.add(`Nhận âm thanh EdgeTTS thành công [${data.model_used || voiceModel}]. Bắt đầu phát...`);
+
+                this.audio = new Audio(audioUrl);
+                this.audio.onended = () => this.resetPlayButtons();
+                this.audio.onerror = () => {
+                    if (window.LingoLog) window.LingoLog.add("Lỗi phát EdgeTTS Audio element -> Chuyển sang Web Speech API.");
+                    this.speakWebSpeechFallback(cleanText);
+                };
+
+                this.audio.play().catch(e => {
+                    console.warn("Play audio url error (Autoplay policy or browser block):", e);
+                    this.speakWebSpeechFallback(cleanText);
+                });
+            } else if (data.fallback_browser) {
+                if (window.LingoLog) window.LingoLog.add("Máy chủ chỉ định chuyển sang Web Speech API.");
+                this.speakWebSpeechFallback(cleanText);
+            } else {
+                throw new Error("Invalid TTS JSON response");
+            }
         })
         .catch(err => {
             console.warn("Server TTS Error, falling back to Web Speech:", err);
+            if (window.LingoLog) window.LingoLog.add(`Lỗi máy chủ TTS (${err.message}) -> Dùng Web Speech API dự phòng.`);
             this.speakWebSpeechFallback(cleanText);
         });
     },
 
     speakWebSpeechFallback(text) {
-        if (!('speechSynthesis' in window)) return;
+        if (!('speechSynthesis' in window)) {
+            this.resetPlayButtons();
+            return;
+        }
 
         window.speechSynthesis.cancel();
 
@@ -105,15 +128,19 @@ window.LingoTTS = {
 
         if (targetLang.includes("日本語")) {
             utterance.lang = 'ja-JP';
+            utterance.rate = 0.95;
         } else if (targetLang.includes("English") || targetLang.includes("us")) {
             utterance.lang = 'en-US';
+            utterance.rate = 0.95;
         } else if (targetLang.includes("Việt") || targetLang.includes("vn")) {
             utterance.lang = 'vi-VN';
+            utterance.rate = 0.95;
         }
 
         utterance.onend = () => this.resetPlayButtons();
         utterance.onerror = () => this.resetPlayButtons();
 
+        if (window.LingoLog) window.LingoLog.add(`Đang đọc bằng giọng đọc Web Speech API của trình duyệt [${utterance.lang}].`);
         window.speechSynthesis.speak(utterance);
     },
 
@@ -151,7 +178,11 @@ window.LingoTTS = {
 
         if (!cleanText) return;
 
-        const url = audioUrl || this.cachedAudioUrls[cleanText];
+        const ttsSelect = document.getElementById("ttsModelSelect");
+        const voiceModel = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
+        const cacheKey = `${voiceModel}_${cleanText}`;
+
+        const url = audioUrl || this.cachedAudioUrls[cacheKey];
         if (url) {
             const a = document.createElement("a");
             a.href = url;
