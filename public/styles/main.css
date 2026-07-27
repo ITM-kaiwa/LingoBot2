@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver5.3 (Simplified Dropdowns, Fixed Labels, Floating Dynamic Prompt Editor Modal) */
+/* Main Layout & Theme System - LingoBot2 Ver5.4 (Local Button Blue/Green Toggle, FdBck, Gen, Cancel) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -254,6 +254,10 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     align-items: center;
     gap: 4px;
 }
+
+/* LOCAL BUTTON COLOR TOGGLE: OFF=BLUE, ON=LIME GREEN */
+.btn-local-blue { background: #0284c7 !important; color: #ffffff !important; }
+.btn-local-green { background: #16a34a !important; color: #ffffff !important; }
 
 .btn-pill-grey { background: #e2e8f0; color: #334155; }
 .btn-orange { background: #f97316; color: #ffffff; }

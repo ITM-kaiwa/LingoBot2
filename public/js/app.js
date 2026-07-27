@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.3 Implementation (Dynamic Prompt Editor & Simplified Controls)
+// Main Application Controller - LingoBot2 Ver5.4 Implementation (Blue/Green Local Button, FdBck, Gen, Cancel)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -9,7 +9,7 @@ window.LingoApp = {
     filterLang: "jp 日本語", // Default Pronunciation Filter: Japanese (日本語)
     filterLevel: "Sơ cấp",    // Default Pronunciation Filter: Beginner (初級)
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
-    useLocalFallback: false,    // Default Local Mode: OFF (Always labeled "Local" in English)
+    useLocalFallback: false,    // Default Local Mode: OFF (Always labeled "Local", Blue=OFF, Lime Green=ON)
     customSystemPrompt: null,   // Stores dynamic user-edited System Prompt
     messages: [],
     isProcessing: false,
@@ -180,7 +180,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "Reset",
             endBtn: "Fin", // Abbreviated End Button for English: Fin
-            feedbackBtn: "Feedback", // Fixed label for EN: Feedback
+            feedbackBtn: "FdBck", // Fixed label for EN: FdBck
             sendBtn: "Send",
             placeholder: "Type a message or speak into mic...",
             scenarioTitle: "🎯 Choose CEFR Level & Scenario:",
@@ -303,7 +303,7 @@ window.LingoApp = {
         { id: 102, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "この電車（でんしゃ）は新宿（しんじゅく）に行（い）きますか。", translation: "Tàu này có đi Shinjuku không ạ?" },
         { id: 103, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "おすすめのメニューは何（なに）ですか。", translation: "Món ăn được đề xuất là món gì ạ?" },
         { id: 104, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "私（わたし）の 趣味（しゅみ）は 映画（えいが）を 見（み）ることです。", translation: "Sở thích của tôi là xem phim." },
-        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎年（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
+        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎週（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
         { id: 106, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "お会計（かいけい）を別々（べつべつ）にお願（ねが）いします。", translation: "Làm ơn tính tiền riêng cho chúng tôi." },
         { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "写真（しゃしん）を撮（と）っていただけますか。", translation: "Bạn có thể chụp giúp tôi một tấm hình được không?" },
         { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "トイレはどこにありますか。", translation: "Nhà vệ sinh ở đâu vậy ạ?" },
@@ -335,7 +335,7 @@ window.LingoApp = {
         { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
         { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
-        { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
+        { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし, 社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
         { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (34 Sentences) ---
@@ -416,7 +416,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.3]. Dynamic Prompt Editor & Simplified Controls.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.4]. Blue/Green Local Button, FdBck, Gen, and Cancel.");
     },
 
     // PROMPT EDITOR POPOUT FLOATING MODAL CONTROLS
@@ -468,26 +468,28 @@ window.LingoApp = {
         window.open(targetUrl, '_blank');
     },
 
-    // LOCAL MODE ALWAYS LABELED "Local" IN ENGLISH
+    // LOCAL MODE ALWAYS LABELED "Local", BLUE WHEN OFF, LIME GREEN WHEN ON
     toggleLocalMode() {
         this.useLocalFallback = !this.useLocalFallback;
         const txtEl = document.getElementById("txtLocalModeStatus");
         const btn = document.getElementById("btnToggleLocalMode");
 
+        if (txtEl) txtEl.textContent = "Local";
+
         if (this.useLocalFallback) {
-            if (txtEl) txtEl.textContent = "Local: ON";
             if (btn) {
-                btn.style.background = "#ea580c";
+                btn.className = "action-btn btn-local-green";
+                btn.style.background = "#16a34a";
                 btn.style.color = "#ffffff";
             }
-            window.LingoLog.add("Bật chế độ dự phòng Local Mode (Sử dụng câu trả lời mẫu khi bận).");
+            window.LingoLog.add("Bật chế độ dự phòng Local Mode (Nút chuyển thành màu vàng xanh Lime Green).");
         } else {
-            if (txtEl) txtEl.textContent = "Local: OFF";
             if (btn) {
-                btn.style.background = "#e7e5e4";
-                btn.style.color = "#44403c";
+                btn.className = "action-btn btn-local-blue";
+                btn.style.background = "#0284c7";
+                btn.style.color = "#ffffff";
             }
-            window.LingoLog.add("Tắt chế độ dự phòng Local Mode (Chỉ hiển thị thông báo chờ đếm ngược).");
+            window.LingoLog.add("Tắt chế độ dự phòng Local Mode (Nút chuyển thành màu xanh dương Blue).");
         }
     },
 
@@ -529,7 +531,7 @@ window.LingoApp = {
         setTxt("txtBtnAdvanced", dict.btnAdvanced);
         setTxt("txtResetBtn", dict.resetBtn);
         setTxt("txtEndBtn", dict.endBtn);
-        setTxt("txtFeedbackBtn", dict.feedbackBtn); // Fixed label: VN -> Gợi ý, JP -> 意見, EN -> Feedback
+        setTxt("txtFeedbackBtn", dict.feedbackBtn); // VN -> Gợi ý, JP -> 意見, EN -> FdBck
         setTxt("txtSendBtn", dict.sendBtn);
         setTxt("txtFooterEndBtn", dict.endBtn);
         setTxt("txtScenarioTitle", dict.scenarioTitle);
