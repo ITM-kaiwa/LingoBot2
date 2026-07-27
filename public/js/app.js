@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.0 Implementation (Feedback Modal & Ver4.0 Updates)
+// Main Application Controller - LingoBot2 Ver4.1 Implementation (Auto Log File Attachment & Dynamic UI Language Sync)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -230,7 +230,6 @@ window.LingoApp = {
             btnDownload: "⬇ DL MP3",
             btnSamplePlay: "▶ Play Sample",
             btnSampleRecord: "🎙️ Record & Grade",
-            btnSampleRecording: "🔴 Record & Grade",
             btnSampleRecording: "🔴 Recording... (Speak now)",
 
             summaryModalTitle: "📊 Lesson Summary & Advice Report",
@@ -399,7 +398,20 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.0]. Feedback Modal & Mailto integration.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.1]. Auto Log File Attachment & UI Language Synchronization.");
+    },
+
+    openFeedbackPage() {
+        // 1. Prepare system execution logs & client diagnostics
+        const fullLogs = window.LingoLog ? (window.LingoLog.getClientDiagnostics() + "\n\n" + window.LingoLog.logs.join("\n")) : "";
+        localStorage.setItem("lingobot_latest_logs", fullLogs);
+        localStorage.setItem("lingobot_ui_lang", this.uiLang);
+
+        window.LingoLog.add(`Mở trang 💡 改善提案 (feedback.html) với UI Lang: ${this.uiLang}`);
+
+        // 2. Open feedback page in a new window with language param
+        const targetUrl = `feedback.html?lang=${encodeURIComponent(this.uiLang)}`;
+        window.open(targetUrl, '_blank');
     },
 
     toggleLocalMode() {
@@ -443,6 +455,8 @@ window.LingoApp = {
 
     updateUiLanguage(lang) {
         this.uiLang = lang;
+        localStorage.setItem("lingobot_ui_lang", lang);
+
         const dict = this.i18n[lang] || this.i18n["tiếng Việt"];
 
         const setTxt = (id, text) => {

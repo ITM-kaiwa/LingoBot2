@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LingoBot2 - 改善提案・フィードバック</title>
+    <title>LingoBot2 - 改善提案 / Feedback</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
         .feedback-card {
             background: #ffffff;
             width: 100%;
-            max-width: 600px;
+            max-width: 620px;
             border-radius: 24px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
             border: 1px solid #f3e8de;
@@ -41,8 +41,8 @@
             gap: 14px;
         }
         .brand-icon {
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: #ffffff;
             border: 2px solid #fdba74;
@@ -51,9 +51,10 @@
             justify-content: center;
             font-size: 1.5rem;
             box-shadow: 0 4px 10px rgba(234, 88, 12, 0.15);
+            flex-shrink: 0;
         }
         .header-title-group h1 {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: #c2410c;
         }
@@ -99,8 +100,22 @@
         }
         .form-textarea {
             resize: vertical;
-            min-height: 140px;
+            min-height: 130px;
             line-height: 1.6;
+        }
+        .log-attach-badge {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-left: 4px solid #16a34a;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.84rem;
+            color: #14532d;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .feedback-footer {
             display: flex;
@@ -109,13 +124,13 @@
             margin-top: 10px;
         }
         .btn-submit {
-            padding: 14px 32px;
+            padding: 14px 30px;
             border-radius: 24px;
             border: none;
             background: linear-gradient(135deg, #f97316, #ea580c);
             color: #ffffff;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.98rem;
             font-weight: 800;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
@@ -129,7 +144,7 @@
             box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45);
         }
         .btn-close {
-            padding: 12px 24px;
+            padding: 12px 22px;
             border-radius: 20px;
             border: 1.5px solid #e7e5e4;
             background: #ffffff;
@@ -157,67 +172,182 @@
         <header class="feedback-header">
             <div class="brand-icon">💡</div>
             <div class="header-title-group">
-                <h1>LingoBot2 改善提案・フィードバック</h1>
-                <p>より使いやすいアプリを目指して、ご意見・ご要望をお聞かせください。</p>
+                <h1 id="txtTitle">LingoBot2 改善提案・フィードバック</h1>
+                <p id="txtSub">より使いやすいアプリを目指して、ご意見・ご要望をお聞かせください。</p>
             </div>
         </header>
 
         <main class="feedback-body">
             <form id="feedbackForm" onsubmit="handleFeedbackSubmit(event)">
+                <!-- Auto Log Attachment Indicator Badge -->
+                <div class="log-attach-badge">
+                    <span>📄</span>
+                    <span id="txtLogBadge">LingoBot2のシステム動作ログ（.txt）が自動的に添付・生成されます。</span>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label" for="userName">👤 お名前 / Name <span class="required">*</span></label>
+                    <label class="form-label" for="userName"><span id="lblUserName">👤 お名前</span> <span class="required">*</span></label>
                     <input type="text" id="userName" class="form-input" placeholder="例: 山田 太郎" required />
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="userEmail">📧 メールアドレス / Email <span class="required">*</span></label>
+                    <label class="form-label" for="userEmail"><span id="lblUserEmail">📧 メールアドレス</span> <span class="required">*</span></label>
                     <input type="email" id="userEmail" class="form-input" placeholder="例: example@domain.com" required />
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="feedbackContent">📝 改善提案内容 / Feedback Details <span class="required">*</span></label>
+                    <label class="form-label" for="feedbackContent"><span id="lblContent">📝 改善提案内容</span> <span class="required">*</span></label>
                     <textarea id="feedbackContent" class="form-textarea" placeholder="機能の要望や使いづらい点など、ご自由にご記入ください..." required></textarea>
                 </div>
 
                 <div class="feedback-footer">
-                    <button type="button" class="btn-close" onclick="window.close()">閉じる</button>
-                    <button type="submit" class="btn-submit">
-                        <span>📧</span> <span>送信 (メーラー起動)</span>
+                    <button type="button" class="btn-close" id="btnClose" onclick="window.close()">閉じる</button>
+                    <button type="submit" class="btn-submit" id="btnSubmit">
+                        <span>📧</span> <span id="txtSubmitBtn">送信 (ログ自動添付 & メーラー起動)</span>
                     </button>
                 </div>
 
-                <p class="notice-text">
-                    ※ 「送信」ボタンを押すと、お使いのメールソフト（Outlook, Mail, Thunderbird等）が自動的に起動します。
+                <p class="notice-text" id="txtNotice">
+                    ※ 「送信」ボタンを押すと、ログファイル（.txt）が自動ダウンロード保存され、お使いのメールソフトが起動します。ダウンロードされたログファイルをメールに添付して送信してください。
                 </p>
             </form>
         </main>
     </div>
 
     <script>
+        // Multi-language dictionary strictly matching LingoBot2 System UI Language
+        const i18nFeedback = {
+            "tiếng Nhật": {
+                title: "LingoBot2 改善提案・フィードバック",
+                sub: "より使いやすいアプリを目指して、ご意見・ご要望をお聞かせください。",
+                logBadge: "LingoBot2のシステム動作ログ（.txt）が自動的に生成・ダウンロード添付されます。",
+                lblName: "👤 お名前",
+                phName: "例: 山田 太郎",
+                lblEmail: "📧 メールアドレス",
+                phEmail: "例: example@domain.com",
+                lblContent: "📝 改善提案内容",
+                phContent: "機能の要望や使いづらい点など、ご自由にご記入ください...",
+                btnClose: "閉じる",
+                btnSubmit: "送信 (ログ自動添付 & メーラー起動)",
+                notice: "※ 「送信」ボタンを押すと、動作ログファイル（.txt）が自動ダウンロード保存され、メールソフトが起動します。ダウンロードされたログファイルをメールに添付して送信してください。",
+                alertSuccess: "【ログファイルの準備完了】\nLingoBot2の動作ログ（.txt）を自動ダウンロードし、クリップボードにもコピーしました！\n起動したメールソフトにログファイルを添付（または貼り付け）して送信してください。"
+            },
+            "tiếng Việt": {
+                title: "LingoBot2 Gợi ý cải tiến & Phản hồi",
+                sub: "Hãy gửi cho chúng tôi ý kiến và đóng góp của bạn để hoàn thiện LingoBot2 tốt hơn.",
+                logBadge: "Tệp nhật ký hệ thống LingoBot2 (.txt) sẽ được tự động tạo và tải xuống để đính kèm.",
+                lblName: "👤 Họ và tên",
+                phName: "Ví dụ: Nguyễn Văn An",
+                lblEmail: "📧 Địa chỉ Email",
+                phEmail: "Ví dụ: example@domain.com",
+                lblContent: "📝 Nội dung gợi ý cải tiến",
+                phContent: "Nhập các tính năng mong muốn hoặc góp ý trải nghiệm...",
+                btnClose: "Đóng",
+                btnSubmit: "Gửi (Tự động tải Log & Mở Mailer)",
+                notice: "※ Khi nhấn 'Gửi', tệp nhật ký (.txt) sẽ tự động được tải về máy và ứng dụng Mail sẽ mở ra. Vui lòng đính kèm tệp nhật ký vừa tải về vào Email trước khi gửi.",
+                alertSuccess: "【ĐÃ CHUẨN BỊ TỆP NHẬT KÝ SYSTEM LOG】\nTệp nhật ký LingoBot2 (.txt) đã được tự động tải về và sao chép vào khay nhớ tạm!\nVui lòng đính kèm tệp .txt này vào ứng dụng Email vừa mở để gửi đi."
+            },
+            "tiếng Anh": {
+                title: "LingoBot2 Feedback & Suggestions",
+                sub: "Help us make LingoBot2 better by sharing your feedback and suggestions.",
+                logBadge: "LingoBot2 system log file (.txt) will be automatically generated and attached.",
+                lblName: "👤 Full Name",
+                phName: "e.g. John Smith",
+                lblEmail: "📧 Email Address",
+                phEmail: "e.g. example@domain.com",
+                lblContent: "📝 Suggestion / Feedback Details",
+                phContent: "Feel free to share feature requests or issues you experienced...",
+                btnClose: "Close",
+                btnSubmit: "Send (Auto-Attach Log & Launch Mailer)",
+                notice: "※ Clicking 'Send' will automatically download the system log (.txt) and open your default email app. Please attach the downloaded log file to your email.",
+                alertSuccess: "【SYSTEM LOG FILE READY】\nLingoBot2 system log (.txt) has been downloaded and copied to clipboard!\nPlease attach the downloaded .txt log file to the opened email app."
+            }
+        };
+
+        // Get language parameter or fallback to localStorage
+        function getUiLanguage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let lang = urlParams.get('lang');
+            if (!lang) {
+                lang = localStorage.getItem("lingobot_ui_lang");
+            }
+            if (lang && i18nFeedback[lang]) return lang;
+            return "tiếng Nhật"; // Default to Japanese if system language is JP
+        }
+
+        // Apply UI text matching system language
+        function applyLanguageUi() {
+            const lang = getUiLanguage();
+            const dict = i18nFeedback[lang] || i18nFeedback["tiếng Nhật"];
+
+            document.getElementById("txtTitle").textContent = dict.title;
+            document.getElementById("txtSub").textContent = dict.sub;
+            document.getElementById("txtLogBadge").textContent = dict.logBadge;
+            document.getElementById("lblUserName").textContent = dict.lblName;
+            document.getElementById("userName").placeholder = dict.phName;
+            document.getElementById("lblUserEmail").textContent = dict.lblEmail;
+            document.getElementById("userEmail").placeholder = dict.phEmail;
+            document.getElementById("lblContent").textContent = dict.lblContent;
+            document.getElementById("feedbackContent").placeholder = dict.phContent;
+            document.getElementById("btnClose").textContent = dict.btnClose;
+            document.getElementById("txtSubmitBtn").textContent = dict.btnSubmit;
+            document.getElementById("txtNotice").textContent = dict.notice;
+        }
+
         function handleFeedbackSubmit(event) {
             event.preventDefault();
+
+            const lang = getUiLanguage();
+            const dict = i18nFeedback[lang] || i18nFeedback["tiếng Nhật"];
 
             const name = document.getElementById("userName").value.trim();
             const email = document.getElementById("userEmail").value.trim();
             const content = document.getElementById("feedbackContent").value.trim();
 
             if (!name || !email || !content) {
-                alert("すべての項目を入力してください。");
+                alert("Vui lòng nhập đầy đủ thông tin / すべての項目を入力してください。");
                 return;
             }
 
+            // Fetch system logs from localStorage saved by main LingoBot2 window
+            const logsText = localStorage.getItem("lingobot_latest_logs") || "LingoBot2 System Log Data:\n[No log recorded]";
+
+            // 1. Auto-download system log text file (.txt)
+            const blob = new Blob([logsText], { type: "text/plain;charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `lingobot_system_logs_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // 2. Auto-copy log text to Clipboard as convenient backup
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(logsText).catch(() => {});
+            }
+
+            // 3. Construct mailto URL with feedback content and log excerpt
             const recipient = "support@example.com";
-            const subject = encodeURIComponent("[LingoBot2] 改善提案・フィードバック");
-            const bodyText = `【LingoBot2 改善提案・フィードバック】
+            const subject = encodeURIComponent(`[LingoBot2] 改善提案・フィードバック (${name}様)`);
+            
+            const logSnippet = logsText.length > 800 ? logsText.substring(logsText.length - 800) : logsText;
 
-■ お名前: ${name}
-■ メールアドレス: ${email}
+            const bodyText = `【LingoBot2 改善提案・フィードバック / Feedback】
 
-■ 改善提案・ご意見内容:
+■ お名前 / Name: ${name}
+■ メールアドレス / Email: ${email}
+
+■ 改善提案内容 / Details:
 ${content}
 
 --------------------------------------------------
-送信日時: ${new Date().toLocaleString('ja-JP')}
+📋 添付ログファイル: lingobot_system_logs.txt (自動ダウンロード保存されました)
+--------------------------------------------------
+🖥️ 直近のシステム動作ログ抜粋 (Recent System Log Excerpt):
+${logSnippet}
+
+--------------------------------------------------
+送信日時: ${new Date().toLocaleString()}
 `;
 
             const body = encodeURIComponent(bodyText);
@@ -226,8 +356,10 @@ ${content}
             // Launch default mail client
             window.location.href = mailtoUrl;
 
-            alert("メールソフトを起動しました。\nそのままメールを送信してください。ありがとうございます！");
+            alert(dict.alertSuccess);
         }
+
+        document.addEventListener("DOMContentLoaded", applyLanguageUi);
     </script>
 </body>
 </html>
