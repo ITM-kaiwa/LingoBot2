@@ -1,9 +1,9 @@
-/* Main Layout & Theme System - LingoBot2 Ver4.5 (Single Line Header Row & Darker Matte Gray Chat Viewport) */
+/* Main Layout & Theme System - LingoBot2 Ver4.6 (Times New Roman for Vietnamese UI) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
     --bg-warm-light: #fcf7f2;
-    --bg-chat-dark-gray: #e2e8f0; /* Darker Matte Gray Tone for Chat Viewport */
+    --bg-chat-dark-gray: #e2e8f0;
     --card-bg: #ffffff;
     --border-color: #cbd5e1;
     --text-primary: #1c1917;
@@ -26,6 +26,15 @@ html, body {
     font-family: var(--font-body);
     background-color: var(--bg-warm-light);
     color: var(--text-primary);
+}
+
+/* TIMES NEW ROMAN FONT EXCLUSIVELY FOR VIETNAMESE UI */
+body[data-ui-lang="tiếng Việt"],
+body[data-ui-lang="tiếng Việt"] button,
+body[data-ui-lang="tiếng Việt"] input,
+body[data-ui-lang="tiếng Việt"] select,
+body[data-ui-lang="tiếng Việt"] textarea {
+    font-family: 'Times New Roman', Times, Georgia, serif !important;
 }
 
 /* UNIVERSAL BUTTON ACTIVE PRESS EFFECT FOR ALL BUTTONS */
@@ -193,7 +202,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     outline: none;
 }
 
-/* 2nd Row: Advanced Collapsible Controls Panel (Only displayed when Advanced is clicked) */
+/* 2nd Row: Advanced Collapsible Controls Panel */
 .header-btns-group {
     display: flex;
     align-items: center;
@@ -252,14 +261,14 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     font-size: 0.78rem;
 }
 
-/* Chat Main Viewport - DARKER MATTE GRAY TONE (#e2e8f0) */
+/* Chat Main Viewport */
 .chat-viewport {
     flex: 1 1 0%;
     min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    background-color: var(--bg-chat-dark-gray) !important; /* Darker Gray than outer container */
+    background-color: var(--bg-chat-dark-gray) !important;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -271,10 +280,10 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background-color: var(--bg-chat-dark-gray) !important; /* Darker Gray tone */
+    background-color: var(--bg-chat-dark-gray) !important;
 }
 
-/* Footer Bar Styling - Fixed to bottom */
+/* Footer Bar Styling */
 .app-footer-bar {
     background: #ffffff;
     border-top: 1.5px solid #cbd5e1;
@@ -301,7 +310,6 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     border-radius: 20px;
     border: 1.5px solid #cbd5e1;
     background: #fafaf9;
-    font-family: inherit;
     font-size: 0.9rem;
     outline: none;
     box-sizing: border-box;
@@ -319,11 +327,9 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     flex-shrink: 0;
 }
 
-/* Footer buttons strictly aligned to 38px height */
 .footer-btn {
     border: none;
     border-radius: 20px;
-    font-family: inherit;
     font-size: 0.85rem;
     font-weight: 800;
     cursor: pointer;

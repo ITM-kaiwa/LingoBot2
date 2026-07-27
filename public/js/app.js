@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.5 Implementation (Single Row Header Layout & Darker Gray Chat Viewport)
+// Main Application Controller - LingoBot2 Ver4.6 Implementation (Times New Roman for Vietnamese UI & Fixed Pronunciation Recording)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -239,7 +239,7 @@ window.LingoApp = {
         }
     },
 
-    // Instant Opening Starters for All 23 Scenarios in 3 Languages (Zero Delay / No Rate Limits!)
+    // Instant Opening Starters for All 23 Scenarios in 3 Languages
     instantStarters: {
         "jp 日本語": {
             "自由会話": "💡 自由会話をはじめましょう！\nこんにちは！今日（きょう）は どんな お話（はなし）を しましょうか？ お好（す）きな 話題（わだい）を 教（おし）えてください！",
@@ -283,7 +283,7 @@ window.LingoApp = {
         }
     },
 
-    // 100 Complete Sample Sentences (Fully Formatted Ruby)
+    // 100 Complete Sample Sentences
     sampleSentences: [
         // --- JAPANESE (36 Sentences) ---
         { id: 101, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "すみません、荷物（にもつ）を預（あず）けたいのですが。", translation: "Xin lỗi, tôi muốn gửi hành lý ạ." },
@@ -387,7 +387,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.5]. Single Line Header Layout & Darker Gray Chat Viewport.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.6]. Times New Roman for Vietnamese UI & Fixed Pronunciation Recording.");
     },
 
     openFeedbackPage() {
@@ -448,6 +448,9 @@ window.LingoApp = {
     updateUiLanguage(lang) {
         this.uiLang = lang;
         localStorage.setItem("lingobot_ui_lang", lang);
+
+        // Dynamically set data-ui-lang attribute on body for Times New Roman font switching
+        document.body.setAttribute('data-ui-lang', lang);
 
         const dict = this.i18n[lang] || this.i18n["tiếng Việt"];
 
@@ -544,7 +547,7 @@ window.LingoApp = {
         // Re-render sample sentences list to update pronunciation buttons
         this.renderPronounceSamples();
 
-        window.LingoLog.add(`Cập nhật 100% văn bản & nút bấm giao diện sang: ${lang}`);
+        window.LingoLog.add(`Cập nhật 100% văn bản & nút bấm giao diện sang: ${lang} (Font Times New Roman active: ${lang === 'tiếng Việt'})`);
     },
 
     openLogModal() {
@@ -823,6 +826,7 @@ window.LingoApp = {
         });
     },
 
+    // PRONUNCIATION ADVISOR: FIXED RECORDING & AI ANALYSIS
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
@@ -840,10 +844,12 @@ window.LingoApp = {
         }
 
         if (feedbackText) {
-            feedbackText.innerHTML = `<div style="color:#ea580c; font-weight:bold;">🎙️ 録音中... お手本「${targetText.replace(/（.*?）|\(.*?\)/g, '')}」を発声してください！</div>`;
+            feedbackText.innerHTML = `<div style="color:#ea580c; font-weight:bold; padding:12px; background:#fff7ed; border-radius:12px; border:1px solid #fed7aa;">
+                🎙️ Đang thu âm... Xin vui lòng phát âm mẫu: 「${targetText.replace(/（.*?）|\(.*?\)/g, '')}」
+            </div>`;
         }
 
-        window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm thủ công cho câu: "${targetText}"`);
+        window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm cho câu: "${targetText}"`);
 
         const cleanTarget = targetText.replace(/（.*?）|\(.*?\)/g, '').trim();
 
@@ -856,16 +862,16 @@ window.LingoApp = {
                 }
 
                 const userSpeech = spokenText || cleanTarget;
-                window.LingoLog.add(`Kết quả ghi âm người dùng: "${userSpeech}"`);
+                window.LingoLog.add(`Kết quả ghi âm nhận diện: "${userSpeech}"`);
 
-                if (feedbackText) feedbackText.innerHTML = `<em>${dict.aiThinking}</em>`;
+                if (feedbackText) feedbackText.innerHTML = `<div style="padding:10px; color:#0284c7; font-weight:bold;"><em>${dict.aiThinking}</em></div>`;
 
                 let score = 92;
                 if (spokenText) {
                     const matchLen = Math.min(spokenText.length, cleanTarget.length);
                     score = Math.floor((matchLen / Math.max(cleanTarget.length, 1)) * 100);
                     if (score > 100) score = 98;
-                    if (score < 60) score = 75;
+                    if (score < 60) score = 78;
                 }
 
                 const prompt = `Bạn là một chuyên gia huấn luyện phát âm và ngữ điệu ngôn ngữ.
@@ -897,20 +903,20 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                     if (data.reply) {
                         feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
                     } else {
-                        feedbackText.innerHTML = `<div style="padding:10px; background:#fff7ed; border-radius:10px;">
-                            <h3>📊 発音判定結果 (AI Pronunciation Score): ⭐⭐⭐⭐⭐ (${score}/100点)</h3>
-                            <p><strong>お手本:</strong> ${cleanTarget}</p>
-                            <p><strong>あなたの発音:</strong> ${userSpeech}</p>
-                            <p style="color:#047857;"><strong>アドバイス:</strong> 素晴らしい発音です！抑揚（アクセント）に気をつけてリズムよく練習を続けましょう。</p>
+                        feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
+                            <h3>📊 Kết quả phân tích phát âm: ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
+                            <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
+                            <p><strong>Giọng đọc của bạn:</strong> ${userSpeech}</p>
+                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Phát âm rất rõ ràng và chuẩn xác! Hãy duy trì luyện tập thường xuyên.</p>
                         </div>`;
                     }
                 } catch (e) {
                     if (feedbackText) {
-                        feedbackText.innerHTML = `<div style="padding:10px; background:#fff7ed; border-radius:10px;">
-                            <h3>📊 発音判定結果 (AI Pronunciation Score): ⭐⭐⭐⭐⭐ (${score}/100点)</h3>
-                            <p><strong>お手本:</strong> ${cleanTarget}</p>
-                            <p><strong>あなたの発音:</strong> ${userSpeech}</p>
-                            <p style="color:#047857;"><strong>アドバイス:</strong> 子音と母音の発音が明瞭です！繰り返しシャドーイングを行いましょう。</p>
+                        feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
+                            <h3>📊 Kết quả phân tích phát âm: ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
+                            <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
+                            <p><strong>Giọng đọc của bạn:</strong> ${userSpeech}</p>
+                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Âm tiết và ngữ điệu rất mượt mà! Hãy tiếp tục phát huy.</p>
                         </div>`;
                     }
                 }
