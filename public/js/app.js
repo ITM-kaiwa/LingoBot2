@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.5-Stable Implementation (Rollback to Ver5.5 Flow)
+// Main Application Controller - LingoBot2 Ver5.5β Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -426,7 +426,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.5-Stable]. Rollback to stable message reveal flow.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.5β]. Restored Ver5.5 stable flow.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
