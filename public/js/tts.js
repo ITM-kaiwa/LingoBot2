@@ -1,7 +1,8 @@
-// TTS Engine Module - LingoBot2 Ver2.8 Implementation (Clean Ruby Annotations & Strip AI Advice)
+// TTS Engine Module - LingoBot2 Ver2.9 Implementation (Audio Playback Toggle & Interrupt Control)
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
+    currentlyPlayingBtn: null,
 
     // Abbreviated TTS Model map for header badge
     ttsBadgeMap: {
@@ -42,6 +43,7 @@ window.LingoTTS = {
             window.speechSynthesis.cancel();
         }
         this.isPlaying = false;
+        this.currentlyPlayingBtn = null;
         
         // Reset all play buttons UI back to "▶ 再生" / "▶ Phát"
         const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
@@ -98,6 +100,15 @@ window.LingoTTS = {
 
     async playText(text, playBtnElement = null) {
         if (!text) return;
+
+        // TOGGLE BEHAVIOR: If currently playing AND user clicks the SAME play button -> Stop audio & reset to start!
+        if (this.isPlaying && playBtnElement && playBtnElement === this.currentlyPlayingBtn) {
+            window.LingoLog.add("Dừng phát âm thanh (Nhấn nút khi đang phát -> Tạm dừng & Reset từ đầu).");
+            this.stop();
+            return;
+        }
+
+        // Otherwise stop any existing audio first, then prepare for fresh playback
         this.stop();
 
         const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát", btnPlaying: "▶ 再生中" };
@@ -105,6 +116,7 @@ window.LingoTTS = {
         if (playBtnElement) {
             playBtnElement.classList.add("playing");
             playBtnElement.textContent = dict.btnPlaying || "▶ 再生中";
+            this.currentlyPlayingBtn = playBtnElement;
         }
 
         const ttsSelect = document.getElementById("ttsModelSelect");
@@ -119,6 +131,7 @@ window.LingoTTS = {
             if (playBtnElement) {
                 playBtnElement.classList.remove("playing");
                 playBtnElement.textContent = dict.btnPlay || "▶ Phát";
+                this.currentlyPlayingBtn = null;
             }
             return;
         }
@@ -162,6 +175,7 @@ window.LingoTTS = {
 
                 this.audioElement.onended = () => {
                     this.isPlaying = false;
+                    this.currentlyPlayingBtn = null;
                     if (playBtnElement) {
                         playBtnElement.classList.remove("playing");
                         playBtnElement.textContent = dict.btnPlay || "▶ Phát";
@@ -197,6 +211,7 @@ window.LingoTTS = {
                 const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
                 playBtnElement.classList.remove("playing");
                 playBtnElement.textContent = dict.btnPlay || "▶ Phát";
+                this.currentlyPlayingBtn = null;
             }
             return;
         }
@@ -213,6 +228,7 @@ window.LingoTTS = {
         
         utterance.onend = () => {
             this.isPlaying = false;
+            this.currentlyPlayingBtn = null;
             if (playBtnElement) {
                 const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
                 playBtnElement.classList.remove("playing");
@@ -223,6 +239,7 @@ window.LingoTTS = {
         utterance.onerror = (e) => {
             console.error("SpeechSynthesis error:", e);
             this.isPlaying = false;
+            this.currentlyPlayingBtn = null;
             if (playBtnElement) {
                 const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
                 playBtnElement.classList.remove("playing");

@@ -1,4 +1,4 @@
-// System Logger Module - LingoBot2 Ver2.8 Implementation
+// System Logger Module - LingoBot2 Ver2.9 Implementation
 window.LingoLog = {
     logs: [],
     
@@ -39,7 +39,7 @@ window.LingoLog = {
 - Hardware: ${hardwareCores} Cores | Memory: ${memory}
 - Network Status: ${networkType}
 - Timezone: ${timeZone}
-- App Version: LingoBot2 Ver2.8 (Render & EdgeTTS)
+- App Version: LingoBot2 Ver2.9 (Render & EdgeTTS)
 ==================================================`;
     },
 
