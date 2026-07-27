@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.7 Implementation (Preloaded Synced Reveal of AI Chat Bubble)
+// Main Application Controller - LingoBot2 Ver5.8 Implementation (Autoplay Unlocked & Reliable Speech Playback)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -281,7 +281,7 @@ window.LingoApp = {
             "カフェでの注文会話": "💡 カフェでの注文会話です！\nいらっしゃいませ！ 店内（てんない）で お召（め）し上（あ）がりですか、それとも お持（も）ち帰（かえ）りですか？",
             "レストランの予約会話": "💡 レストラン予約の会話です！\nお電話（でんわ）ありがとうございます。ご予約（よやく）の 日時（にちじ）と 人数（にんずう）を お教（おし）えいただけますか？",
             "居酒屋での注文会話": "💡 居酒屋の会話です！\nいらっしゃいませ！ まずは お飲（の）み物（もの）から お伺（うかが）いしましょうか？",
-            "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきん）と カード、どちらに なさいますか？",
+            "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきn）と カード、どちらに なさいますか？",
 
             "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
             "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（かん）させて いただけますか？",
@@ -342,7 +342,7 @@ window.LingoApp = {
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "構造改革を断行しなければ、持続可能な成長を実現することは困難でしょう。", translation: "Nếu không quyết liệt cải cách cơ cấu, rất khó đạt được tăng trưởng bền vững." },
         { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "双方の利害を調整し、双方にとって望ましい着地点を模索すべきです。", translation: "Cần điều hòa lợi ích đôi bên và tìm kiếm điểm đồng thuận mong muốn." },
         { id: 131, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "技術革新の波に伴い、従来のビジネスモデルの再構築が強く求められています。", translation: "Cùng với làn sóng đổi mới công nghệ, việc tái cấu trúc mô hình kinh doanh cũ là cấp thiết." },
-        { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
+        { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく, 迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
         { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
@@ -426,7 +426,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.7]. Audio-synced bubble reveal mode.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.8]. Autoplay unlocked & robust TTS playback.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -803,6 +803,11 @@ window.LingoApp = {
     },
 
     bindEvents() {
+        // Unlock Autoplay on Any User Interaction
+        document.addEventListener("click", () => {
+            if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
+        }, { once: false });
+
         const uiLangSelect = document.getElementById("uiLangSelect");
         if (uiLangSelect) {
             uiLangSelect.addEventListener("change", (e) => {
@@ -872,7 +877,10 @@ window.LingoApp = {
 
         const sendBtn = document.getElementById("sendBtn");
         if (sendBtn) {
-            sendBtn.addEventListener("click", () => this.handleSendMessage());
+            sendBtn.addEventListener("click", () => {
+                if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
+                this.handleSendMessage();
+            });
         }
 
         const chatInput = document.getElementById("chatInput");
@@ -880,6 +888,7 @@ window.LingoApp = {
             chatInput.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
                     e.preventDefault();
+                    if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
                     window.LingoLog.add("Phím ENTER được nhấn (Đã ngăn gửi tin nhắn).");
                 }
             });
@@ -1143,6 +1152,8 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
     },
 
     startConversation() {
+        if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
+
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.add("hidden");
@@ -1284,7 +1295,7 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                 window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}] -> Preloading TTS Audio for synced bubble reveal.`);
                 
                 if (window.LingoTTS) {
-                    // PRELOAD AUDIO FIRST: Keep typing indicator, reveal bubble synced with playback start
+                    // PRELOAD AUDIO FIRST & REVEAL BUBBLE SYNCED WITH SPEECH PLAYBACK
                     window.LingoTTS.playWithSyncBubble(reply, () => {
                         this.removeTypingIndicator(typingBubble);
                         const aiBubbleEl = this.appendMessage("model", reply, modelUsed, 0);
