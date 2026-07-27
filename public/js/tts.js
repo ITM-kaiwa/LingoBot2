@@ -1,22 +1,8 @@
-// Text-to-Speech (TTS) Module - LingoBot2 Ver5.8 Implementation
-// Robust Autoplay Unlocker, Synchronized Bubble Reveal, and Reliable Play Buttons
+// Text-to-Speech (TTS) Module - LingoBot2 Ver5.5 Stable Rollback
 window.LingoTTS = {
     audio: null,
     activePlayBtn: null,
-    cachedAudioBlobs: {},
-    isAudioUnlocked: false,
-
-    // UNLOCK BROWSER AUTOPLAY POLICY ON FIRST USER GESTURE
-    unlockAutoplay() {
-        if (this.isAudioUnlocked) return;
-        try {
-            const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
-            silentAudio.play().then(() => {
-                this.isAudioUnlocked = true;
-                if (window.LingoLog) window.LingoLog.add("Đã kích hoạt giải khóa Autoplay Audio cho trình duyệt.");
-            }).catch(() => {});
-        } catch (e) {}
-    },
+    cachedAudioUrls: {},
 
     stop() {
         if (this.audio) {
@@ -40,95 +26,8 @@ window.LingoTTS = {
         this.activePlayBtn = null;
     },
 
-    // PRELOAD AUDIO AND REVEAL BUBBLE SYNCED WITH AUDIO PLAYBACK
-    async playWithSyncBubble(text, playCallback) {
-        this.stop();
-        this.unlockAutoplay();
-
-        const cleanText = (text || "")
-            .replace(/💡.*?\n/g, '') // Filter out 💡 advice lines from TTS
-            .replace(/（.*?）|\(.*?\)/g, '') // Filter out furigana in parentheses
-            .replace(/<ruby>.*?<rt>(.*?)<\/rt><\/ruby>/g, '$1')
-            .trim();
-
-        if (!cleanText) {
-            if (playCallback) playCallback();
-            return;
-        }
-
-        let hasExecutedCallback = false;
-        const executeOnceCallback = () => {
-            if (!hasExecutedCallback) {
-                hasExecutedCallback = true;
-                if (playCallback) playCallback();
-            }
-        };
-
-        const ttsSelect = document.getElementById("ttsModelSelect");
-        const voiceModel = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
-
-        // Check Cached Audio Blob
-        if (this.cachedAudioBlobs[cleanText]) {
-            const blobUrl = URL.createObjectURL(this.cachedAudioBlobs[cleanText]);
-            this.audio = new Audio(blobUrl);
-            this.audio.onended = () => this.resetPlayButtons();
-            this.audio.onerror = () => executeOnceCallback();
-
-            executeOnceCallback();
-            this.audio.play().catch(err => {
-                console.warn("Autoplay blocked for cached audio:", err);
-            });
-            return;
-        }
-
-        // Fetch Audio Stream from Server
-        try {
-            const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
-            const response = await fetch("/api/tts", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    text: cleanText,
-                    voice: voiceModel,
-                    api_key: apiKey
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`TTS HTTP status ${response.status}`);
-            }
-
-            const blob = await response.blob();
-            if (blob.size < 300) {
-                throw new Error("TTS payload too small");
-            }
-
-            this.cachedAudioBlobs[cleanText] = blob;
-            const blobUrl = URL.createObjectURL(blob);
-
-            this.audio = new Audio(blobUrl);
-            this.audio.onended = () => this.resetPlayButtons();
-            this.audio.onerror = () => executeOnceCallback();
-
-            // REVEAL BUBBLE AT ONCE BEFORE PLAYING AUDIO
-            executeOnceCallback();
-
-            try {
-                await this.audio.play();
-            } catch (playErr) {
-                console.warn("Autoplay policy restriction triggered:", playErr);
-            }
-        } catch (err) {
-            console.warn("TTS fetch failed, using Web Speech fallback:", err);
-            executeOnceCallback();
-            this.speakWebSpeechFallback(cleanText);
-        }
-    },
-
-    // MANUAL PLAY BUTTON HANDLER (ALWAYS WORKS ON DIRECT USER CLICK)
     playText(text, playBtn = null) {
         this.stop();
-        this.unlockAutoplay();
 
         const cleanText = (text || "")
             .replace(/💡.*?\n/g, '')
@@ -151,12 +50,10 @@ window.LingoTTS = {
         const ttsSelect = document.getElementById("ttsModelSelect");
         const voiceModel = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
 
-        // Check Cache
-        if (this.cachedAudioBlobs[cleanText]) {
-            const blobUrl = URL.createObjectURL(this.cachedAudioBlobs[cleanText]);
-            if (playBtn) playBtn._cachedAudioUrl = blobUrl;
+        let audioUrl = this.cachedAudioUrls[cleanText];
 
-            this.audio = new Audio(blobUrl);
+        if (audioUrl) {
+            this.audio = new Audio(audioUrl);
             this.audio.onended = () => this.resetPlayButtons();
             this.audio.onerror = () => this.resetPlayButtons();
             this.audio.play().catch(e => {
@@ -176,18 +73,15 @@ window.LingoTTS = {
                 api_key: apiKey
             })
         })
-        .then(res => {
-            if (!res.ok) throw new Error("TTS response error");
-            return res.blob();
-        })
+        .then(res => res.blob())
         .then(blob => {
             if (blob.size < 300) throw new Error("TTS Blob payload too small");
-            this.cachedAudioBlobs[cleanText] = blob;
-            const blobUrl = URL.createObjectURL(blob);
+            audioUrl = URL.createObjectURL(blob);
+            this.cachedAudioUrls[cleanText] = audioUrl;
 
-            if (playBtn) playBtn._cachedAudioUrl = blobUrl;
+            if (playBtn) playBtn._cachedAudioUrl = audioUrl;
 
-            this.audio = new Audio(blobUrl);
+            this.audio = new Audio(audioUrl);
             this.audio.onended = () => this.resetPlayButtons();
             this.audio.onerror = () => this.resetPlayButtons();
             this.audio.play().catch(e => {
@@ -257,11 +151,7 @@ window.LingoTTS = {
 
         if (!cleanText) return;
 
-        let url = audioUrl;
-        if (!url && this.cachedAudioBlobs[cleanText]) {
-            url = URL.createObjectURL(this.cachedAudioBlobs[cleanText]);
-        }
-
+        const url = audioUrl || this.cachedAudioUrls[cleanText];
         if (url) {
             const a = document.createElement("a");
             a.href = url;

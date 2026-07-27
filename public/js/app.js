@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.8 Implementation (Autoplay Unlocked & Reliable Speech Playback)
+// Main Application Controller - LingoBot2 Ver5.5-Stable Implementation (Rollback to Ver5.5 Flow)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -78,7 +78,7 @@ window.LingoApp = {
             filterLang: "Ngôn ngữ:",
             filterLevel: "Trình độ:",
             filterAll: "Tất cả",
-            aiThinking: "AI đang suy nghĩ...",
+            aiThinking: "AI đang phân tích giọng nói...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
 
             pronounceIdleMsg: "🎙️ Hãy nói qua Micro (Vui lòng chọn câu mẫu ở trên)",
@@ -159,7 +159,7 @@ window.LingoApp = {
             filterLang: "言語:",
             filterLevel: "レベル:",
             filterAll: "すべて",
-            aiThinking: "AIが考えています...",
+            aiThinking: "AIが音声分析中です...",
             aiSummarizing: "AIがまとめています...",
 
             pronounceIdleMsg: "🎙️ マイクで話してください (上の例文から文を選択してください)",
@@ -240,7 +240,7 @@ window.LingoApp = {
             filterLang: "Language:",
             filterLevel: "Level:",
             filterAll: "All",
-            aiThinking: "AI is thinking...",
+            aiThinking: "AI is analyzing voice...",
             aiSummarizing: "AI is summarizing...",
 
             pronounceIdleMsg: "🎙️ Please speak into the mic (Select a sample above)",
@@ -281,7 +281,7 @@ window.LingoApp = {
             "カフェでの注文会話": "💡 カフェでの注文会話です！\nいらっしゃいませ！ 店内（てんない）で お召（め）し上（あ）がりですか、それとも お持（も）ち帰（かえ）りですか？",
             "レストランの予約会話": "💡 レストラン予約の会話です！\nお電話（でんわ）ありがとうございます。ご予約（よやく）の 日時（にちじ）と 人数（にんずう）を お教（おし）えいただけますか？",
             "居酒屋での注文会話": "💡 居酒屋の会話です！\nいらっしゃいませ！ まずは お飲（の）み物（もの）から お伺（うかが）いしましょうか？",
-            "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきn）と カード、どちらに なさいますか？",
+            "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきん）と カード、どちらに なさいますか？",
 
             "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
             "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（かん）させて いただけますか？",
@@ -342,7 +342,7 @@ window.LingoApp = {
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "構造改革を断行しなければ、持続可能な成長を実現することは困難でしょう。", translation: "Nếu không quyết liệt cải cách cơ cấu, rất khó đạt được tăng trưởng bền vững." },
         { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "双方の利害を調整し、双方にとって望ましい着地点を模索すべきです。", translation: "Cần điều hòa lợi ích đôi bên và tìm kiếm điểm đồng thuận mong muốn." },
         { id: 131, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "技術革新の波に伴い、従来のビジネスモデルの再構築が強く求められています。", translation: "Cùng với làn sóng đổi mới công nghệ, việc tái cấu trúc mô hình kinh doanh cũ là cấp thiết." },
-        { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく, 迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
+        { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
         { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
@@ -426,7 +426,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.8]. Autoplay unlocked & robust TTS playback.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.5-Stable]. Rollback to stable message reveal flow.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -803,11 +803,6 @@ window.LingoApp = {
     },
 
     bindEvents() {
-        // Unlock Autoplay on Any User Interaction
-        document.addEventListener("click", () => {
-            if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
-        }, { once: false });
-
         const uiLangSelect = document.getElementById("uiLangSelect");
         if (uiLangSelect) {
             uiLangSelect.addEventListener("change", (e) => {
@@ -877,10 +872,7 @@ window.LingoApp = {
 
         const sendBtn = document.getElementById("sendBtn");
         if (sendBtn) {
-            sendBtn.addEventListener("click", () => {
-                if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
-                this.handleSendMessage();
-            });
+            sendBtn.addEventListener("click", () => this.handleSendMessage());
         }
 
         const chatInput = document.getElementById("chatInput");
@@ -888,7 +880,6 @@ window.LingoApp = {
             chatInput.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
                     e.preventDefault();
-                    if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
                     window.LingoLog.add("Phím ENTER được nhấn (Đã ngăn gửi tin nhắn).");
                 }
             });
@@ -1152,8 +1143,6 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
     },
 
     startConversation() {
-        if (window.LingoTTS) window.LingoTTS.unlockAutoplay();
-
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.add("hidden");
@@ -1167,18 +1156,11 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
         const langStarters = this.instantStarters[this.targetLang] || this.instantStarters["jp 日本語"];
         const starterText = langStarters[this.scenario] || langStarters["自由会話"] || `こんにちは！${this.scenario}の 会話（かいわ）を 始（はじ）めましょう！ 何（なに）か 質問（しつもん）は ありますか？`;
 
-        const typingBubble = this.showTypingIndicator();
-
+        const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
+        
+        const playBtn = aiBubbleEl.querySelector(".btn-play");
         if (window.LingoTTS) {
-            window.LingoTTS.playWithSyncBubble(starterText, () => {
-                this.removeTypingIndicator(typingBubble);
-                const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
-                const playBtn = aiBubbleEl.querySelector(".btn-play");
-                if (playBtn) playBtn.classList.add("playing");
-            });
-        } else {
-            this.removeTypingIndicator(typingBubble);
-            this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
+            window.LingoTTS.playText(starterText, playBtn);
         }
     },
 
@@ -1259,25 +1241,18 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             });
 
             const data = await response.json();
+            this.removeTypingIndicator(typingBubble);
+
             const retrySeconds = data.retry_after_seconds || 0;
 
             if (data.reply && (data.used_model === "local-fallback" || data.is_smart_fallback)) {
                 if (this.useLocalFallback) {
                     let modelUsed = "Local";
                     window.LingoLog.add(`Sử dụng câu trả lời Local dự phòng [Model: Local]`);
-                    if (window.LingoTTS) {
-                        window.LingoTTS.playWithSyncBubble(data.reply, () => {
-                            this.removeTypingIndicator(typingBubble);
-                            const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
-                            const playBtn = aiBubbleEl.querySelector(".btn-play");
-                            if (playBtn) playBtn.classList.add("playing");
-                        });
-                    } else {
-                        this.removeTypingIndicator(typingBubble);
-                        this.appendMessage("model", data.reply, modelUsed, retrySeconds);
-                    }
+                    const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
+                    const playBtn = aiBubbleEl.querySelector(".btn-play");
+                    if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
                 } else {
-                    this.removeTypingIndicator(typingBubble);
                     if (retrySeconds > 0 && retrySeconds <= 20) {
                         window.LingoLog.add(`Gemini Rate Limit (${retrySeconds}s) -> Thể hiện thông báo đếm ngược từng giây.`);
                         this.appendCountdownPromptBubble(retrySeconds);
@@ -1292,26 +1267,19 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             if (data.reply) {
                 const reply = data.reply;
                 let modelUsed = data.display_model || data.used_model || "Gemini";
-                window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}] -> Preloading TTS Audio for synced bubble reveal.`);
+                window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}]`);
                 
-                if (window.LingoTTS) {
-                    // PRELOAD AUDIO FIRST & REVEAL BUBBLE SYNCED WITH SPEECH PLAYBACK
-                    window.LingoTTS.playWithSyncBubble(reply, () => {
-                        this.removeTypingIndicator(typingBubble);
-                        const aiBubbleEl = this.appendMessage("model", reply, modelUsed, 0);
-                        const playBtn = aiBubbleEl.querySelector(".btn-play");
-                        if (playBtn) playBtn.classList.add("playing");
-                    });
-                } else {
-                    this.removeTypingIndicator(typingBubble);
-                    this.appendMessage("model", reply, modelUsed, 0);
-                }
+                const aiBubbleEl = this.appendMessage("model", reply, modelUsed, 0);
 
                 if ((data.api_key_required || data.api_key_invalid) && !apiKey) {
                     this.showSetupPromptRow();
                 }
+
+                const playBtn = aiBubbleEl.querySelector(".btn-play");
+                if (window.LingoTTS) {
+                    window.LingoTTS.playText(reply, playBtn);
+                }
             } else {
-                this.removeTypingIndicator(typingBubble);
                 if (data.api_key_required || data.api_key_invalid) {
                     this.showSetupPromptRow();
                     const errMsg = data.api_key_invalid 
