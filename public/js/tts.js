@@ -1,264 +1,268 @@
-// TTS Engine Module - LingoBot2 Ver3.1 Implementation (Preserve Numbers & Exact Sentence Text for TTS)
+// Text-to-Speech (TTS) Module - LingoBot2 Ver5.7 Implementation
+// Audio Preload & Synchronized Bubble Reveal with Speech Playback
 window.LingoTTS = {
-    audioElement: null,
-    isPlaying: false,
-    currentlyPlayingBtn: null,
-
-    // Abbreviated TTS Model map for header badge
-    ttsBadgeMap: {
-        "browser-native": "General",
-        "ja-JP-Chirp3-HD-F": "EdgeTTS(♀)",
-        "ja-JP-Chirp3-HD-M": "EdgeTTS(♂)",
-        "en-US-Chirp3-HD-F": "EN-EdgeTTS(♀)",
-        "en-US-Chirp3-HD-M": "EN-EdgeTTS(♂)",
-        "ja-JP-Neural2-B": "JP-EdgeTTS(♂)",
-        "en-US-Neural2-F": "EN-EdgeTTS(♀)",
-        "vi-VN-Neural2-A": "VN-EdgeTTS(♀)"
-    },
-
-    updateActiveTtsBadge(modelValue) {
-        const badgeEl = document.getElementById("activeTtsBadge");
-        if (!badgeEl) return;
-        const abbr = this.ttsBadgeMap[modelValue] || modelValue;
-        badgeEl.textContent = abbr;
-
-        if (modelValue === "browser-native") {
-            badgeEl.style.background = "#fef3c7";
-            badgeEl.style.color = "#d97706";
-            badgeEl.style.borderColor = "#fde68a";
-        } else {
-            badgeEl.style.background = "#e0f2fe";
-            badgeEl.style.color = "#0284c7";
-            badgeEl.style.borderColor = "#bae6fd";
-        }
-    },
+    audio: null,
+    activePlayBtn: null,
+    cachedAudioUrls: {},
 
     stop() {
-        if (this.audioElement) {
-            this.audioElement.pause();
-            this.audioElement.currentTime = 0;
-            this.audioElement = null;
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.currentTime = 0;
+            this.audio = null;
         }
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
-        this.isPlaying = false;
-        this.currentlyPlayingBtn = null;
-        
-        // Reset all play buttons UI back to "▶ 再生" / "▶ Phát"
-        const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
-        document.querySelectorAll(".btn-play, .btn-sample-play").forEach(btn => {
+        this.resetPlayButtons();
+        if (window.LingoLog) window.LingoLog.add("Đã dừng phát âm thanh TTS.");
+    },
+
+    resetPlayButtons() {
+        const uiLang = window.LingoApp ? window.LingoApp.uiLang : "tiếng Việt";
+        const dict = (window.LingoApp && window.LingoApp.i18n[uiLang]) || {};
+        const defaultText = dict.btnPlay || "▶ Phát";
+
+        document.querySelectorAll(".btn-play").forEach(btn => {
             btn.classList.remove("playing");
-            btn.textContent = dict.btnPlay || "▶ Phát";
+            btn.textContent = defaultText;
         });
-        window.LingoLog.add("Đã dừng phát âm thanh.");
+        this.activePlayBtn = null;
     },
 
-    /**
-     * Clean text specifically for TTS reading (Ver3.1):
-     * 1. Strips out ONLY explicit AI feedback / advice lines (starting with 💡, 📝, Sửa lỗi...).
-     * 2. Preserves ALL numbers (e.g. 10000mAh, 3列, 15番, 14時30分) and text characters.
-     * 3. Removes ONLY furigana ruby annotations in parentheses (e.g. "荷物（にもつ）" -> "荷物").
-     */
-    cleanTextForTTS(text) {
-        if (!text) return "";
-
-        // 1. Remove UI Advice / Correction / Feedback lines
-        let lines = text.split("\n");
-        let speechLines = [];
-
-        for (let line of lines) {
-            let trimmed = line.trim();
-            if (!trimmed) continue;
-
-            // Skip ONLY advice / feedback lines starting with markers, emojis or correction terms
-            if (/^(💡|📝|🔧|✨|👍|⚠️|Sửa lỗi|Nhận xét|Lời khuyên|Câu của bạn|Bạn nên|Lỗi:|Note:|Feedback:)/i.test(trimmed)) {
-                continue;
-            }
-
-            speechLines.push(trimmed);
-        }
-
-        let speechText = speechLines.join(" ");
-        if (!speechText || !speechText.trim()) {
-            speechText = text; // Fallback if all lines were filtered
-        }
-
-        // 2. Strip Ruby annotations: "荷物（にもつ）" -> "荷物", "14時（じ）" -> "14時"
-        // PRESERVES all numbers, units (mAh, 番, 時, 分), Kanji, Kana, and English characters!
-        speechText = speechText
-            .replace(/([\u3400-\u4dbf\u4e00-\u9fff0-9A-Za-z]+)\s*[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g, '$1')
-            .replace(/[（\(][\u3040-\u309f\u30a0-\u30ff\s]+[）\)]/g, '') // Any remaining isolated furigana parens
-            .replace(/【.*?】/g, '') // Square brackets
-            .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ''); // Emojis
-
-        return speechText.trim();
-    },
-
-    async playText(text, playBtnElement = null) {
-        if (!text) return;
-
-        // TOGGLE BEHAVIOR: If currently playing AND user clicks the SAME play button -> Stop audio & reset to start!
-        if (this.isPlaying && playBtnElement && playBtnElement === this.currentlyPlayingBtn) {
-            window.LingoLog.add("Dừng phát âm thanh (Nhấn nút khi đang phát -> Tạm dừng & Reset từ đầu).");
-            this.stop();
-            return;
-        }
-
-        // Otherwise stop any existing audio first, then prepare for fresh playback
+    // PRELOAD AUDIO AND EXECUTE SYNCED REVEAL AT EXACT PLAYBACK START
+    async playWithSyncBubble(text, playCallback) {
         this.stop();
 
-        const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát", btnPlaying: "▶ 再生中" };
+        const cleanText = (text || "")
+            .replace(/💡.*?\n/g, '') // Filter out 💡 advice lines from TTS
+            .replace(/（.*?）|\(.*?\)/g, '') // Filter out furigana in parentheses
+            .replace(/<ruby>.*?<rt>(.*?)<\/rt><\/ruby>/g, '$1')
+            .trim();
 
-        if (playBtnElement) {
-            playBtnElement.classList.add("playing");
-            playBtnElement.textContent = dict.btnPlaying || "▶ 再生中";
-            this.currentlyPlayingBtn = playBtnElement;
+        if (!cleanText) {
+            if (playCallback) playCallback();
+            return;
         }
 
         const ttsSelect = document.getElementById("ttsModelSelect");
-        const selectedVoice = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
-        this.updateActiveTtsBadge(selectedVoice);
+        const voiceModel = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
 
-        // Get fully cleaned text: preserves numbers & units, removes advice & furigana parens
-        const cleanText = this.cleanTextForTTS(text);
+        let audioUrl = this.cachedAudioUrls[cleanText];
+        let hasExecutedCallback = false;
 
-        if (!cleanText) {
-            window.LingoLog.add("Bỏ qua đọc TTS: Không tìm thấy câu hội thoại chính sau khi lọc lời khuyên.");
-            if (playBtnElement) {
-                playBtnElement.classList.remove("playing");
-                playBtnElement.textContent = dict.btnPlay || "▶ Phát";
-                this.currentlyPlayingBtn = null;
+        const executeOnceCallback = () => {
+            if (!hasExecutedCallback) {
+                hasExecutedCallback = true;
+                if (playCallback) playCallback();
+            }
+        };
+
+        if (audioUrl) {
+            this.audio = new Audio(audioUrl);
+            this.audio.onplay = () => executeOnceCallback();
+            this.audio.onended = () => this.resetPlayButtons();
+            this.audio.onerror = () => executeOnceCallback();
+
+            try {
+                await this.audio.play();
+            } catch (err) {
+                console.warn("Audio autoplay blocked or failed:", err);
+                executeOnceCallback();
             }
             return;
         }
 
-        // Option A: User Explicitly Selected "General (Web Speech API)"
-        if (selectedVoice === "browser-native") {
-            window.LingoLog.add(`Phát âm thanh [Voice: General (Web Speech API)]: "${cleanText.substring(0, 30)}..."`);
-            this.playBrowserNativeSpeech(cleanText, playBtnElement);
-            return;
-        }
-
-        // Option B: EdgeTTS API Call via Render Backend (/api/tts)
-        window.LingoLog.add(`Yêu cầu EdgeTTS Engine [Voice: ${selectedVoice}]: "${cleanText.substring(0, 40)}..."`);
-
+        // Fetch Audio Stream from Server
         try {
-            const reqPayload = {
-                text: cleanText,
-                voice_name: selectedVoice
-            };
-
             const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
-            if (apiKey && apiKey.length > 5) {
-                reqPayload.api_key = apiKey;
-            }
-
             const response = await fetch("/api/tts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(reqPayload)
+                body: JSON.stringify({
+                    text: cleanText,
+                    voice: voiceModel,
+                    api_key: apiKey
+                })
             });
 
-            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(`TTS HTTP status ${response.status}`);
+            }
 
-            if (data.audio_url) {
-                this.audioElement = new Audio(data.audio_url);
-                this.isPlaying = true;
-                
-                if (playBtnElement) {
-                    playBtnElement._cachedAudioUrl = data.audio_url;
-                }
+            const blob = await response.blob();
+            if (blob.size < 500) {
+                throw new Error("TTS payload too small");
+            }
 
-                this.audioElement.onended = () => {
-                    this.isPlaying = false;
-                    this.currentlyPlayingBtn = null;
-                    if (playBtnElement) {
-                        playBtnElement.classList.remove("playing");
-                        playBtnElement.textContent = dict.btnPlay || "▶ Phát";
-                    }
-                };
-                
-                this.audioElement.onerror = () => {
-                    window.LingoLog.add("Lỗi phát tệp Audio EdgeTTS -> Chuyển sang General trình duyệt dự phòng...");
-                    this.playBrowserNativeSpeech(cleanText, playBtnElement);
-                };
+            audioUrl = URL.createObjectURL(blob);
+            this.cachedAudioUrls[cleanText] = audioUrl;
 
-                await this.audioElement.play();
-                window.LingoLog.add(`Phát âm thanh EdgeTTS thành công! [Model: ${data.model_used || selectedVoice}]`);
-            } else if (data.fallback_browser) {
-                window.LingoLog.add(`EdgeTTS API (${data.error || 'Tự động dự phòng'}). Chuyển sang General trình duyệt...`);
-                this.playBrowserNativeSpeech(cleanText, playBtnElement);
-            } else {
-                window.LingoLog.add(`Lỗi TTS: ${data.error}. Chuyển sang General trình duyệt...`);
-                this.playBrowserNativeSpeech(cleanText, playBtnElement);
+            this.audio = new Audio(audioUrl);
+            
+            // SYNCHRONIZED REVEAL: Trigger bubble creation on exact audio play event
+            this.audio.onplay = () => executeOnceCallback();
+            this.audio.onended = () => this.resetPlayButtons();
+            this.audio.onerror = () => executeOnceCallback();
+
+            // Safety timeout: If audio play is blocked or takes longer than 2.5s, reveal bubble anyway
+            setTimeout(() => executeOnceCallback(), 2500);
+
+            try {
+                await this.audio.play();
+            } catch (playErr) {
+                console.warn("Autoplay interaction requirement triggered:", playErr);
+                executeOnceCallback();
             }
         } catch (err) {
-            window.LingoLog.add(`Lỗi kết nối EdgeTTS: ${err.message}. Chuyển sang General trình duyệt...`);
-            this.playBrowserNativeSpeech(cleanText, playBtnElement);
+            console.warn("Preload TTS Server Error, falling back to Web Speech:", err);
+            this.speakWebSpeechFallback(cleanText, executeOnceCallback);
         }
     },
 
-    playBrowserNativeSpeech(text, playBtnElement = null) {
-        this.updateActiveTtsBadge("browser-native");
+    playText(text, playBtn = null) {
+        this.stop();
 
+        const cleanText = (text || "")
+            .replace(/💡.*?\n/g, '')
+            .replace(/（.*?）|\(.*?\)/g, '')
+            .replace(/<ruby>.*?<rt>(.*?)<\/rt><\/ruby>/g, '$1')
+            .trim();
+
+        if (!cleanText) return;
+
+        const uiLang = window.LingoApp ? window.LingoApp.uiLang : "tiếng Việt";
+        const dict = (window.LingoApp && window.LingoApp.i18n[uiLang]) || {};
+        const playingText = dict.btnPlaying || "▶ 再生中";
+
+        if (playBtn) {
+            this.activePlayBtn = playBtn;
+            playBtn.classList.add("playing");
+            playBtn.textContent = playingText;
+        }
+
+        const ttsSelect = document.getElementById("ttsModelSelect");
+        const voiceModel = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
+
+        let audioUrl = this.cachedAudioUrls[cleanText];
+
+        if (audioUrl) {
+            this.audio = new Audio(audioUrl);
+            this.audio.onended = () => this.resetPlayButtons();
+            this.audio.onerror = () => this.resetPlayButtons();
+            this.audio.play().catch(e => {
+                console.warn("Play cached audio error:", e);
+                this.resetPlayButtons();
+            });
+            return;
+        }
+
+        const apiKey = window.LingoApp ? window.LingoApp.getApiKey() : "";
+        fetch("/api/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: cleanText,
+                voice: voiceModel,
+                api_key: apiKey
+            })
+        })
+        .then(res => res.blob())
+        .then(blob => {
+            if (blob.size < 500) throw new Error("TTS Blob payload too small");
+            audioUrl = URL.createObjectURL(blob);
+            this.cachedAudioUrls[cleanText] = audioUrl;
+
+            if (playBtn) playBtn._cachedAudioUrl = audioUrl;
+
+            this.audio = new Audio(audioUrl);
+            this.audio.onended = () => this.resetPlayButtons();
+            this.audio.onerror = () => this.resetPlayButtons();
+            this.audio.play().catch(e => {
+                console.warn("Play audio blob error:", e);
+                this.resetPlayButtons();
+            });
+        })
+        .catch(err => {
+            console.warn("Server TTS Error, falling back to Web Speech:", err);
+            this.speakWebSpeechFallback(cleanText, () => {});
+        });
+    },
+
+    speakWebSpeechFallback(text, onStartCallback = null) {
         if (!('speechSynthesis' in window)) {
-            alert("Trình duyệt của bạn không hỗ trợ Web SpeechSynthesis API.");
-            if (playBtnElement) {
-                const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
-                playBtnElement.classList.remove("playing");
-                playBtnElement.textContent = dict.btnPlay || "▶ Phát";
-                this.currentlyPlayingBtn = null;
-            }
+            if (onStartCallback) onStartCallback();
             return;
         }
 
         window.speechSynthesis.cancel();
+
         const utterance = new SpeechSynthesisUtterance(text);
-        
         const targetLang = window.LingoApp ? window.LingoApp.targetLang : "jp 日本語";
-        if (targetLang.includes("日本語")) utterance.lang = "ja-JP";
-        else if (targetLang.includes("English")) utterance.lang = "en-US";
-        else utterance.lang = "vi-VN";
 
-        utterance.rate = 0.95;
-        
-        utterance.onend = () => {
-            this.isPlaying = false;
-            this.currentlyPlayingBtn = null;
-            if (playBtnElement) {
-                const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
-                playBtnElement.classList.remove("playing");
-                playBtnElement.textContent = dict.btnPlay || "▶ Phát";
-            }
+        if (targetLang.includes("日本語")) {
+            utterance.lang = 'ja-JP';
+        } else if (targetLang.includes("English") || targetLang.includes("us")) {
+            utterance.lang = 'en-US';
+        } else if (targetLang.includes("Việt") || targetLang.includes("vn")) {
+            utterance.lang = 'vi-VN';
+        }
+
+        utterance.onstart = () => {
+            if (onStartCallback) onStartCallback();
         };
 
-        utterance.onerror = (e) => {
-            console.error("SpeechSynthesis error:", e);
-            this.isPlaying = false;
-            this.currentlyPlayingBtn = null;
-            if (playBtnElement) {
-                const dict = window.LingoApp ? (window.LingoApp.i18n[window.LingoApp.uiLang] || window.LingoApp.i18n["tiếng Việt"]) : { btnPlay: "▶ Phát" };
-                playBtnElement.classList.remove("playing");
-                playBtnElement.textContent = dict.btnPlay || "▶ Phát";
-            }
+        utterance.onend = () => this.resetPlayButtons();
+        utterance.onerror = () => {
+            if (onStartCallback) onStartCallback();
+            this.resetPlayButtons();
         };
 
-        this.isPlaying = true;
         window.speechSynthesis.speak(utterance);
     },
 
-    downloadAudio(text, cachedUrl = null) {
-        if (cachedUrl && cachedUrl.startsWith("data:audio")) {
+    updateActiveTtsBadge(modelName) {
+        const badge = document.getElementById("activeTtsBadge");
+        if (!badge) return;
+
+        if (modelName === "browser-native") {
+            badge.textContent = "Gen";
+            badge.style.background = "#e0e7ff";
+            badge.style.color = "#3730a3";
+        } else if (modelName.includes("Chirp3")) {
+            const gender = modelName.endsWith("-F") ? "♀" : "♂";
+            const lang = modelName.startsWith("ja") ? "JP" : "EN";
+            badge.textContent = `EdgeTTS ${lang}(${gender})`;
+            badge.style.background = "#f0f9ff";
+            badge.style.color = "#0369a1";
+        } else if (modelName.includes("Neural2")) {
+            badge.textContent = "EdgeTTS VN(♀)";
+            badge.style.background = "#f0f9ff";
+            badge.style.color = "#0369a1";
+        } else {
+            badge.textContent = "Gen";
+            badge.style.background = "#f1f5f9";
+            badge.style.color = "#334155";
+        }
+    },
+
+    downloadAudio(text, audioUrl = null) {
+        const cleanText = (text || "")
+            .replace(/💡.*?\n/g, '')
+            .replace(/（.*?）|\(.*?\)/g, '')
+            .replace(/<ruby>.*?<rt>(.*?)<\/rt><\/ruby>/g, '$1')
+            .trim();
+
+        if (!cleanText) return;
+
+        const url = audioUrl || this.cachedAudioUrls[cleanText];
+        if (url) {
             const a = document.createElement("a");
-            a.href = cachedUrl;
-            a.download = `lingobot_tts_${Date.now()}.mp3`;
+            a.href = url;
+            a.download = `lingobot_speech_${Date.now()}.mp3`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            window.LingoLog.add("Đã tải xuống tệp âm thanh MP3 (EdgeTTS).");
+            if (window.LingoLog) window.LingoLog.add("Đã tải xuống tệp MP3 về máy.");
         } else {
-            alert("Tệp âm thanh MP3 chỉ khả dụng khi phát bằng EdgeTTS.\n(音声MP3ファイルはEdgeTTS再生時のみダウンロード可能です)");
+            alert("Tệp MP3 đang được khởi tạo, vui lòng nhấn phát âm thanh 1 lần trước khi tải về.");
         }
     }
 };

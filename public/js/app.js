@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.6 Implementation (Removed Lang Guide & Show More Scenarios Toggle)
+// Main Application Controller - LingoBot2 Ver5.7 Implementation (Preloaded Synced Reveal of AI Chat Bubble)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -78,7 +78,7 @@ window.LingoApp = {
             filterLang: "Ngôn ngữ:",
             filterLevel: "Trình độ:",
             filterAll: "Tất cả",
-            aiThinking: "AI đang phân tích giọng nói...",
+            aiThinking: "AI đang suy nghĩ...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
 
             pronounceIdleMsg: "🎙️ Hãy nói qua Micro (Vui lòng chọn câu mẫu ở trên)",
@@ -159,7 +159,7 @@ window.LingoApp = {
             filterLang: "言語:",
             filterLevel: "レベル:",
             filterAll: "すべて",
-            aiThinking: "AIが音声分析中です...",
+            aiThinking: "AIが考えています...",
             aiSummarizing: "AIがまとめています...",
 
             pronounceIdleMsg: "🎙️ マイクで話してください (上の例文から文を選択してください)",
@@ -240,7 +240,7 @@ window.LingoApp = {
             filterLang: "Language:",
             filterLevel: "Level:",
             filterAll: "All",
-            aiThinking: "AI is analyzing voice...",
+            aiThinking: "AI is thinking...",
             aiSummarizing: "AI is summarizing...",
 
             pronounceIdleMsg: "🎙️ Please speak into the mic (Select a sample above)",
@@ -426,7 +426,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.6]. Removed Lang Guide & Show More Scenarios Toggle.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.7]. Audio-synced bubble reveal mode.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -1156,11 +1156,18 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
         const langStarters = this.instantStarters[this.targetLang] || this.instantStarters["jp 日本語"];
         const starterText = langStarters[this.scenario] || langStarters["自由会話"] || `こんにちは！${this.scenario}の 会話（かいわ）を 始（はじ）めましょう！ 何（なに）か 質問（しつもん）は ありますか？`;
 
-        const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
-        
-        const playBtn = aiBubbleEl.querySelector(".btn-play");
+        const typingBubble = this.showTypingIndicator();
+
         if (window.LingoTTS) {
-            window.LingoTTS.playText(starterText, playBtn);
+            window.LingoTTS.playWithSyncBubble(starterText, () => {
+                this.removeTypingIndicator(typingBubble);
+                const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
+                const playBtn = aiBubbleEl.querySelector(".btn-play");
+                if (playBtn) playBtn.classList.add("playing");
+            });
+        } else {
+            this.removeTypingIndicator(typingBubble);
+            this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
         }
     },
 
@@ -1241,18 +1248,25 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             });
 
             const data = await response.json();
-            this.removeTypingIndicator(typingBubble);
-
             const retrySeconds = data.retry_after_seconds || 0;
 
             if (data.reply && (data.used_model === "local-fallback" || data.is_smart_fallback)) {
                 if (this.useLocalFallback) {
                     let modelUsed = "Local";
                     window.LingoLog.add(`Sử dụng câu trả lời Local dự phòng [Model: Local]`);
-                    const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
-                    const playBtn = aiBubbleEl.querySelector(".btn-play");
-                    if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
+                    if (window.LingoTTS) {
+                        window.LingoTTS.playWithSyncBubble(data.reply, () => {
+                            this.removeTypingIndicator(typingBubble);
+                            const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
+                            const playBtn = aiBubbleEl.querySelector(".btn-play");
+                            if (playBtn) playBtn.classList.add("playing");
+                        });
+                    } else {
+                        this.removeTypingIndicator(typingBubble);
+                        this.appendMessage("model", data.reply, modelUsed, retrySeconds);
+                    }
                 } else {
+                    this.removeTypingIndicator(typingBubble);
                     if (retrySeconds > 0 && retrySeconds <= 20) {
                         window.LingoLog.add(`Gemini Rate Limit (${retrySeconds}s) -> Thể hiện thông báo đếm ngược từng giây.`);
                         this.appendCountdownPromptBubble(retrySeconds);
@@ -1267,19 +1281,26 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             if (data.reply) {
                 const reply = data.reply;
                 let modelUsed = data.display_model || data.used_model || "Gemini";
-                window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}]`);
+                window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}] -> Preloading TTS Audio for synced bubble reveal.`);
                 
-                const aiBubbleEl = this.appendMessage("model", reply, modelUsed, 0);
+                if (window.LingoTTS) {
+                    // PRELOAD AUDIO FIRST: Keep typing indicator, reveal bubble synced with playback start
+                    window.LingoTTS.playWithSyncBubble(reply, () => {
+                        this.removeTypingIndicator(typingBubble);
+                        const aiBubbleEl = this.appendMessage("model", reply, modelUsed, 0);
+                        const playBtn = aiBubbleEl.querySelector(".btn-play");
+                        if (playBtn) playBtn.classList.add("playing");
+                    });
+                } else {
+                    this.removeTypingIndicator(typingBubble);
+                    this.appendMessage("model", reply, modelUsed, 0);
+                }
 
                 if ((data.api_key_required || data.api_key_invalid) && !apiKey) {
                     this.showSetupPromptRow();
                 }
-
-                const playBtn = aiBubbleEl.querySelector(".btn-play");
-                if (window.LingoTTS) {
-                    window.LingoTTS.playText(reply, playBtn);
-                }
             } else {
+                this.removeTypingIndicator(typingBubble);
                 if (data.api_key_required || data.api_key_invalid) {
                     this.showSetupPromptRow();
                     const errMsg = data.api_key_invalid 
