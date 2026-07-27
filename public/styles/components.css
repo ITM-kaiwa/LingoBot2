@@ -1,37 +1,6 @@
-/* UI Components & Ruby Styling - LingoBot2 Ver4.4 (Restored Classic Colors & High Contrast Ruby) */
+/* Component Specific Styles - LingoBot2 Ver4.8 Implementation (Darker Slate Gray Background for Pronunciation Mode Filter Bar) */
 
-/* Button active animation for component buttons */
-.btn-purple {
-    background: linear-gradient(135deg, #a855f7, #7e22ce) !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(126, 34, 206, 0.3) !important;
-}
-
-.btn-purple:hover {
-    background: linear-gradient(135deg, #9333ea, #6b21a8) !important;
-}
-
-.btn-advanced {
-    padding: 4px 10px;
-    border-radius: 14px;
-    border: 1.5px solid #cbd5e1;
-    background: #ffffff;
-    color: #334155;
-    font-size: 0.78rem;
-    font-weight: 800;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.btn-advanced.active {
-    background: #0f172a;
-    color: #ffffff;
-    border-color: #0f172a;
-}
-
-/* Chat Rows & Bubbles - RESTORED CLASSIC COLOR SYSTEM */
+/* Chat Row & Bubble Layout */
 .chat-row {
     display: flex;
     width: 100%;
@@ -46,124 +15,124 @@
     justify-content: flex-start;
 }
 
+/* Chat Message Bubbles */
 .chat-bubble {
-    max-width: 88%;
+    max-width: 82%;
     padding: 12px 16px;
-    border-radius: 20px;
+    border-radius: 18px;
     font-size: 0.95rem;
-    line-height: 1.6;
+    line-height: 1.5;
     position: relative;
     word-break: break-word;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* User Message Bubble - Restored Vivid Orange Gradient */
+/* Restored Vivid User Bubble Gradient (#ea580c) with White Text & High Contrast Ruby */
 .user-row .chat-bubble {
     background: linear-gradient(135deg, #ea580c, #c2410c) !important;
     color: #ffffff !important;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25) !important;
 }
 
-/* AI Message Bubble - Restored Soft White Card */
+.user-row .chat-bubble ruby rt {
+    color: #ffedd5 !important;
+    font-weight: 700;
+}
+
+/* Restored Classic AI White Card Bubble */
 .ai-row .chat-bubble {
     background: #ffffff !important;
     color: #1c1917 !important;
+    border: 1px solid #cbd5e1;
     border-bottom-left-radius: 4px;
-    border: 1.5px solid #f3e8de !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
 }
 
-/* OVERHAULED RUBY CSS: NO GAPS BETWEEN CHARACTERS WHEN FURIGANA IS LONGER THAN KANJI */
-ruby {
-    display: inline-ruby !important;
-    ruby-align: center !important;
-    ruby-position: over !important;
-    line-height: 2.1 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-rt {
-    font-size: 0.58em !important;
+.ai-row .chat-bubble ruby rt {
     color: #ea580c !important;
-    font-weight: 700 !important;
-    line-height: 1.0 !important;
-    text-align: center !important;
-    user-select: none;
-    -webkit-user-select: none;
+    font-weight: 700;
 }
 
-.user-row rt {
-    color: #ffedd5 !important;
+.bubble-text {
+    margin-bottom: 6px;
 }
 
 .message-meta {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 6px;
-    padding-top: 4px;
-    border-top: 1px solid rgba(0,0,0,0.05);
     font-size: 0.72rem;
-    opacity: 0.85;
+    color: var(--text-secondary);
+    gap: 8px;
 }
 
+.user-row .message-meta {
+    color: #ffedd5;
+}
+
+/* Audio Control Buttons inside AI Bubbles */
 .audio-controls {
     display: flex;
     gap: 4px;
 }
 
 .audio-btn {
-    padding: 2px 8px;
-    border-radius: 10px;
-    border: none;
-    background: #f5f5f4;
-    color: #44403c;
+    padding: 3px 8px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
     font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
+    color: #334155;
 }
 
-/* Scenario Card inside Chat Bubble */
-.scenario-prompt-bubble {
-    background: #fff7ed !important;
-    border: 1.5px solid #fed7aa !important;
+.audio-btn.playing {
+    background: #ea580c;
+    color: #ffffff;
+    border-color: #ea580c;
+}
+
+/* Scenario & Setup Prompt Card inside Chat Bubble */
+.scenario-prompt-bubble, .setup-prompt-bubble {
+    background: #ffffff !important;
+    border: 1.5px solid #fdba74 !important;
+    border-left: 5px solid #ea580c !important;
     width: 100%;
-    max-width: 100% !important;
+    max-width: 100%;
 }
 
-.scenario-title {
+.scenario-title, .setup-title {
     font-weight: 800;
-    font-size: 0.98rem;
-    color: #c2410c;
-    margin-bottom: 10px;
+    color: #ea580c;
+    font-size: 1.02rem;
+    margin-bottom: 12px;
 }
 
 .selection-group {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .selection-label {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    color: #78350f;
-    margin-bottom: 4px;
+    color: #44403c;
+    margin-bottom: 6px;
 }
 
 .pill-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
 }
 
 .pill-opt {
-    padding: 5px 11px;
+    padding: 5px 12px;
     border-radius: 16px;
-    border: 1px solid #fed7aa;
-    background: #ffffff;
-    color: #9a3412;
-    font-size: 0.78rem;
-    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
     cursor: pointer;
 }
 
@@ -171,21 +140,7 @@ rt {
     background: #ea580c;
     color: #ffffff;
     border-color: #ea580c;
-}
-
-.cat-block {
-    margin-bottom: 8px;
-    background: #ffffff;
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid #ffedd5;
-}
-
-.cat-title {
-    font-size: 0.78rem;
-    font-weight: 800;
-    color: #ea580c;
-    margin-bottom: 4px;
+    font-weight: 700;
 }
 
 .btn-start-chat {
@@ -193,91 +148,150 @@ rt {
     padding: 10px;
     border-radius: 20px;
     border: none;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: var(--primary-gradient);
     color: #ffffff;
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
-    margin-top: 4px;
 }
 
-/* Pronunciation Viewport */
-.pronounce-card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 16px;
-    border: 1px solid #f3e8de;
-}
-
-.pronounce-filter-bar {
+/* Categorized Scenarios in Selection Card */
+.scenario-categories-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 10px;
-    margin: 10px 0;
-    padding: 8px;
-    background: #fafaf9;
+}
+
+.cat-block {
+    background: #fcf7f2;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid #fed7aa;
+}
+
+.cat-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #ea580c;
+    margin-bottom: 6px;
+}
+
+/* PRONUNCIATION PRACTICE VIEW - DARKER SLATE GRAY BACKGROUND (#e2e8f0) MATCHING CHAT VIEWPORT */
+.pronounce-viewport {
+    padding: 16px;
+    background-color: var(--bg-chat-dark-gray) !important; /* Darker Slate Gray (#e2e8f0) */
+}
+
+.pronounce-card {
+    background: var(--bg-chat-dark-gray) !important; /* Darker Gray background matching chat viewport */
+    border-radius: 18px;
+    padding: 16px;
+    border: 1px solid #cbd5e1;
+}
+
+.pronounce-header h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.pronounce-header p {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 14px;
+}
+
+/* PRONUNCIATION FILTER BAR - DARK SLATE GRAY CONTAINER (#cbd5e1 / #e2e8f0) */
+.pronounce-filter-bar {
+    background: #cbd5e1 !important; /* Dark Slate Gray background matching chat viewport */
+    padding: 10px 14px;
     border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #94a3b8;
 }
 
 .filter-group {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .filter-chip {
-    padding: 3px 9px;
-    border-radius: 12px;
-    border: 1px solid #e7e5e4;
+    padding: 4px 10px;
+    border-radius: 14px;
+    border: 1px solid #94a3b8;
     background: #ffffff;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 700;
+    color: #334155;
     cursor: pointer;
 }
 
 .filter-chip.active {
-    background: #0284c7;
-    color: #ffffff;
-    border-color: #0284c7;
+    background: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #ea580c !important;
+}
+
+/* Sample Sentences List - Clean White Cards over Dark Gray Background */
+.sample-sentences-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .sample-sentence-item {
-    padding: 12px;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1;
     border-radius: 14px;
-    border: 1px solid #f3e8de;
-    margin-bottom: 8px;
-    background: #ffffff;
+    padding: 12px 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.sentence-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
 }
 
 .category-tag {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 800;
     color: #ea580c;
     background: #fff7ed;
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 8px;
 }
 
 .sentence-main {
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
-    margin: 6px 0;
+    color: #1c1917;
+    margin-bottom: 4px;
 }
 
 .sentence-sub {
     font-size: 0.82rem;
-    color: #78716c;
+    color: #64748b;
+    margin-bottom: 10px;
 }
 
 .sentence-actions {
     display: flex;
     gap: 6px;
-    margin-top: 8px;
 }
 
 .btn-sample {
-    padding: 5px 11px;
+    padding: 5px 12px;
     border-radius: 14px;
     border: none;
     font-size: 0.78rem;
@@ -285,19 +299,29 @@ rt {
     cursor: pointer;
 }
 
-.btn-sample-play { background: #e0f2fe; color: #0369a1; }
-.btn-sample-record { background: #ffedd5; color: #ea580c; }
+.btn-sample-play {
+    background: #e0f2fe;
+    color: #0369a1;
+}
 
-/* Modal Backdrops & Cards */
+.btn-sample-record {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+/* Modal Styling */
 .modal-backdrop {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,0.5);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     z-index: 100;
-    padding: 14px;
+    padding: 16px;
 }
 
 .modal-backdrop.hidden {
@@ -312,43 +336,58 @@ rt {
     max-height: 85vh;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     overflow: hidden;
 }
 
+.modal-large {
+    max-width: 800px;
+}
+
 .modal-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid #f3e8de;
+    padding: 14px 20px;
+    border-bottom: 1px solid #cbd5e1;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.modal-body {
-    padding: 16px;
-    overflow-y: auto;
-    flex: 1;
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1c1917;
 }
 
-.modal-footer {
-    padding: 12px 18px;
-    border-top: 1px solid #f3e8de;
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .log-console {
     background: #0f172a;
     color: #38bdf8;
-    padding: 12px;
+    padding: 14px;
     border-radius: 12px;
     font-family: monospace;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     white-space: pre-wrap;
-    max-height: 380px;
+    max-height: 50vh;
     overflow-y: auto;
 }
 
-.hidden {
-    display: none !important;
+.modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #cbd5e1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }

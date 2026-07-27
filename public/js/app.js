@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.7 Implementation (Language Fonts: UDP Gothic / UD Digi Kyokasho NK-R / Times New Roman & 3s Silence Auto-OFF & Top Status Banner for Pronunciation Mode)
+// Main Application Controller - LingoBot2 Ver4.8 Implementation (Dark Slate Gray Background for Pronunciation Mode Filter Bar)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -275,7 +275,7 @@ window.LingoApp = {
             "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
             "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（こうかん）させて いただけますか？",
             "会議での意見表明会話": "💡 会議の会話です！\nそれでは、次（つぎ）の アジェンダについて 議論（ぎろん）を 始（はじ）めます。ご意見（いけん）の ある方（かた）は いらっしゃいますか？",
-            "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうしわけ）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
+            "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうし分け）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
             "採用面接の会話": "💡 採用面接の会話です！\n本日は 面接（めんせつ）に お越しいただき ありがとうございます。まず 簡単（かんたん）な 自己PR（じこピーアール）から お願（ねが）いできますか？",
 
             "病院・薬局での会話": "💡 病院・薬局の会話です！\nこんにちは。今日（きょう）は どのような 症状（しょうじょう）が ございますか？",
@@ -302,7 +302,7 @@ window.LingoApp = {
         { id: 102, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "この電車（でんしゃ）は新宿（しんじゅく）に行（い）きますか。", translation: "Tàu này có đi Shinjuku không ạ?" },
         { id: 103, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "おすすめのメニューは何（なに）ですか。", translation: "Món ăn được đề xuất là món gì ạ?" },
         { id: 104, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "私（わたし）の 趣味（しゅみ）は 映画（えいが）を 見（み）ることです。", translation: "Sở thích của tôi là xem phim." },
-        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎週（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
+        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎年（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
         { id: 106, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "お会計（かいけい）を別々（べつべつ）にお願（ねが）いします。", translation: "Làm ơn tính tiền riêng cho chúng tôi." },
         { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "写真（しゃしん）を撮（と）っていただけますか。", translation: "Bạn có thể chụp giúp tôi một tấm hình được không?" },
         { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "トイレはどこにありますか。", translation: "Nhà vệ sinh ở đâu vậy ạ?" },
@@ -399,7 +399,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.7]. Fonts: UDP Gothic / UD Digi Kyokasho NK-R / Times New Roman & 3s Silence Auto-OFF.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.8]. Dark Slate Gray Background for Pronunciation Mode Filter Bar.");
     },
 
     openFeedbackPage() {
@@ -461,8 +461,6 @@ window.LingoApp = {
         this.uiLang = lang;
         localStorage.setItem("lingobot_ui_lang", lang);
 
-        // Dynamically set data-ui-lang attribute on body for font switching:
-        // EN: UDP Gothic, JP: UD Digi Kyokasho NK-R, VN: Times New Roman
         document.body.setAttribute('data-ui-lang', lang);
 
         const dict = this.i18n[lang] || this.i18n["tiếng Việt"];
@@ -537,10 +535,8 @@ window.LingoApp = {
         setTxt("chipLevelAll", dict.filterAll);
         setTxt("txtSummaryLoading", dict.aiSummarizing);
 
-        // Status banner default text
         setTxt("txtPronounceStatus", dict.pronounceIdleMsg);
 
-        // Update Summary Modal elements
         setTxt("txtSummaryModalTitle", dict.summaryModalTitle);
         setTxt("txtPrintBtn", dict.btnPrint);
         setTxt("txtPdfBtn", dict.btnPdf);
@@ -549,7 +545,6 @@ window.LingoApp = {
         const chatInput = document.getElementById("chatInput");
         if (chatInput) chatInput.placeholder = dict.placeholder;
 
-        // Dynamically update all existing chat bubble buttons to UI language
         document.querySelectorAll(".btn-play").forEach(btn => {
             if (btn.classList.contains("playing")) {
                 btn.textContent = dict.btnPlaying || "▶ 再生中";
@@ -560,7 +555,6 @@ window.LingoApp = {
         document.querySelectorAll(".btn-stop").forEach(btn => btn.textContent = dict.btnStop);
         document.querySelectorAll(".btn-download").forEach(btn => btn.textContent = dict.btnDownload);
 
-        // Re-render sample sentences list to update pronunciation buttons
         this.renderPronounceSamples();
 
         window.LingoLog.add(`Cập nhật 100% văn bản & nút bấm giao diện sang: ${lang}`);
@@ -598,7 +592,6 @@ window.LingoApp = {
         return formatted;
     },
 
-    // MODE SWITCHING WITH FOOTER HIDE FOR PRONUNCIATION MODE
     switchMode(modeType) {
         const tabGiaoTiep = document.getElementById("tabGiaoTiep");
         const tabPhatAm = document.getElementById("tabPhatAm");
@@ -618,7 +611,6 @@ window.LingoApp = {
                 pronounceContainer.style.setProperty("display", "block", "important");
                 pronounceContainer.classList.remove("hidden");
             }
-            // HIDE CHAT FOOTER BAR IN PRONUNCIATION MODE
             if (footerBar) {
                 footerBar.style.setProperty("display", "none", "important");
             }
@@ -626,7 +618,6 @@ window.LingoApp = {
             this.mode = "Phát âm";
             this.renderPronounceSamples();
             
-            // Set Top Status Banner to Idle
             const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
             const banner = document.getElementById("pronounceStatusBanner");
             const statusTxt = document.getElementById("txtPronounceStatus");
@@ -646,7 +637,6 @@ window.LingoApp = {
                 chatContainer.style.setProperty("display", "flex", "important");
                 chatContainer.classList.remove("hidden");
             }
-            // RESTORE CHAT FOOTER BAR IN CONVERSATION MODE
             if (footerBar) {
                 footerBar.style.setProperty("display", "flex", "important");
             }
@@ -860,7 +850,6 @@ window.LingoApp = {
         });
     },
 
-    // PRONUNCIATION ADVISOR: FIXED RECORDING & TOP BANNER STATUS UPDATES
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
@@ -879,7 +868,6 @@ window.LingoApp = {
             recBtn.style.color = "#ffffff";
         }
 
-        // UPDATE TOP STATUS BANNER TO RECORDING STATE
         if (banner) banner.className = "pronounce-status-banner recording";
         if (statusTxt) statusTxt.textContent = dict.pronounceRecordingMsg || "🔴 マイクが収録中… (Đang thu âm...)";
 
@@ -901,7 +889,6 @@ window.LingoApp = {
                     recBtn.style.color = "#ea580c";
                 }
 
-                // UPDATE TOP STATUS BANNER TO ANALYZING STATE
                 if (banner) banner.className = "pronounce-status-banner analyzing";
                 if (statusTxt) statusTxt.textContent = dict.pronounceAnalyzingMsg || "🤖 AIが発音を分析中… (AI đang phân tích...)";
 
@@ -964,7 +951,6 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                         </div>`;
                     }
                 } finally {
-                    // RESET TOP STATUS BANNER TO IDLE STATE
                     if (banner) banner.className = "pronounce-status-banner";
                     if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (Hãy nói qua Micro)";
                 }
