@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.2 Implementation (Collapsible Advanced Controls Panel)
+// Main Application Controller - LingoBot2 Ver3.3 Implementation (Default Japanese + Beginner Pronunciation Filter)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -6,8 +6,8 @@ window.LingoApp = {
     targetLang: "jp 日本語", // Default target language: Japanese
     level: "Sơ cấp (CEFR A1, A2)",
     scenario: "自由会話",
-    filterLang: "all",
-    filterLevel: "all",
+    filterLang: "jp 日本語", // Default Pronunciation Filter: Japanese (日本語)
+    filterLevel: "Sơ cấp",    // Default Pronunciation Filter: Beginner (初級)
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
     messages: [],
     isProcessing: false,
@@ -331,7 +331,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.2]. Advanced Header Controls Panel Collapsed by Default.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.3]. Default Pronunciation Filters: 日本語 + 初級.");
     },
 
     toggleAdvancedPanel() {
@@ -485,7 +485,7 @@ window.LingoApp = {
             
             this.mode = "Phát âm";
             this.renderPronounceSamples();
-            window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode)");
+            window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode - Filtered: 日本語 + 初級)");
         } else {
             if (tabGiaoTiep) tabGiaoTiep.classList.add("active");
             if (tabPhatAm) tabPhatAm.classList.remove("active");
@@ -611,6 +611,7 @@ window.LingoApp = {
                 langFilterChips.forEach(c => c.classList.remove('active'));
                 e.currentTarget.classList.add('active');
                 this.filterLang = e.currentTarget.getAttribute('data-lang');
+                window.LingoLog.add(`Bộ lọc phát âm - Ngôn ngữ: ${this.filterLang}`);
                 this.renderPronounceSamples();
             });
         });
@@ -621,6 +622,7 @@ window.LingoApp = {
                 levelFilterChips.forEach(c => c.classList.remove('active'));
                 e.currentTarget.classList.add('active');
                 this.filterLevel = e.currentTarget.getAttribute('data-level');
+                window.LingoLog.add(`Bộ lọc phát âm - Trình độ: ${this.filterLevel}`);
                 this.renderPronounceSamples();
             });
         });

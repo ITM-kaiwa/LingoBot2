@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver3.2 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver3.2 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver3.3 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver3.3 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=3.2">
-    <link rel="stylesheet" href="styles/components.css?v=3.2">
+    <link rel="stylesheet" href="styles/main.css?v=3.3">
+    <link rel="stylesheet" href="styles/components.css?v=3.3">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver3.2 & Advanced Collapsible Controls Panel -->
+            <!-- Header with Version Badge Ver3.3 & Advanced Collapsible Controls Panel -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver3.2</span>
+                    <span class="version-badge">Ver3.3</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -249,20 +249,20 @@
                             <h2 id="txtPronounceTitle">🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)</h2>
                             <p id="txtPronounceSub">Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.</p>
                             
-                            <!-- Filters for Pronunciation Sentences -->
+                            <!-- Filters for Pronunciation Sentences - Default Active: JP + Sơ cấp (Japanese + Beginner) -->
                             <div class="pronounce-filter-bar">
                                 <div class="filter-group">
                                     <span id="lblFilterLang">Ngôn ngữ:</span>
-                                    <button type="button" id="chipLangAll" class="filter-chip active" data-lang="all">Tất cả</button>
-                                    <button type="button" class="filter-chip" data-lang="jp 日本語">JP</button>
+                                    <button type="button" id="chipLangAll" class="filter-chip" data-lang="all">Tất cả</button>
+                                    <button type="button" class="filter-chip active" data-lang="jp 日本語">JP</button>
                                     <button type="button" class="filter-chip" data-lang="us English">EN</button>
                                     <button type="button" class="filter-chip" data-lang="vn Tiếng Việt">VN</button>
                                 </div>
 
                                 <div class="filter-group">
                                     <span id="lblFilterLevel">Trình độ:</span>
-                                    <button type="button" id="chipLevelAll" class="filter-chip active" data-level="all">Tất cả</button>
-                                    <button type="button" id="chipLevel1" class="filter-chip" data-level="Sơ cấp">Sơ cấp (A1-A2)</button>
+                                    <button type="button" id="chipLevelAll" class="filter-chip" data-level="all">Tất cả</button>
+                                    <button type="button" id="chipLevel1" class="filter-chip active" data-level="Sơ cấp">Sơ cấp (A1-A2)</button>
                                     <button type="button" id="chipLevel2" class="filter-chip" data-level="Trung cấp">Trung cấp (B1-B2)</button>
                                     <button type="button" id="chipLevel3" class="filter-chip" data-level="Cao cấp">Cao cấp (C1-C2)</button>
                                 </div>
@@ -270,7 +270,7 @@
                         </div>
 
                         <div class="sample-sentences-list" id="sampleSentencesList">
-                            <!-- 80 Sample Sentences inserted dynamically -->
+                            <!-- Sample Sentences inserted dynamically -->
                         </div>
 
                         <!-- Pronunciation Feedback Box -->
@@ -362,10 +362,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=3.2"></script>
-    <script src="js/tts.js?v=3.2"></script>
-    <script src="js/stt.js?v=3.2"></script>
-    <script src="js/summary.js?v=3.2"></script>
-    <script src="js/app.js?v=3.2"></script>
+    <script src="js/log.js?v=3.3"></script>
+    <script src="js/tts.js?v=3.3"></script>
+    <script src="js/stt.js?v=3.3"></script>
+    <script src="js/summary.js?v=3.3"></script>
+    <script src="js/app.js?v=3.3"></script>
 </body>
 </html>
