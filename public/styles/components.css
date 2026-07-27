@@ -1,22 +1,22 @@
-/* Components Styling - Indigo Theme Setup Bubbles, Restored Scenario Selector & Matched Chat Bubbles (Ver2.4) */
+/* Components Styling - Soft Violet Setup Bubbles & Deep Royal Navy AI Bubbles (Ver2.5) */
 
 /* ==========================================
-   1. SETUP PROMPT BUBBLE (SOFT INDIGO MATCHED WITH SCREENSHOT)
+   1. SETUP PROMPT BUBBLE (SOFT LIGHT VIOLET THEME)
    ========================================== */
 .setup-prompt-bubble {
-    background: #f3f0ff !important; /* Soft Lavender / Indigo Tint from screenshot */
-    border: 1px solid #c7d2fe !important; /* Indigo light border */
-    border-left: 5px solid #4f46e5 !important; /* Deep Indigo accent bar */
-    color: #3730a3 !important;
+    background: #f5f3ff !important; /* Soft Light Violet tint */
+    border: 1px solid #ddd6fe !important; /* Soft Violet light border */
+    border-left: 5px solid #8b5cf6 !important; /* Violet accent bar */
+    color: #5b21b6 !important;
     border-radius: 18px !important;
     padding: 16px 20px !important;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.1) !important;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.1) !important;
 }
 
 .setup-prompt-bubble .setup-title {
     font-size: 1.05rem !important;
     font-weight: 800 !important;
-    color: #4338ca !important; /* Soft Indigo title */
+    color: #6d28d9 !important; /* Deep Violet Title */
     margin-bottom: 8px !important;
     display: flex !important;
     align-items: center !important;
@@ -25,29 +25,29 @@
 
 .setup-prompt-bubble .setup-text-vn,
 .setup-prompt-bubble .setup-text-jp {
-    color: #3730a3 !important;
+    color: #5b21b6 !important;
     font-size: 0.9rem !important;
     line-height: 1.5 !important;
 }
 
 .setup-prompt-bubble .bubble-key-input {
-    border: 2px solid #c7d2fe !important;
+    border: 2px solid #ddd6fe !important;
     border-radius: 12px !important;
     padding: 8px 14px !important;
     font-size: 0.88rem !important;
-    color: #1e1b4b !important;
+    color: #4c1d95 !important;
     background: #ffffff !important;
     outline: none !important;
     transition: border-color 0.2s ease !important;
 }
 
 .setup-prompt-bubble .bubble-key-input:focus {
-    border-color: #4f46e5 !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
 }
 
 .setup-prompt-bubble .bubble-key-btn {
-    background: #4f46e5 !important; /* Indigo action button matching screenshot */
+    background: #8b5cf6 !important; /* Soft Violet action button */
     color: #ffffff !important;
     border: none !important;
     border-radius: 12px !important;
@@ -59,12 +59,12 @@
 }
 
 .setup-prompt-bubble .bubble-key-btn:hover {
-    background: #4338ca !important;
+    background: #7c3aed !important;
     transform: translateY(-1px) !important;
 }
 
 .setup-prompt-bubble .sender-tag {
-    color: #6366f1 !important;
+    color: #7c3aed !important;
     font-weight: 700 !important;
 }
 
@@ -101,20 +101,20 @@
     box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
 }
 
-/* User Bubble: Premium Emerald Green */
+/* User Bubble: Crisp Emerald Green */
 .user-row .chat-bubble {
-    background: linear-gradient(135deg, #059669, #047857) !important; /* Emerald Gradient */
+    background: #047857 !important; /* Crisp Emerald Green */
     color: #ffffff !important;
     border-bottom-right-radius: 4px !important;
-    box-shadow: 0 3px 10px rgba(4, 120, 87, 0.2) !important;
+    box-shadow: 0 3px 10px rgba(4, 120, 87, 0.15) !important;
 }
 
-/* AI Model Bubble: Premium Soft Indigo (Matched with User's Screenshot) */
+/* AI Model Bubble: Deep Royal Navy Blue (Clean, Natural & High Contrast) */
 .ai-row .chat-bubble {
-    background: linear-gradient(135deg, #4f46e5, #4338ca) !important; /* Soft Indigo Gradient */
+    background: #1e3a8a !important; /* Deep Royal Navy Blue */
     color: #ffffff !important;
     border-bottom-left-radius: 4px !important;
-    box-shadow: 0 3px 10px rgba(67, 56, 202, 0.2) !important;
+    box-shadow: 0 3px 10px rgba(30, 58, 138, 0.15) !important;
 }
 
 .bubble-text {
