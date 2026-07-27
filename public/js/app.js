@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.3 Implementation (Default Japanese + Beginner Pronunciation Filter)
+// Main Application Controller - LingoBot2 Ver3.4 Implementation (Manual Local Mode Toggle & Exact Countdown Bubbles)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -9,6 +9,7 @@ window.LingoApp = {
     filterLang: "jp 日本語", // Default Pronunciation Filter: Japanese (日本語)
     filterLevel: "Sơ cấp",    // Default Pronunciation Filter: Beginner (初級)
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
+    useLocalFallback: false,    // Default Local Mode: OFF (Only enabled via Advanced button)
     messages: [],
     isProcessing: false,
 
@@ -331,7 +332,29 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.3]. Default Pronunciation Filters: 日本語 + 初級.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.4]. Local Mode is OFF by default. Countdown prompts for rate limits enabled.");
+    },
+
+    toggleLocalMode() {
+        this.useLocalFallback = !this.useLocalFallback;
+        const txtEl = document.getElementById("txtLocalModeStatus");
+        const btn = document.getElementById("btnToggleLocalMode");
+
+        if (this.useLocalFallback) {
+            if (txtEl) txtEl.textContent = "ローカル併用: ON";
+            if (btn) {
+                btn.style.background = "#ea580c";
+                btn.style.color = "#ffffff";
+            }
+            window.LingoLog.add("Bật chế độ dự phòng Local Mode (Sử dụng câu trả lời mẫu khi bận).");
+        } else {
+            if (txtEl) txtEl.textContent = "ローカル併用: OFF";
+            if (btn) {
+                btn.style.background = "#e7e5e4";
+                btn.style.color = "#44403c";
+            }
+            window.LingoLog.add("Tắt chế độ dự phòng Local Mode (Chỉ hiển thị thông báo chờ đếm ngược).");
+        }
     },
 
     toggleAdvancedPanel() {
@@ -485,7 +508,7 @@ window.LingoApp = {
             
             this.mode = "Phát âm";
             this.renderPronounceSamples();
-            window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode - Filtered: 日本語 + 初級)");
+            window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode)");
         } else {
             if (tabGiaoTiep) tabGiaoTiep.classList.add("active");
             if (tabPhatAm) tabPhatAm.classList.remove("active");
@@ -899,22 +922,38 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             const data = await response.json();
             this.removeTypingIndicator(typingBubble);
 
+            const retrySeconds = data.retry_after_seconds || 0;
+
+            // Scenario 1: Local Fallback Used AND Local Mode is Enabled by User
+            if (data.reply && (data.used_model === "local-fallback" || data.is_smart_fallback)) {
+                if (this.useLocalFallback) {
+                    let modelUsed = "Local";
+                    window.LingoLog.add(`Sử dụng câu trả lời Local dự phòng [Model: Local]`);
+                    const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
+                    const playBtn = aiBubbleEl.querySelector(".btn-play");
+                    if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
+                } else {
+                    // Local Mode is OFF -> Display exact user requested countdown or busy prompt!
+                    if (retrySeconds > 0 && retrySeconds <= 20) {
+                        window.LingoLog.add(`Gemini Rate Limit (${retrySeconds}s) -> Thể hiện thông báo đếm ngược từng giây.`);
+                        this.appendCountdownPromptBubble(retrySeconds);
+                    } else {
+                        window.LingoLog.add(`AI 🤖 quá tải -> Thể hiện thông báo 'ただいまAIが混雑中です'.`);
+                        this.appendMessage("model", "ただいまAIが混雑中です");
+                    }
+                }
+                return;
+            }
+
+            // Scenario 2: Direct Gemini Response Success
             if (data.reply) {
                 const reply = data.reply;
-
-                // Show EXACT real model name returned by server (e.g. gemini-2.5-flash, gemini-1.5-flash, gemini-2.0-flash, etc.)
                 let modelUsed = data.display_model || data.used_model || "Gemini";
-                let retrySeconds = data.retry_after_seconds || 0;
-
-                if (modelUsed === "Local" || data.used_model === "local-fallback" || data.is_smart_fallback) {
-                    modelUsed = "Local";
-                }
-
                 window.LingoLog.add(`AI phản hồi thành công [Model: ${modelUsed}]`);
                 
-                const aiBubbleEl = this.appendMessage("model", reply, modelUsed, retrySeconds);
+                const aiBubbleEl = this.appendMessage("model", reply, modelUsed, 0);
 
-                if ((data.api_key_required || data.api_key_invalid) && data.used_model === "local-fallback" && !apiKey) {
+                if ((data.api_key_required || data.api_key_invalid) && !apiKey) {
                     this.showSetupPromptRow();
                 }
 
@@ -930,10 +969,10 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                         : (data.error || "Google API Key が必要です。画面上部に入力してください。");
                     this.appendMessage("model", `🔑 ${errMsg}`);
                     window.LingoLog.add("API Key 要入力/無効: " + errMsg);
+                } else if (retrySeconds > 0 && retrySeconds <= 20) {
+                    this.appendCountdownPromptBubble(retrySeconds);
                 } else {
-                    const errText = data.error || "Không thể kết nối tới Gemini AI.";
-                    this.appendMessage("model", `⚠️ ${errText}`);
-                    window.LingoLog.add("Lỗi AI Chat: " + errText);
+                    this.appendMessage("model", "ただいまAIが混雑中です");
                 }
             }
         } catch (err) {
@@ -943,6 +982,51 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
         } finally {
             this.isProcessing = false;
         }
+    },
+
+    /**
+     * Appends an exact real-time 1-second countdown bubble:
+     * "お待たせしてすみません、X秒後にもう一度入力をお願いします。"
+     */
+    appendCountdownPromptBubble(seconds) {
+        const container = document.getElementById("chatContainer");
+        const row = document.createElement("div");
+        row.className = "chat-row ai-row";
+
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble";
+        bubble.style.background = "#fff7ed";
+        bubble.style.border = "1px solid #fed7aa";
+        bubble.style.borderLeft = "5px solid #ea580c";
+        bubble.style.color = "#9a3412";
+
+        const textDiv = document.createElement("div");
+        textDiv.className = "bubble-text";
+        textDiv.style.fontWeight = "700";
+        textDiv.textContent = `お待たせしてすみません、${seconds}秒後にもう一度入力をお願いします。`;
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "message-meta";
+        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        metaDiv.innerHTML = `<span class="msg-time" style="color:#c2410c;">${timeStr} • Gemini Wait</span>`;
+
+        bubble.appendChild(textDiv);
+        bubble.appendChild(metaDiv);
+        row.appendChild(bubble);
+        container.appendChild(row);
+        container.scrollTop = container.scrollHeight;
+
+        let currentSec = seconds;
+        const timer = setInterval(() => {
+            currentSec -= 1;
+            if (currentSec > 0) {
+                textDiv.textContent = `お待たせしてすみません、${currentSec}秒後にもう一度入力をお願いします。`;
+            } else {
+                clearInterval(timer);
+                textDiv.textContent = `準備ができました。もう一度メッセージを入力してください。`;
+                textDiv.style.color = "#047857";
+            }
+        }, 1000);
     },
 
     appendMessage(role, content, usedModel = null, retrySeconds = 0) {
