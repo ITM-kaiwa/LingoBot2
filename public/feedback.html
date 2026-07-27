@@ -160,10 +160,11 @@
             color: #44403c;
         }
         .notice-text {
-            font-size: 0.8rem;
-            color: #78716c;
+            font-size: 0.82rem;
+            color: #c2410c;
             margin-top: 14px;
             line-height: 1.5;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -179,10 +180,10 @@
 
         <main class="feedback-body">
             <form id="feedbackForm" onsubmit="handleFeedbackSubmit(event)">
-                <!-- Auto Log Attachment Indicator Badge -->
+                <!-- Auto Log Clipboard Badge -->
                 <div class="log-attach-badge">
-                    <span>📄</span>
-                    <span id="txtLogBadge">LingoBot2のシステム動作ログ（.txt）が自動的に添付・生成されます。</span>
+                    <span>📋</span>
+                    <span id="txtLogBadge">動作ログは「改善提案」ボタン押下時にクリップボードへ自動コピーされています。</span>
                 </div>
 
                 <div class="form-group">
@@ -203,12 +204,12 @@
                 <div class="feedback-footer">
                     <button type="button" class="btn-close" id="btnClose" onclick="window.close()">閉じる</button>
                     <button type="submit" class="btn-submit" id="btnSubmit">
-                        <span>📧</span> <span id="txtSubmitBtn">送信 (ログ自動添付 & メーラー起動)</span>
+                        <span>📧</span> <span id="txtSubmitBtn">送信 (メーラー起動)</span>
                     </button>
                 </div>
 
                 <p class="notice-text" id="txtNotice">
-                    ※ 「送信」ボタンを押すと、ログファイル（.txt）が自動ダウンロード保存され、お使いのメールソフトが起動します。ダウンロードされたログファイルをメールに添付して送信してください。
+                    指示にしたがってログを本文に貼り付けてから送ってください。
                 </p>
             </form>
         </main>
@@ -220,7 +221,7 @@
             "tiếng Nhật": {
                 title: "LingoBot2 改善提案・フィードバック",
                 sub: "より使いやすいアプリを目指して、ご意見・ご要望をお聞かせください。",
-                logBadge: "LingoBot2のシステム動作ログ（.txt）が自動的に生成・ダウンロード添付されます。",
+                logBadge: "動作ログは「改善提案」ボタン押下時にクリップボードへ自動コピーされています。",
                 lblName: "👤 お名前",
                 phName: "例: 山田 太郎",
                 lblEmail: "📧 メールアドレス",
@@ -228,14 +229,14 @@
                 lblContent: "📝 改善提案内容",
                 phContent: "機能の要望や使いづらい点など、ご自由にご記入ください...",
                 btnClose: "閉じる",
-                btnSubmit: "送信 (ログ自動添付 & メーラー起動)",
-                notice: "※ 「送信」ボタンを押すと、動作ログファイル（.txt）が自動ダウンロード保存され、メールソフトが起動します。ダウンロードされたログファイルをメールに添付して送信してください。",
-                alertSuccess: "【ログファイルの準備完了】\nLingoBot2の動作ログ（.txt）を自動ダウンロードし、クリップボードにもコピーしました！\n起動したメールソフトにログファイルを添付（または貼り付け）して送信してください。"
+                btnSubmit: "送信 (メーラー起動)",
+                notice: "指示にしたがってログを本文に貼り付けてから送ってください。",
+                placeholderLog: "<-----ここにCtrl＋Vでログをコピーしてください----->"
             },
             "tiếng Việt": {
                 title: "LingoBot2 Gợi ý cải tiến & Phản hồi",
                 sub: "Hãy gửi cho chúng tôi ý kiến và đóng góp của bạn để hoàn thiện LingoBot2 tốt hơn.",
-                logBadge: "Tệp nhật ký hệ thống LingoBot2 (.txt) sẽ được tự động tạo và tải xuống để đính kèm.",
+                logBadge: "Nhật ký hệ thống đã được tự động sao chép vào khay nhớ tạm khi bấm nút Gợi ý cải tiến.",
                 lblName: "👤 Họ và tên",
                 phName: "Ví dụ: Nguyễn Văn An",
                 lblEmail: "📧 Địa chỉ Email",
@@ -243,14 +244,14 @@
                 lblContent: "📝 Nội dung gợi ý cải tiến",
                 phContent: "Nhập các tính năng mong muốn hoặc góp ý trải nghiệm...",
                 btnClose: "Đóng",
-                btnSubmit: "Gửi (Tự động tải Log & Mở Mailer)",
-                notice: "※ Khi nhấn 'Gửi', tệp nhật ký (.txt) sẽ tự động được tải về máy và ứng dụng Mail sẽ mở ra. Vui lòng đính kèm tệp nhật ký vừa tải về vào Email trước khi gửi.",
-                alertSuccess: "【ĐÃ CHUẨN BỊ TỆP NHẬT KÝ SYSTEM LOG】\nTệp nhật ký LingoBot2 (.txt) đã được tự động tải về và sao chép vào khay nhớ tạm!\nVui lòng đính kèm tệp .txt này vào ứng dụng Email vừa mở để gửi đi."
+                btnSubmit: "Gửi (Mở Mailer)",
+                notice: "Vui lòng dán nhật ký (Ctrl+V) vào nội dung Email theo hướng dẫn trước khi gửi.",
+                placeholderLog: "<-----Vui lòng Ctrl+V dán nhật ký vào đây----->"
             },
             "tiếng Anh": {
                 title: "LingoBot2 Feedback & Suggestions",
                 sub: "Help us make LingoBot2 better by sharing your feedback and suggestions.",
-                logBadge: "LingoBot2 system log file (.txt) will be automatically generated and attached.",
+                logBadge: "System log has been automatically copied to clipboard when clicking Feedback button.",
                 lblName: "👤 Full Name",
                 phName: "e.g. John Smith",
                 lblEmail: "📧 Email Address",
@@ -258,9 +259,9 @@
                 lblContent: "📝 Suggestion / Feedback Details",
                 phContent: "Feel free to share feature requests or issues you experienced...",
                 btnClose: "Close",
-                btnSubmit: "Send (Auto-Attach Log & Launch Mailer)",
-                notice: "※ Clicking 'Send' will automatically download the system log (.txt) and open your default email app. Please attach the downloaded log file to your email.",
-                alertSuccess: "【SYSTEM LOG FILE READY】\nLingoBot2 system log (.txt) has been downloaded and copied to clipboard!\nPlease attach the downloaded .txt log file to the opened email app."
+                btnSubmit: "Send (Launch Mailer)",
+                notice: "Please paste the log (Ctrl+V) into the email body as instructed before sending.",
+                placeholderLog: "<-----Please press Ctrl+V to paste the log here----->"
             }
         };
 
@@ -309,28 +310,10 @@
                 return;
             }
 
-            // Fetch system logs from localStorage saved by main LingoBot2 window
-            const logsText = localStorage.getItem("lingobot_latest_logs") || "LingoBot2 System Log Data:\n[No log recorded]";
-
-            // 1. Auto-download system log text file (.txt)
-            const blob = new Blob([logsText], { type: "text/plain;charset=utf-8" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `lingobot_system_logs_${Date.now()}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // 2. Auto-copy log text to Clipboard as convenient backup
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(logsText).catch(() => {});
-            }
-
-            // 3. Construct mailto URL with feedback content and log excerpt
+            // Construct mailto URL with feedback content and clipboard paste instruction
             const recipient = "support@example.com";
             const subject = encodeURIComponent(`[LingoBot2] 改善提案・フィードバック (${name}様)`);
-            
-            const logSnippet = logsText.length > 800 ? logsText.substring(logsText.length - 800) : logsText;
+            const placeholderText = dict.placeholderLog || "<-----ここにCtrl＋Vでログをコピーしてください----->";
 
             const bodyText = `【LingoBot2 改善提案・フィードバック / Feedback】
 
@@ -341,11 +324,8 @@
 ${content}
 
 --------------------------------------------------
-📋 添付ログファイル: lingobot_system_logs.txt (自動ダウンロード保存されました)
---------------------------------------------------
-🖥️ 直近のシステム動作ログ抜粋 (Recent System Log Excerpt):
-${logSnippet}
-
+🖥️ システム動作ログ (System Logs):
+${placeholderText}
 --------------------------------------------------
 送信日時: ${new Date().toLocaleString()}
 `;
@@ -355,8 +335,6 @@ ${logSnippet}
 
             // Launch default mail client
             window.location.href = mailtoUrl;
-
-            alert(dict.alertSuccess);
         }
 
         document.addEventListener("DOMContentLoaded", applyLanguageUi);

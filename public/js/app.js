@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.1 Implementation (Auto Log File Attachment & Dynamic UI Language Sync)
+// Main Application Controller - LingoBot2 Ver4.2 Implementation (Instant Clipboard Log Copy & Manual Log Paste Template)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -261,7 +261,7 @@ window.LingoApp = {
             "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきん）と カード、どちらに なさいますか？",
 
             "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
-            "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（こうかん）させて いただけますか？",
+            "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（かん）させて いただけますか？",
             "会議での意見表明会話": "💡 会議の会話です！\nそれでは、次（つぎ）の アジェンダについて 議論（ぎろん）を 始（はじ）めます。ご意見（いけん）の ある方（かた）は いらっしゃいますか？",
             "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうしわけ）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
             "採用面接の会話": "💡 採用面接の会話です！\n本日は 面接（めんせつ）に お越しいただき ありがとうございます。まず 簡単（かんたん）な 自己PR（じこピーアール）から お願（ねが）いできますか？",
@@ -398,18 +398,25 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.1]. Auto Log File Attachment & UI Language Synchronization.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.2]. Instant Clipboard Log Copy & Manual Paste Template.");
     },
 
     openFeedbackPage() {
-        // 1. Prepare system execution logs & client diagnostics
+        // 1. Capture exact system execution logs & client diagnostics at this very instant
         const fullLogs = window.LingoLog ? (window.LingoLog.getClientDiagnostics() + "\n\n" + window.LingoLog.logs.join("\n")) : "";
         localStorage.setItem("lingobot_latest_logs", fullLogs);
         localStorage.setItem("lingobot_ui_lang", this.uiLang);
 
-        window.LingoLog.add(`Mở trang 💡 改善提案 (feedback.html) với UI Lang: ${this.uiLang}`);
+        // 2. Instantly copy logs to Clipboard on button press
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(fullLogs).catch(err => {
+                console.warn("Clipboard copy warning:", err);
+            });
+        }
 
-        // 2. Open feedback page in a new window with language param
+        window.LingoLog.add(`Mở trang 💡 改善提案 (feedback.html) - Đã sao chép 100% System Logs vào Clipboard.`);
+
+        // 3. Open feedback page in a new window with language param
         const targetUrl = `feedback.html?lang=${encodeURIComponent(this.uiLang)}`;
         window.open(targetUrl, '_blank');
     },
