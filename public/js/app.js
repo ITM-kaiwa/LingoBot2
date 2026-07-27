@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.7 Implementation
+// Main Application Controller - LingoBot2 Ver2.8 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -328,7 +328,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.7]. High-Contrast Maximum Legibility Chat Text Colors.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.8]. Pure Dialogue TTS playback without advice lines or ruby parens.");
     },
 
     updateUiLanguage(lang) {
@@ -821,15 +821,15 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
 Cấu hình hội thoại:
 - Chế độ: ${this.mode}
 - Ngôn ngữ học: ${this.targetLang}
-- Ngôn ngữ nhận xét: ${this.uiLang} (MỌI LỜI GIẢI THÍCH, NHẬN XÉT, SỬA LỖI PHẢI BẰNG ${this.uiLang})
+- Ngôn ngữ nhận xét: ${this.uiLang} (Nếu có nhận xét/sửa lỗi, hãy dùng ${this.uiLang})
 - Trình độ (CEFR): ${this.level}
 - Tình huống: ${this.scenario}
 
-Quy tắc ứng xử:
-1. ${scenarioRules} Trả lời chính bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）để hiển thị thẻ ruby cho người học dễ đọc.
-2. Nếu người dùng nói sai ngữ pháp hoặc từ vựng, nhẹ nhàng sửa lỗi bằng ${this.uiLang} ở đầu tin nhắn.
-3. Đặt 1 câu hỏi tương tác ngắn ở cuối để duy trì nhịp độ giao tiếp tự nhiên trong tình huống "${this.scenario}".
-4. Trả lời ngắn gọn (2-3 câu) để phản hồi siêu nhanh.`;
+Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
+1. Nếu người học nói sai ngữ pháp, hãy ghi dòng nhận xét/sửa lỗi ở ĐẦU TIÊN với biểu tượng 💡 ở đầu dòng bằng ${this.uiLang} (Ví dụ: 💡 Câu của bạn rất chuẩn xác!). Dòng nhận xét này là để người học đọc bằng mắt, TTS sẽ tự động lọc không đọc dòng này.
+2. Dòng tiếp theo là CÂU HỘI THOẠI CHÍNH (セリフ) hoàn toàn bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. TTS sẽ đọc dòng này.
+3. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）để hiển thị thẻ ruby. Hệ thống sẽ tự động lọc bỏ phần trong ngoặc（にもつ）khi đọc TTS để tránh đọc lặp lại 2 lần!
+4. Đặt 1 câu hỏi tương tác ngắn ở cuối để duy trì nhịp độ giao tiếp tự nhiên trong tình huống "${this.scenario}".`;
     },
 
     async handleSendMessage() {

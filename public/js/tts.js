@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver2.7 Implementation (EdgeTTS & Render Support)
+// TTS Engine Module - LingoBot2 Ver2.8 Implementation (Clean Ruby Annotations & Strip AI Advice)
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
@@ -52,6 +52,50 @@ window.LingoTTS = {
         window.LingoLog.add("Đã dừng phát âm thanh.");
     },
 
+    /**
+     * Clean text specifically for TTS reading:
+     * 1. Strips out AI feedback / advice / correction lines (e.g. "Câu của bạn...", "💡 Sửa lỗi...").
+     * 2. Cleans up Ruby Furigana annotations (e.g. "荷物（にもつ）" -> "荷物") so TTS reads standard Kanji without double reading.
+     */
+    cleanTextForTTS(text) {
+        if (!text) return "";
+
+        // 1. Remove UI Advice / Correction / Feedback lines
+        let lines = text.split("\n");
+        let speechLines = [];
+
+        for (let line of lines) {
+            let trimmed = line.trim();
+            if (!trimmed) continue;
+
+            // Skip advice / feedback lines starting with markers, emojis or correction terms
+            if (/^(💡|📝|🔧|✨|👍|⚠️|Sửa lỗi|Nhận xét|Lời khuyên|Câu của bạn|Bạn nên|Lỗi:|Note:|Feedback:)/i.test(trimmed)) {
+                continue;
+            }
+            
+            // Skip lines that are entirely in parentheses or brackets (notes/translations)
+            if (/^[（\(【\[].*[）\)】\]]$/.test(trimmed)) {
+                continue;
+            }
+
+            speechLines.push(trimmed);
+        }
+
+        let speechText = speechLines.join(" ");
+        if (!speechText || !speechText.trim()) {
+            speechText = text; // Fallback if all lines were filtered
+        }
+
+        // 2. Strip Ruby annotations: "荷物（にもつ）" -> "荷物" (removes parenthesis part)
+        speechText = speechText
+            .replace(/([\u3400-\u4dbf\u4e00-\u9fff]+)\s*[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g, '$1')
+            .replace(/[（\(][\u3040-\u309f\u30a0-\u30ff\s]+[）\)]/g, '') // Any remaining isolated furigana parens
+            .replace(/【.*?】/g, '') // Square brackets
+            .replace(/[\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u2600-\u26FF\u2700-\u27BF]/g, ''); // Emojis
+
+        return speechText.trim();
+    },
+
     async playText(text, playBtnElement = null) {
         if (!text) return;
         this.stop();
@@ -67,10 +111,17 @@ window.LingoTTS = {
         const selectedVoice = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
         this.updateActiveTtsBadge(selectedVoice);
 
-        // Clean text for TTS (remove ruby markings)
-        const cleanText = text.replace(/[\u3400-\u4dbf\u4e00-\u9fff]+（([\u3040-\u309f\u30a0-\u30ff\s]+)）/g, '$1')
-                             .replace(/\(.*?\)/g, '')
-                             .replace(/【.*?】/g, '');
+        // Get fully cleaned text without advice lines & without ruby furigana parens
+        const cleanText = this.cleanTextForTTS(text);
+
+        if (!cleanText) {
+            window.LingoLog.add("Bỏ qua đọc TTS: Không tìm thấy câu hội thoại chính sau khi lọc lời khuyên.");
+            if (playBtnElement) {
+                playBtnElement.classList.remove("playing");
+                playBtnElement.textContent = dict.btnPlay || "▶ Phát";
+            }
+            return;
+        }
 
         // Option A: User Explicitly Selected "General (Web Speech API)"
         if (selectedVoice === "browser-native") {
