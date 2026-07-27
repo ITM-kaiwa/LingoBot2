@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver5.2 (Universal Multi-Language Font Stack & Fixed Advanced Button) */
+/* Main Layout & Theme System - LingoBot2 Ver5.3 (Simplified Dropdowns, Fixed Labels, Floating Dynamic Prompt Editor Modal) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -29,11 +29,6 @@ html, body {
 }
 
 /* UNIVERSAL MULTI-LANGUAGE FONT STACK FOR ALL UI LANGUAGES */
-/* 
-  1. Japanese characters (Kanji/Hiragana/Katakana) -> UD Digi Kyokasho NK-R / BIZ UDPGothic
-  2. English/Latin characters -> UDP Gothic / Plus Jakarta Sans
-  3. Vietnamese accent characters -> Times New Roman
-*/
 body, body *,
 body[data-ui-lang="tiếng Việt"] *,
 body[data-ui-lang="tiếng Nhật"] *,
@@ -265,6 +260,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 .btn-red { background: #dc2626; color: #ffffff; }
 .btn-key { background: #0284c7; color: #ffffff; }
 .btn-purple { background: #8b5cf6; color: #ffffff; }
+.btn-edit-prompt { background: #059669; color: #ffffff; }
 
 .header-select {
     padding: 4px 8px;
@@ -449,4 +445,24 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     0% { transform: scale(1); }
     50% { transform: scale(1.02); }
     100% { transform: scale(1); }
+}
+
+/* DYNAMIC SYSTEM PROMPT EDITOR FLOATING MODAL */
+.prompt-editor-textarea {
+    width: 100%;
+    height: 260px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.prompt-editor-textarea:focus {
+    border-color: #059669;
+    background: #ffffff;
 }

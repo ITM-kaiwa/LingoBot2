@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver5.2 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver5.2 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver5.3 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver5.3 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=5.2">
-    <link rel="stylesheet" href="styles/components.css?v=5.2">
+    <link rel="stylesheet" href="styles/main.css?v=5.3">
+    <link rel="stylesheet" href="styles/components.css?v=5.3">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body data-ui-lang="tiếng Việt">
@@ -22,7 +22,7 @@
                     <div class="brand-group">
                         <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver5.2</span>
+                        <span class="version-badge">Ver5.3</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -66,18 +66,18 @@
 
                 <!-- 2nd Row: Advanced Collapsible Controls Panel (Initially Closed/Hidden) -->
                 <div class="header-btns-group hidden" id="advancedPanel">
-                    <!-- Local Mode Toggle Button -->
+                    <!-- Local Mode Toggle Button (Always displays 'Local' in English) -->
                     <button type="button" id="btnToggleLocalMode" class="action-btn btn-pill-grey" onclick="window.LingoApp.toggleLocalMode()" title="Bật/Tắt chế độ dự phòng Local">
-                        🏠 <span id="txtLocalModeStatus">ローカル併用: OFF</span>
+                        🏠 <span id="txtLocalModeStatus">Local: OFF</span>
                     </button>
 
-                    <!-- Dropdown with EdgeTTS as Default -->
+                    <!-- Simplified TTS Dropdown List -->
                     <select id="ttsModelSelect" class="header-select" title="Chọn mô hình giọng đọc TTS">
-                        <option value="ja-JP-Chirp3-HD-F" selected>TTS: EdgeTTS (ja-JP Nữ)</option>
-                        <option value="ja-JP-Chirp3-HD-M">TTS: EdgeTTS (ja-JP Nam)</option>
-                        <option value="en-US-Chirp3-HD-F">TTS: EdgeTTS (en-US Nữ)</option>
-                        <option value="en-US-Chirp3-HD-M">TTS: EdgeTTS (en-US Nam)</option>
-                        <option value="vi-VN-Neural2-A">TTS: EdgeTTS (vi-VN Nữ)</option>
+                        <option value="ja-JP-Chirp3-HD-F" selected>TTS: JP(♀)</option>
+                        <option value="ja-JP-Chirp3-HD-M">TTS: JP(♂)</option>
+                        <option value="en-US-Chirp3-HD-F">TTS: EN(♀)</option>
+                        <option value="en-US-Chirp3-HD-M">TTS: EN(♂)</option>
+                        <option value="vi-VN-Neural2-A">TTS: VN(♀)</option>
                         <option value="browser-native">General</option>
                     </select>
 
@@ -94,9 +94,14 @@
                         <span>🔄</span> <span id="txtResetBtn">Đặt lại</span>
                     </button>
 
-                    <!-- Feedback Button -->
-                    <button type="button" id="headerFeedbackBtn" class="action-btn btn-purple" title="Mở trang Gợi ý cải tiến (改善提案)" onclick="window.LingoApp.openFeedbackPage()">
-                        <span>💡</span> <span id="txtFeedbackBtn">Gợi ý cải tiến</span>
+                    <!-- Edit Prompt Button (Always displays 'Edit' in English) -->
+                    <button type="button" id="btnEditPrompt" class="action-btn btn-edit-prompt" onclick="window.LingoApp.openPromptEditorModal()" title="Chỉnh sửa Prompt chỉ định AI">
+                        <span>✏️</span> <span>Edit</span>
+                    </button>
+
+                    <!-- Feedback Button (Gợi ý in VN, 意見 in JP, Feedback in EN) -->
+                    <button type="button" id="headerFeedbackBtn" class="action-btn btn-purple" title="Mở trang Gợi ý cải tiến" onclick="window.LingoApp.openFeedbackPage()">
+                        <span>💡</span> <span id="txtFeedbackBtn">Gợi ý</span>
                     </button>
                 </div>
             </header>
@@ -336,6 +341,26 @@
         </div>
     </div>
 
+    <!-- DYNAMIC SYSTEM PROMPT EDITOR FLOATING MODAL -->
+    <div id="promptEditorModal" class="modal-backdrop hidden">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h2>✏️ AI System Prompt Instruction Editor</h2>
+                <button type="button" class="close-btn" id="closePromptModalXBtn" onclick="window.LingoApp.closePromptEditorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem; color:#475569; margin-bottom:10px;">
+                    Chỉnh sửa câu lệnh hướng dẫn System Prompt cho AI dưới đây. Nhấn <strong>Lưu / Save</strong> để áp dụng cho các lượt hội thoại tiếp theo.
+                </p>
+                <textarea id="customPromptInput" class="prompt-editor-textarea" placeholder="Nhập câu lệnh chỉ định cho AI..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelPromptBtn" class="modal-btn btn-pill-grey" onclick="window.LingoApp.closePromptEditorModal()">Hủy / Cancel</button>
+                <button type="button" id="savePromptBtn" class="modal-btn btn-pill-orange" onclick="window.LingoApp.saveCustomPrompt()">💾 Lưu / Save</button>
+            </div>
+        </div>
+    </div>
+
     <!-- System Log Modal -->
     <div id="logModal" class="modal-backdrop hidden">
         <div class="modal-card modal-large">
@@ -384,10 +409,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=5.2"></script>
-    <script src="js/tts.js?v=5.2"></script>
-    <script src="js/stt.js?v=5.2"></script>
-    <script src="js/summary.js?v=5.2"></script>
-    <script src="js/app.js?v=5.2"></script>
+    <script src="js/log.js?v=5.3"></script>
+    <script src="js/tts.js?v=5.3"></script>
+    <script src="js/stt.js?v=5.3"></script>
+    <script src="js/summary.js?v=5.3"></script>
+    <script src="js/app.js?v=5.3"></script>
 </body>
 </html>

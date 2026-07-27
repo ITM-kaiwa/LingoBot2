@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.2 Implementation (Fixed Advanced Panel Toggle & Universal Multi-Language Font Stack)
+// Main Application Controller - LingoBot2 Ver5.3 Implementation (Dynamic Prompt Editor & Simplified Controls)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -9,7 +9,8 @@ window.LingoApp = {
     filterLang: "jp 日本語", // Default Pronunciation Filter: Japanese (日本語)
     filterLevel: "Sơ cấp",    // Default Pronunciation Filter: Beginner (初級)
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
-    useLocalFallback: false,    // Default Local Mode: OFF (Only enabled via Advanced button)
+    useLocalFallback: false,    // Default Local Mode: OFF (Always labeled "Local" in English)
+    customSystemPrompt: null,   // Stores dynamic user-edited System Prompt
     messages: [],
     isProcessing: false,
 
@@ -23,7 +24,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "Đặt lại",
             endBtn: "Kết", // Abbreviated End Button for Vietnamese: Kết
-            feedbackBtn: "Gợi ý cải tiến",
+            feedbackBtn: "Gợi ý", // Fixed label for VN: Gợi ý
             sendBtn: "Gửi",
             placeholder: "Nhập tin nhắn hoặc nói bằng micro...",
             scenarioTitle: "🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:",
@@ -101,7 +102,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "リセット",
             endBtn: "終", // Abbreviated End Button for Japanese: 終
-            feedbackBtn: "改善提案",
+            feedbackBtn: "意見", // Fixed label for JP: 意見
             sendBtn: "送信",
             placeholder: "メッセージを入力、またはマイクで話してください...",
             scenarioTitle: "🎯 レベル(CEFR)と対話シチュエーションの選択:",
@@ -179,7 +180,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "Reset",
             endBtn: "Fin", // Abbreviated End Button for English: Fin
-            feedbackBtn: "Feedback",
+            feedbackBtn: "Feedback", // Fixed label for EN: Feedback
             sendBtn: "Send",
             placeholder: "Type a message or speak into mic...",
             scenarioTitle: "🎯 Choose CEFR Level & Scenario:",
@@ -302,7 +303,7 @@ window.LingoApp = {
         { id: 102, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "この電車（でんしゃ）は新宿（しんじゅく）に行（い）きますか。", translation: "Tàu này có đi Shinjuku không ạ?" },
         { id: 103, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "おすすめのメニューは何（なに）ですか。", translation: "Món ăn được đề xuất là món gì ạ?" },
         { id: 104, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "私（わたし）の 趣味（しゅみ）は 映画（えいが）を 見（み）ることです。", translation: "Sở thích của tôi là xem phim." },
-        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎週（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
+        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎年（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
         { id: 106, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "お会計（かいけい）を別々（べつべつ）にお願（ねが）いします。", translation: "Làm ơn tính tiền riêng cho chúng tôi." },
         { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "写真（しゃしん）を撮（と）っていただけますか。", translation: "Bạn có thể chụp giúp tôi một tấm hình được không?" },
         { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "トイレはどこにありますか。", translation: "Nhà vệ sinh ở đâu vậy ạ?" },
@@ -405,7 +406,50 @@ window.LingoApp = {
         if (advPanel) advPanel.classList.add("hidden");
         if (advBtn) advBtn.classList.remove("active");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.2]. Fixed Advanced Panel Toggle & Universal Multi-Language Font Stack.");
+        // Close floating Prompt Editor Modal when clicking outside
+        const promptModal = document.getElementById("promptEditorModal");
+        if (promptModal) {
+            promptModal.addEventListener("click", (e) => {
+                if (e.target === promptModal) {
+                    this.closePromptEditorModal();
+                }
+            });
+        }
+
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.3]. Dynamic Prompt Editor & Simplified Controls.");
+    },
+
+    // PROMPT EDITOR POPOUT FLOATING MODAL CONTROLS
+    openPromptEditorModal() {
+        const modal = document.getElementById("promptEditorModal");
+        const textarea = document.getElementById("customPromptInput");
+        if (textarea) {
+            textarea.value = this.customSystemPrompt || this.buildSystemPrompt();
+        }
+        if (modal) {
+            modal.classList.remove("hidden");
+            window.LingoLog.add("Mở cửa sổ Floating Popout Pop-up: Chỉnh sửa AI System Prompt (Edit Prompt Modal).");
+        }
+    },
+
+    closePromptEditorModal() {
+        const modal = document.getElementById("promptEditorModal");
+        if (modal) {
+            modal.classList.add("hidden");
+            window.LingoLog.add("Đóng cửa sổ Popout Pop-up Chỉnh sửa Prompt (Không lưu thay đổi).");
+        }
+    },
+
+    saveCustomPrompt() {
+        const textarea = document.getElementById("customPromptInput");
+        if (textarea && textarea.value.trim()) {
+            this.customSystemPrompt = textarea.value.trim();
+            this.closePromptEditorModal();
+            alert("Đã lưu câu lệnh chỉ định System Prompt mới cho AI thành công!\n(AIに与える指示プロンプトを正常に保存しました)");
+            window.LingoLog.add("Đã lưu System Prompt động tùy chỉnh do người dùng thiết lập.");
+        } else {
+            alert("Vui lòng nhập câu lệnh Prompt / プロンプト文を入力してください。");
+        }
     },
 
     openFeedbackPage() {
@@ -424,20 +468,21 @@ window.LingoApp = {
         window.open(targetUrl, '_blank');
     },
 
+    // LOCAL MODE ALWAYS LABELED "Local" IN ENGLISH
     toggleLocalMode() {
         this.useLocalFallback = !this.useLocalFallback;
         const txtEl = document.getElementById("txtLocalModeStatus");
         const btn = document.getElementById("btnToggleLocalMode");
 
         if (this.useLocalFallback) {
-            if (txtEl) txtEl.textContent = "ローカル併用: ON";
+            if (txtEl) txtEl.textContent = "Local: ON";
             if (btn) {
                 btn.style.background = "#ea580c";
                 btn.style.color = "#ffffff";
             }
             window.LingoLog.add("Bật chế độ dự phòng Local Mode (Sử dụng câu trả lời mẫu khi bận).");
         } else {
-            if (txtEl) txtEl.textContent = "ローカル併用: OFF";
+            if (txtEl) txtEl.textContent = "Local: OFF";
             if (btn) {
                 btn.style.background = "#e7e5e4";
                 btn.style.color = "#44403c";
@@ -484,7 +529,7 @@ window.LingoApp = {
         setTxt("txtBtnAdvanced", dict.btnAdvanced);
         setTxt("txtResetBtn", dict.resetBtn);
         setTxt("txtEndBtn", dict.endBtn);
-        setTxt("txtFeedbackBtn", dict.feedbackBtn);
+        setTxt("txtFeedbackBtn", dict.feedbackBtn); // Fixed label: VN -> Gợi ý, JP -> 意見, EN -> Feedback
         setTxt("txtSendBtn", dict.sendBtn);
         setTxt("txtFooterEndBtn", dict.endBtn);
         setTxt("txtScenarioTitle", dict.scenarioTitle);
@@ -599,7 +644,6 @@ window.LingoApp = {
         return formatted;
     },
 
-    // MODE SWITCHING: FOOTER REPURPOSED FOR PRONUNCIATION STATUS BANNER
     switchMode(modeType) {
         const tabGiaoTiep = document.getElementById("tabGiaoTiep");
         const tabPhatAm = document.getElementById("tabPhatAm");
@@ -621,7 +665,6 @@ window.LingoApp = {
                 pronounceContainer.classList.remove("hidden");
             }
 
-            // HIDE CONVERSATION FOOTER CONTROLS & SHOW PRONUNCIATION STATUS BANNER IN FOOTER
             if (chatFooterControls) {
                 chatFooterControls.style.setProperty("display", "none", "important");
             }
@@ -652,7 +695,6 @@ window.LingoApp = {
                 chatContainer.classList.remove("hidden");
             }
 
-            // SHOW CONVERSATION FOOTER CONTROLS & HIDE PRONUNCIATION STATUS BANNER
             if (pronounceFooterStatus) {
                 pronounceFooterStatus.style.setProperty("display", "none", "important");
                 pronounceFooterStatus.classList.add("hidden");
@@ -870,7 +912,6 @@ window.LingoApp = {
         });
     },
 
-    // REAL-TIME DYNAMIC AI PRONUNCIATION COACH WITH LEVEL-SPECIFIC PROMPTING
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
@@ -889,7 +930,6 @@ window.LingoApp = {
             recBtn.style.color = "#ffffff";
         }
 
-        // UPDATE FOOTER STATUS BANNER TO RECORDING STATE
         if (banner) banner.className = "pronounce-footer-status recording";
         if (statusTxt) statusTxt.textContent = dict.pronounceRecordingMsg || "🔴 マイクが収録中… (Đang thu âm...)";
 
@@ -911,7 +951,6 @@ window.LingoApp = {
                     recBtn.style.color = "#ea580c";
                 }
 
-                // UPDATE FOOTER STATUS BANNER TO ANALYZING STATE
                 if (banner) banner.className = "pronounce-footer-status analyzing";
                 if (statusTxt) statusTxt.textContent = dict.pronounceAnalyzingMsg || "🤖 AIが発音を分析中… (AI đang phân tích...)";
 
@@ -932,7 +971,6 @@ window.LingoApp = {
 
                 if (feedbackText) feedbackText.innerHTML = `<div style="padding:10px; color:#0284c7; font-weight:bold;"><em>${dict.aiThinking}</em></div>`;
 
-                // Calculate string match similarity score
                 let score = 95;
                 const targetChars = cleanTarget.replace(/\s+/g, '').toLowerCase();
                 const spokenChars = actualSpeech.replace(/\s+/g, '').toLowerCase();
@@ -948,7 +986,6 @@ window.LingoApp = {
                     if (score < 50) score = 65;
                 }
 
-                // LEVEL-SPECIFIC PROMPT INSTRUCTION GUIDANCE
                 const levelInstructionMap = {
                     "Sơ cấp": "Người học ở trình độ SƠ CẤP (A1-A2). Hãy đưa ra lời khuyên THÂN THIỆN, DỄ HIỂU, tập trung vào cách phát âm chuẩn từng nguyên âm, phụ âm cơ bản, thanh điệu/trọng âm đơn giản.",
                     "Trung cấp": "Người học ở trình độ TRUNG CẤP (B1-B2). Hãy tập trung phân tích NGỮ ĐIỆU (Intonation), cách ngắt nghỉ (Pause) giữa các cụm từ, và độ lưu loát (Fluency) khi nói.",
@@ -1011,7 +1048,6 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
                         </div>`;
                     }
                 } finally {
-                    // RESET FOOTER STATUS BANNER TO IDLE STATE
                     if (banner) banner.className = "pronounce-footer-status";
                     if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
                 }
@@ -1056,7 +1092,6 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
             setupRow.style.setProperty("display", "flex", "important");
             setupRow.scrollIntoView({ behavior: 'smooth' });
         }
-        // ONLY OPEN ADVANCED PANEL IF IT IS CURRENTLY HIDDEN AND API KEY IS ABSENT
         const advPanel = document.getElementById("advancedPanel");
         if (advPanel && advPanel.classList.contains("hidden")) {
             this.toggleAdvancedPanel();
@@ -1116,6 +1151,10 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
     },
 
     buildSystemPrompt() {
+        if (this.customSystemPrompt && this.customSystemPrompt.trim()) {
+            return this.customSystemPrompt;
+        }
+
         return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh, luôn CHỦ ĐỘNG dẫn dắt hội thoại.
 
 Cấu hình hội thoại:
