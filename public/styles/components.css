@@ -1,4 +1,40 @@
-/* Components Styling - Maximum Legibility High-Contrast Text for Chat Bubbles (Ver2.7) */
+/* Components Styling - Maximum Legibility & Clean Advanced Header Toggle Panel (Ver3.2) */
+
+/* Advanced Header Toggle Button & Collapsible Panel */
+.btn-advanced {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 5px 13px !important;
+    border-radius: 16px !important;
+    border: 1.5px solid #fdba74 !important;
+    background: #fff7ed !important;
+    color: #c2410c !important;
+    font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif) !important;
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.08) !important;
+}
+
+.btn-advanced:hover {
+    background: #ffedd5 !important;
+    border-color: #ea580c !important;
+    color: #9a3412 !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-advanced.active {
+    background: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #ea580c !important;
+    box-shadow: 0 3px 10px rgba(234, 88, 12, 0.3) !important;
+}
+
+.header-btns-group.hidden {
+    display: none !important;
+}
 
 /* ==========================================
    1. SETUP PROMPT BUBBLE (SOFT LIGHT VIOLET THEME)
@@ -71,7 +107,7 @@
 
 
 /* ==========================================
-   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER2.7 HIGH CONTRAST)
+   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER3.2 HIGH CONTRAST)
    ========================================== */
 .chat-row {
     display: flex !important;

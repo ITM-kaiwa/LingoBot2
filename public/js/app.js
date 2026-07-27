@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.1 Implementation
+// Main Application Controller - LingoBot2 Ver3.2 Implementation (Collapsible Advanced Controls Panel)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -19,6 +19,7 @@ window.LingoApp = {
             tabPhatAm: "Phát âm",
             lblUiLang: "Sử dụng:",
             lblTargetLang: "Mục tiêu:",
+            btnAdvanced: "Advanced",
             resetBtn: "Đặt lại",
             endBtn: "Kết thúc",
             sendBtn: "Gửi",
@@ -88,6 +89,7 @@ window.LingoApp = {
             tabPhatAm: "発音練習",
             lblUiLang: "UI言語:",
             lblTargetLang: "学習言語:",
+            btnAdvanced: "Advanced",
             resetBtn: "リセット",
             endBtn: "終了",
             sendBtn: "送信",
@@ -157,6 +159,7 @@ window.LingoApp = {
             tabPhatAm: "Pronunciation",
             lblUiLang: "UI Lang:",
             lblTargetLang: "Target Lang:",
+            btnAdvanced: "Advanced",
             resetBtn: "Reset",
             endBtn: "End",
             sendBtn: "Send",
@@ -328,7 +331,24 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.1]. Full Number & Text Preservation in TTS.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.2]. Advanced Header Controls Panel Collapsed by Default.");
+    },
+
+    toggleAdvancedPanel() {
+        const panel = document.getElementById("advancedPanel");
+        const btn = document.getElementById("btnAdvanced");
+        if (!panel) return;
+
+        const isHidden = panel.classList.contains("hidden");
+        if (isHidden) {
+            panel.classList.remove("hidden");
+            if (btn) btn.classList.add("active");
+            window.LingoLog.add("Hiển thị Bảng điều khiển nâng cao (Advanced Header Panel).");
+        } else {
+            panel.classList.add("hidden");
+            if (btn) btn.classList.remove("active");
+            window.LingoLog.add("Ẩn Bảng điều khiển nâng cao (Advanced Header Panel).");
+        }
     },
 
     updateUiLanguage(lang) {
@@ -344,6 +364,7 @@ window.LingoApp = {
         setTxt("txtTabPhatAm", dict.tabPhatAm);
         setTxt("lblUiLang", dict.lblUiLang);
         setTxt("lblTargetLang", dict.lblTargetLang);
+        setTxt("txtBtnAdvanced", dict.btnAdvanced);
         setTxt("txtResetBtn", dict.resetBtn);
         setTxt("txtEndBtn", dict.endBtn);
         setTxt("txtSendBtn", dict.sendBtn);
@@ -769,6 +790,8 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
             setupRow.style.setProperty("display", "flex", "important");
             setupRow.scrollIntoView({ behavior: 'smooth' });
         }
+        // Auto open advanced panel if closed when API key setup is required
+        this.toggleAdvancedPanel();
         const headerInput = document.getElementById("headerApiKeyInput");
         if (headerInput) {
             headerInput.focus();
