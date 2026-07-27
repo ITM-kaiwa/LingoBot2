@@ -1,4 +1,4 @@
-/* Main Design System - Screenshot Matched Styling with Darker Chat Viewport Background (Ver2.6) */
+/* Main Design System - High Contrast Text & Legibility System (Ver2.7) */
 :root {
     --bg-page: #f9f3ec;
     --card-bg: #ffffff;
@@ -14,13 +14,13 @@
     --btn-red-grad: linear-gradient(135deg, #ef4444, #dc2626);
     --btn-red-hover: #b91c1c;
 
-    /* User Bubble Color: Light Emerald Green (Image 2 Matched) */
+    /* User Bubble Color: Light Emerald Green with Deep Forest Green Text (#022c22) */
     --bubble-user-bg: #e6f4ea;
-    --bubble-user-text: #137333;
+    --bubble-user-text: #022c22;
 
-    /* AI Model Bubble Color: Light Sky Blue (Image 1 Matched) */
+    /* AI Model Bubble Color: Light Sky Blue with Deep Navy Blue Text (#0f172a) */
     --bubble-ai-bg: #e0f2fe;
-    --bubble-ai-text: #0369a1;
+    --bubble-ai-text: #0f172a;
 
     --text-main: #292524;
     --text-muted: #66605b;
@@ -290,7 +290,7 @@ body {
     background: #dc2626;
 }
 
-/* Main Chat Viewport - Darker background tone for distinct chat area boundary (Ver2.6) */
+/* Main Chat Viewport - Darker background tone for distinct chat area boundary (Ver2.7) */
 .chat-viewport {
     flex: 1 1 0%;
     min-height: 0;
@@ -413,10 +413,10 @@ body {
     100% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.2); }
 }
 
-/* Retry Countdown Badge Styling - Blend in seamlessly with meta text color */
+/* Retry Countdown Badge Styling - High contrast readable style */
 .retry-countdown-badge {
     font-size: 0.76rem;
-    font-weight: 500;
+    font-weight: 700;
     color: #0369a1;
     background: transparent;
     border: none;

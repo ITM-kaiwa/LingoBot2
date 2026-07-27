@@ -1,13 +1,13 @@
-/* Components Styling - Exact Image Matched Light Blue AI Bubble & Light Emerald User Bubble (Ver2.6) */
+/* Components Styling - Maximum Legibility High-Contrast Text for Chat Bubbles (Ver2.7) */
 
 /* ==========================================
    1. SETUP PROMPT BUBBLE (SOFT LIGHT VIOLET THEME)
    ========================================== */
 .setup-prompt-bubble {
-    background: #f5f3ff !important; /* Soft Light Violet tint */
-    border: 1px solid #ddd6fe !important; /* Soft Violet light border */
-    border-left: 5px solid #8b5cf6 !important; /* Violet accent bar */
-    color: #5b21b6 !important;
+    background: #f5f3ff !important;
+    border: 1px solid #ddd6fe !important;
+    border-left: 5px solid #8b5cf6 !important;
+    color: #4c1d95 !important;
     border-radius: 18px !important;
     padding: 16px 20px !important;
     box-shadow: 0 4px 14px rgba(139, 92, 246, 0.1) !important;
@@ -16,7 +16,7 @@
 .setup-prompt-bubble .setup-title {
     font-size: 1.05rem !important;
     font-weight: 800 !important;
-    color: #6d28d9 !important; /* Deep Violet Title */
+    color: #5b21b6 !important;
     margin-bottom: 8px !important;
     display: flex !important;
     align-items: center !important;
@@ -25,9 +25,10 @@
 
 .setup-prompt-bubble .setup-text-vn,
 .setup-prompt-bubble .setup-text-jp {
-    color: #5b21b6 !important;
-    font-size: 0.9rem !important;
-    line-height: 1.5 !important;
+    color: #4c1d95 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.55 !important;
+    font-weight: 600 !important;
 }
 
 .setup-prompt-bubble .bubble-key-input {
@@ -35,7 +36,7 @@
     border-radius: 12px !important;
     padding: 8px 14px !important;
     font-size: 0.88rem !important;
-    color: #4c1d95 !important;
+    color: #3b0764 !important;
     background: #ffffff !important;
     outline: none !important;
     transition: border-color 0.2s ease !important;
@@ -47,11 +48,11 @@
 }
 
 .setup-prompt-bubble .bubble-key-btn {
-    background: #8b5cf6 !important; /* Soft Violet action button */
+    background: #8b5cf6 !important;
     color: #ffffff !important;
     border: none !important;
     border-radius: 12px !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     padding: 8px 18px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
@@ -64,13 +65,13 @@
 }
 
 .setup-prompt-bubble .sender-tag {
-    color: #7c3aed !important;
-    font-weight: 700 !important;
+    color: #6d28d9 !important;
+    font-weight: 800 !important;
 }
 
 
 /* ==========================================
-   2. GENERAL CHAT BUBBLE & LAYOUT STYLING (VER2.6 IMAGE MATCHED)
+   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER2.7 HIGH CONTRAST)
    ========================================== */
 .chat-row {
     display: flex !important;
@@ -94,57 +95,81 @@
     max-width: 88% !important;
     padding: 14px 18px !important;
     border-radius: 18px !important;
-    font-size: 0.95rem !important;
-    line-height: 1.55 !important;
+    font-size: 0.96rem !important;
+    line-height: 1.6 !important;
     position: relative !important;
     word-break: break-word !important;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.04) !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
 }
 
-/* User Bubble: Light Emerald Green (Exact Matched with Attached Image 2) */
+/* User Bubble: Light Emerald Green Background + Ultra Dark Forest Text (#022c22 / #064e3b) */
 .user-row .chat-bubble {
     background: #e6f4ea !important; /* Light Emerald Green */
-    color: #137333 !important; /* Deep Emerald Green Text */
-    border: 1px solid #ceebd6 !important;
-    border-right: 5px solid #137333 !important;
+    color: #022c22 !important; /* Deep Dark Forest Green - Maximum Contrast */
+    border: 1px solid #b7e4c7 !important;
+    border-right: 5px solid #059669 !important;
     border-bottom-right-radius: 4px !important;
-    box-shadow: 0 3px 10px rgba(19, 115, 51, 0.08) !important;
+    box-shadow: 0 3px 10px rgba(5, 150, 105, 0.08) !important;
 }
 
-.user-row .chat-bubble .msg-time {
-    color: #0f5223 !important;
-    opacity: 0.85 !important;
+.user-row .chat-bubble .bubble-text {
+    color: #022c22 !important;
     font-weight: 600 !important;
 }
 
-/* AI Model Bubble: Light Sky Blue (Exact Matched with Attached Image 1) */
+.user-row .chat-bubble strong {
+    color: #064e3b !important;
+    font-weight: 800 !important;
+}
+
+.user-row .chat-bubble rt {
+    color: #047857 !important;
+    font-weight: 700 !important;
+}
+
+.user-row .chat-bubble .msg-time {
+    color: #047857 !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
+}
+
+/* AI Model Bubble: Light Sky Blue Background + Ultra Dark Navy Blue Text (#0f172a / #034694) */
 .ai-row .chat-bubble {
     background: #e0f2fe !important; /* Light Sky Blue */
-    color: #0369a1 !important; /* Deep Blue Text */
+    color: #0f172a !important; /* Deep Dark Navy - Maximum Contrast */
     border: 1px solid #bae6fd !important;
     border-left: 5px solid #0284c7 !important;
     border-bottom-left-radius: 4px !important;
     box-shadow: 0 3px 10px rgba(2, 132, 199, 0.08) !important;
 }
 
-.ai-row .chat-bubble .msg-time {
-    color: #0369a1 !important;
-    opacity: 0.85 !important;
+.ai-row .chat-bubble .bubble-text {
+    color: #0f172a !important;
     font-weight: 600 !important;
 }
 
-.bubble-text {
-    margin-bottom: 6px !important;
-    font-weight: 500 !important;
+.ai-row .chat-bubble strong {
+    color: #034694 !important;
+    font-weight: 800 !important;
+}
+
+.ai-row .chat-bubble rt {
+    color: #0284c7 !important;
+    font-weight: 700 !important;
+}
+
+.ai-row .chat-bubble .msg-time {
+    color: #0369a1 !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
 }
 
 .message-meta, .setup-meta {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    font-size: 0.78rem !important;
-    opacity: 0.9 !important;
-    margin-top: 6px !important;
+    font-size: 0.8rem !important;
+    margin-top: 8px !important;
     gap: 8px !important;
     flex-wrap: wrap !important;
 }
@@ -157,21 +182,22 @@
 
 .audio-btn {
     background: #ffffff !important;
-    border: 1px solid #bae6fd !important;
+    border: 1.5px solid #0284c7 !important;
     border-radius: 14px !important;
-    padding: 3px 10px !important;
-    color: #0284c7 !important;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
+    padding: 4px 11px !important;
+    color: #0369a1 !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06) !important;
 }
 
 .audio-btn:hover {
     background: #0284c7 !important;
     color: #ffffff !important;
     border-color: #0284c7 !important;
+    transform: translateY(-1px) !important;
 }
 
 
@@ -429,9 +455,8 @@ ruby {
 }
 
 rt {
-    font-size: 0.65em;
+    font-size: 0.68em;
     color: inherit;
-    opacity: 0.9;
 }
 
 /* Modal styling */

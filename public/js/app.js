@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.6 Implementation
+// Main Application Controller - LingoBot2 Ver2.7 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -328,7 +328,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.6]. Image Matched: Light Sky Blue AI Bubble & Light Emerald User Bubble.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.7]. High-Contrast Maximum Legibility Chat Text Colors.");
     },
 
     updateUiLanguage(lang) {
@@ -1023,10 +1023,10 @@ Quy tắc ứng xử:
         const thinkingMsg = dict.aiThinking || "AI đang suy nghĩ...";
 
         row.innerHTML = `
-            <div class="chat-bubble" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">
+            <div class="chat-bubble" style="background:#e0f2fe; color:#0f172a; border:1px solid #bae6fd;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <div class="spinner" style="width:16px; height:16px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                    <span style="font-size:0.85rem; font-weight:600;">${thinkingMsg}</span>
+                    <span style="font-size:0.85rem; font-weight:700; color:#034694;">${thinkingMsg}</span>
                 </div>
             </div>
         `;
