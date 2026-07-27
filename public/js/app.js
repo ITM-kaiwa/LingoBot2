@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.3 Implementation (Button Active Press Effect, Mobile Viewport Layout Fix, Compact Send & Abbreviated End Buttons)
+// Main Application Controller - LingoBot2 Ver4.4 Implementation (Restored Classic Bubble Colors, Aligned Footer Button Heights, Manual Pronunciation Audio)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -323,7 +323,7 @@ window.LingoApp = {
         { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (34 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "My favorite hobby is playing the acoustic guitar in my free time.", translation: "Sở thích của tôi là chơi đàn guitar vào thời gian rảnh." },
@@ -351,17 +351,6 @@ window.LingoApp = {
         { id: 222, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Thanks to your continuous support, we successfully achieved our quarterly goals.", translation: "Nhờ sự hỗ trợ liên tục của bạn, chúng tôi đã đạt mục tiêu quý thành công." },
         { id: 223, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I am feeling a bit under the weather today, so I will take a sick leave.", translation: "Hôm nay tôi thấy mệt nên xin phép nghỉ bệnh." },
         { id: 224, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We look forward to continuing our fruitful cooperation in the upcoming year.", translation: "Chúng tôi mong tiếp tục hợp tác hiệu quả trong năm tới." },
-
-        { id: 225, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Pursuing creative hobbies significantly enhances work-life balance and mental well-being.", translation: "Theo đuổi sở thích sáng tạo giúp cân bằng công việc và tinh thần." },
-        { id: 226, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Achieving peak athletic performance demands extraordinary discipline, strategic thinking, and resilience.", translation: "Đạt đỉnh cao thể thao đòi hỏi kỷ luật vượt trội, tư duy chiến lược và sự kiên cường." },
-        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
-        { id: 228, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "In light of prevailing economic uncertainties, we decided to postpone the product launch.", translation: "Căn cứ tình hình kinh tế bất ổn, chúng tôi quyết định hoãn ra mắt sản phẩm." },
-        { id: 229, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Implementing structural reforms is imperative to securing sustainable corporate growth.", translation: "Thực hiện cải cách cơ cấu là bắt buộc để đảm bảo tăng trưởng bền vững." },
-        { id: 230, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
-        { id: 231, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Rapid technological advancement necessitates a comprehensive overhaul of traditional business paradigms.", translation: "Tiến bộ công nghệ nhanh đòi hỏi đại tu toàn diện mô hình kinh doanh truyền thống." },
-        { id: 232, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Swift and decisive leadership is pivotal in navigating unprecedented organizational crises.", translation: "Lãnh đạo nhanh nhạy và quyết đoán là then chốt để vượt qua khủng hoảng." },
-        { id: 233, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
-        { id: 234, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We remain committed to optimizing resource allocation while enforcing strict cost discipline.", translation: "Chúng tôi cam kết tối ưu phân bổ nguồn lực đồng thời kỷ luật chi phí nghiêm ngặt." },
 
         // --- VIETNAMESE (30 Sentences) ---
         { id: 301, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Sở thích vào thời gian rảnh rỗi của tôi là nghe nhạc và đọc sách.", translation: "My leisure hobby is listening to music and reading books." },
@@ -398,7 +387,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.3]. Mobile Active Press Effects & Layout Fixes.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.4]. Restored Classic Bubble Colors, Aligned Footer Button Heights, Manual Pronunciation Audio.");
     },
 
     openFeedbackPage() {
@@ -618,7 +607,7 @@ window.LingoApp = {
 
             if (pronounceContainer) {
                 pronounceContainer.style.setProperty("display", "none", "important");
-                pronounceContainer.classList.remove("hidden");
+                pronounceContainer.classList.add("hidden");
             }
             if (chatContainer) {
                 chatContainer.style.setProperty("display", "flex", "important");
@@ -834,6 +823,7 @@ window.LingoApp = {
         });
     },
 
+    // REVISED PRONUNCIATION ADVISOR: Strictly manual (No auto-play of sample audio upon clicking record button)
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
@@ -854,7 +844,7 @@ window.LingoApp = {
             feedbackText.innerHTML = `<div style="color:#ea580c; font-weight:bold;">🎙️ 録音中... お手本「${targetText.replace(/（.*?）|\(.*?\)/g, '')}」を発声してください！</div>`;
         }
 
-        window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm cho câu: "${targetText}"`);
+        window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm thủ công cho câu: "${targetText}"`);
 
         const cleanTarget = targetText.replace(/（.*?）|\(.*?\)/g, '').trim();
 
@@ -907,7 +897,7 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                     const data = await res.json();
                     if (data.reply) {
                         feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
-                        if (window.LingoTTS) window.LingoTTS.playText(cleanTarget);
+                        // Manual Flow: Do NOT auto-play audio here. Let user click Play manually if desired.
                     } else {
                         feedbackText.innerHTML = `<div style="padding:10px; background:#fff7ed; border-radius:10px;">
                             <h3>📊 発音判定結果 (AI Pronunciation Score): ⭐⭐⭐⭐⭐ (${score}/100点)</h3>

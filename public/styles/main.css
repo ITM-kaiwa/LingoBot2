@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver4.3 (Mobile Viewport Lock & Button Active Press Effect) */
+/* Main Layout & Theme System - LingoBot2 Ver4.4 (Restored Classic Colors & Aligned Footer Heights) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -257,7 +257,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     gap: 12px;
 }
 
-/* Footer Bar Styling - Fixed to bottom, never cropped or hidden on mobile */
+/* Footer Bar Styling - Fixed to bottom, strictly aligned vertical heights for all buttons */
 .app-footer-bar {
     background: #ffffff;
     border-top: 1px solid var(--border-color);
@@ -279,13 +279,15 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 
 .footer-chat-input {
     width: 100%;
-    padding: 10px 14px;
+    height: 38px !important;
+    padding: 0 14px;
     border-radius: 20px;
     border: 1.5px solid #e7e5e4;
     background: #fafaf9;
     font-family: inherit;
     font-size: 0.9rem;
     outline: none;
+    box-sizing: border-box;
 }
 
 .footer-chat-input:focus {
@@ -300,6 +302,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     flex-shrink: 0;
 }
 
+/* Footer buttons strictly aligned to 38px height */
 .footer-btn {
     border: none;
     border-radius: 20px;
@@ -312,26 +315,36 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     justify-content: center;
     gap: 4px;
     white-space: nowrap;
+    height: 38px !important;
+    line-height: 1;
+    box-sizing: border-box;
+    padding: 0 14px;
 }
 
 /* SLIM COMPACT SEND BUTTON STYLING */
 .btn-send {
     background: var(--primary-gradient);
     color: #ffffff;
-    padding: 8px 12px !important;
+    padding: 0 12px !important;
     min-width: auto !important;
     box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
 }
 
 .btn-mic {
-    width: 38px;
-    height: 38px;
+    width: 38px !important;
+    height: 38px !important;
     border-radius: 50% !important;
     background: #fff7ed;
     border: 1.5px solid #fdba74;
     color: #ea580c;
     font-size: 1rem;
     padding: 0 !important;
+}
+
+.btn-red {
+    background: #dc2626;
+    color: #ffffff;
+    padding: 0 12px !important;
 }
 
 .btn-mic.recording {

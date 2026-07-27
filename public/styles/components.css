@@ -1,4 +1,4 @@
-/* UI Components & Ruby Styling - LingoBot2 Ver4.3 (Ruby Furigana Center Alignment & Purple Feedback Button) */
+/* UI Components & Ruby Styling - LingoBot2 Ver4.4 (Restored Classic Colors & High Contrast Ruby) */
 
 /* Button active animation for component buttons */
 .btn-purple {
@@ -31,7 +31,7 @@
     border-color: #0f172a;
 }
 
-/* Chat Rows & Bubbles */
+/* Chat Rows & Bubbles - RESTORED CLASSIC COLOR SYSTEM */
 .chat-row {
     display: flex;
     width: 100%;
@@ -56,19 +56,21 @@
     word-break: break-word;
 }
 
+/* User Message Bubble - Restored Vivid Orange Gradient */
 .user-row .chat-bubble {
-    background: linear-gradient(135deg, #ea580c, #c2410c);
-    color: #ffffff;
+    background: linear-gradient(135deg, #ea580c, #c2410c) !important;
+    color: #ffffff !important;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25) !important;
 }
 
+/* AI Message Bubble - Restored Soft White Card */
 .ai-row .chat-bubble {
-    background: #ffffff;
-    color: #1c1917;
+    background: #ffffff !important;
+    color: #1c1917 !important;
     border-bottom-left-radius: 4px;
-    border: 1px solid #f3e8de;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1.5px solid #f3e8de !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
 }
 
 /* OVERHAULED RUBY CSS: NO GAPS BETWEEN CHARACTERS WHEN FURIGANA IS LONGER THAN KANJI */
