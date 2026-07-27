@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.4 Implementation (Manual Local Mode Toggle & Exact Countdown Bubbles)
+// Main Application Controller - LingoBot2 Ver3.5 Implementation (Exact Kanji Ruby Positioning & Darker Badge Colors)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -261,7 +261,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -332,7 +332,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.4]. Local Mode is OFF by default. Countdown prompts for rate limits enabled.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.5]. Exact Kanji Ruby Positioning & Darker Badge Colors.");
     },
 
     toggleLocalMode() {
@@ -480,11 +480,35 @@ window.LingoApp = {
         }
     },
 
+    /**
+     * Converts Ruby Parens into HTML <ruby> tags (Ver3.5):
+     * Completely eliminates parens such as "初めて（はじめて）" or "荷物（にもつ）"
+     * and strictly places <rt> ONLY on top of Kanji!
+     */
     formatFuriganaForDisplay(text) {
         if (!text) return "";
-        return text
-            .replace(/([\u3400-\u4dbf\u4e00-\u9fff]+)（([\u3040-\u309f\u30a0-\u30ff\s]+)）/g, '<ruby>$1<rt>$2</rt></ruby>')
-            .replace(/([\u3400-\u4dbf\u4e00-\u9fff]+)\(([\u3040-\u309f\u30a0-\u30ff\s]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>');
+        let formatted = text;
+
+        // Pattern 1: Kanji + Okurigana + Ruby Parens (e.g. "初めて（はじめて）" -> "<ruby>初<rt>はじ</rt></ruby>めて")
+        formatted = formatted.replace(
+            /([\u3400-\u4dbf\u4e00-\u9fff]+)([\u3040-\u309f\u30a0-\u30ff]*)[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g,
+            (match, kanji, okurigana, ruby) => {
+                let cleanRuby = ruby.trim();
+                // Strip trailing okurigana from ruby if it reproduces okurigana (e.g. "はじめて" for "初" + "めて")
+                if (okurigana && cleanRuby.endsWith(okurigana)) {
+                    cleanRuby = cleanRuby.slice(0, -okurigana.length);
+                }
+                return `<ruby>${kanji}<rt>${cleanRuby}</rt></ruby>${okurigana}`;
+            }
+        );
+
+        // Pattern 2: Pure Kanji + Ruby Parens (e.g. "荷物（にもつ）" -> "<ruby>荷物<rt>にもつ</rt></ruby>")
+        formatted = formatted.replace(
+            /([\u3400-\u4dbf\u4e00-\u9fff]+)[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g,
+            '<ruby>$1<rt>$2</rt></ruby>'
+        );
+
+        return formatted;
     },
 
     switchMode(modeType) {
@@ -882,7 +906,7 @@ Cấu hình hội thoại:
 Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
 1. Nếu người học nói sai ngữ pháp, hãy ghi dòng nhận xét/sửa lỗi ở ĐẦU TIÊN với biểu tượng 💡 ở đầu dòng bằng ${this.uiLang} (Ví dụ: 💡 Câu của bạn rất chuẩn xác!). Dòng nhận xét này là để người học đọc bằng mắt, TTS sẽ tự động lọc không đọc dòng này.
 2. Dòng tiếp theo là CÂU HỘI THOẠI CHÍNH (セリフ) hoàn toàn bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. TTS sẽ đọc dòng này.
-3. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）để hiển thị thẻ ruby. Hệ thống sẽ tự động lọc bỏ phần trong ngoặc（にもつ）khi đọc TTS để tránh đọc lặp lại 2 lần!
+3. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）hoặc 初めて（はじめて）để hiển thị thẻ ruby. Hệ thống sẽ tự động chuyển thành thẻ ruby chuẩn <ruby>初<rt>はじ</rt></ruby>めて!
 4. Đặt 1 câu hỏi tương tác ngắn ở cuối để duy trì nhịp độ giao tiếp tự nhiên trong tình huống "${this.scenario}".`;
     },
 
@@ -984,10 +1008,6 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
         }
     },
 
-    /**
-     * Appends an exact real-time 1-second countdown bubble:
-     * "お待たせしてすみません、X秒後にもう一度入力をお願いします。"
-     */
     appendCountdownPromptBubble(seconds) {
         const container = document.getElementById("chatContainer");
         const row = document.createElement("div");

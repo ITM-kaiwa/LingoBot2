@@ -1,31 +1,12 @@
-/* Main Design System - High Contrast Text & Legibility System (Ver2.7) */
+/* Main App Viewport & Header Bar Styling - LingoBot2 Ver3.5 Implementation */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 :root {
-    --bg-page: #f9f3ec;
-    --card-bg: #ffffff;
-    --card-border: #e8ded4;
-
-    /* Distinct slightly darker background for chat viewport area */
-    --chat-viewport-bg: #efe6dc;
-    --chat-viewport-shadow: inset 0 2px 8px rgba(120, 80, 40, 0.08);
-
-    --brand-orange: #ea580c;
-    --btn-orange-grad: linear-gradient(135deg, #f97316, #ea580c);
-    
-    --btn-red-grad: linear-gradient(135deg, #ef4444, #dc2626);
-    --btn-red-hover: #b91c1c;
-
-    /* User Bubble Color: Light Emerald Green with Deep Forest Green Text (#022c22) */
-    --bubble-user-bg: #e6f4ea;
-    --bubble-user-text: #022c22;
-
-    /* AI Model Bubble Color: Light Sky Blue with Deep Navy Blue Text (#0f172a) */
-    --bubble-ai-bg: #e0f2fe;
-    --bubble-ai-text: #0f172a;
-
-    --text-main: #292524;
-    --text-muted: #66605b;
-
-    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --color-bg-app: #fcf7f2;
+    --color-header-bg: #ffffff;
+    --color-brand: #ea580c;
+    --color-brand-hover: #c2410c;
 }
 
 * {
@@ -34,51 +15,50 @@
     padding: 0;
 }
 
-body {
-    font-family: var(--font-body);
-    background-color: var(--bg-page);
-    color: var(--text-main);
-    height: 100vh;
-    height: 100dvh;
+html, body {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
+    background-color: var(--color-bg-app);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
 }
 
 .app-viewport {
-    width: 100%;
-    max-width: 1180px;
-    height: 98vh;
-    height: 98dvh;
+    width: 100vw;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
 }
 
 .app-card {
-    background: #ffffff;
-    border: 2px solid var(--card-border);
-    border-radius: 20px;
+    width: 100%;
+    max-width: 1100px;
     height: 100%;
+    max-height: 940px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 30px rgba(160, 100, 50, 0.08);
     overflow: hidden;
-    position: relative;
+    border: 1px solid #f3e8de;
 }
 
-/* Header Bar */
+/* ==========================================
+   HEADER BAR & STATUS BADGES (VER3.5 RICHER DARKER COLORS)
+   ========================================== */
 .app-header-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 16px;
-    background: #fff9f3;
+    padding: 10px 18px;
+    background: #ffffff;
     border-bottom: 1px solid #f0e4d8;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
-    flex-shrink: 0;
 }
 
 .brand-group {
@@ -88,75 +68,73 @@ body {
 }
 
 .logo-badge-btn {
-    font-size: 1.5rem;
-    background: #ffedd5;
-    border: 1px solid #fed7aa;
-    border-radius: 12px;
-    padding: 4px 8px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #fed7aa;
+    background: #fff7ed;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .logo-badge-btn:hover {
-    background: #fed7aa;
-    transform: scale(1.08) rotate(-4deg);
-}
-
-.logo-badge-btn:active {
-    transform: translateY(2px) scale(0.95);
+    transform: scale(1.08);
+    background: #ffedd5;
 }
 
 .brand-title {
     font-size: 1.25rem;
     font-weight: 800;
     color: #1c1917;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.5px;
 }
 
-/* Version Badge */
 .version-badge {
+    background: #ffedd5;
+    color: #ea580c;
     font-size: 0.72rem;
     font-weight: 800;
-    color: #ea580c;
-    background: #ffedd5;
-    border: 1px solid #fed7aa;
     padding: 2px 8px;
-    border-radius: 10px;
-    letter-spacing: 0.2px;
+    border-radius: 12px;
+    border: 1px solid #fed7aa;
 }
 
-/* Nav Mode Tabs */
+/* Navigation Mode Tabs */
 .nav-tabs-group {
     display: flex;
-    background: #f7ebe1;
-    padding: 4px;
-    border-radius: 16px;
-    gap: 4px;
+    background: #f5f5f4;
+    padding: 3px;
+    border-radius: 20px;
+    border: 1px solid #e7e5e4;
 }
 
 .nav-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 16px;
+    padding: 6px 14px;
+    border-radius: 16px;
     border: none;
-    border-radius: 12px;
-    font-family: var(--font-body);
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #66605b;
     background: transparent;
+    color: #78716c;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
 }
 
 .nav-tab.active {
     background: #ffffff;
     color: #ea580c;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-/* Status Badges */
+/* STATUS BADGES PILLS (VER3.5 MUCH RICHER & DARKER VISIBILITY) */
 .badges-group {
     display: flex;
     align-items: center;
@@ -167,36 +145,60 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    transition: all 0.2s ease;
 }
 
+/* UI Language Badge Pill - Richer Darker Orange Theme */
 .badge-ui {
-    background: #fff3e0;
-    color: #c2410c;
-    border: 1px solid #ffedd5;
+    background: #ffedd5 !important;
+    border: 1.5px solid #f97316 !important;
+    color: #9a3412 !important;
+    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15) !important;
 }
 
+.badge-ui .badge-prefix {
+    color: #9a3412 !important;
+    font-weight: 800 !important;
+}
+
+.badge-ui .badge-select {
+    color: #7c2d12 !important;
+    font-weight: 800 !important;
+}
+
+/* Target Language Badge Pill - Richer Darker Blue Theme */
 .badge-target {
-    background: #e6f4ea;
-    color: #137333;
-    border: 1px solid #ceebd6;
+    background: #e0f2fe !important;
+    border: 1.5px solid #0284c7 !important;
+    color: #034694 !important;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15) !important;
+}
+
+.badge-target .badge-prefix {
+    color: #034694 !important;
+    font-weight: 800 !important;
+}
+
+.badge-target .badge-select {
+    color: #0c4a6e !important;
+    font-weight: 800 !important;
 }
 
 .badge-select {
-    border: none;
     background: transparent;
+    border: none;
     font-family: var(--font-body);
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: inherit;
-    outline: none;
+    font-size: 0.82rem;
+    font-weight: 800;
     cursor: pointer;
+    outline: none;
 }
 
-/* Header Buttons & Active TTS Badge */
+/* Header Buttons & Controls Panel Group */
 .header-btns-group {
     display: flex;
     align-items: center;
@@ -204,34 +206,30 @@ body {
 }
 
 .header-select {
-    padding: 6px 10px;
-    border-radius: 12px;
+    padding: 5px 10px;
+    border-radius: 14px;
     border: 1px solid #fed7aa;
-    background: #fffaf5;
+    background: #fff8f0;
+    color: #c2410c;
     font-family: var(--font-body);
     font-size: 0.8rem;
+    font-weight: 700;
     outline: none;
     cursor: pointer;
 }
 
 .active-tts-badge {
-    font-size: 0.76rem;
-    font-weight: 800;
-    color: #0284c7;
     background: #e0f2fe;
+    color: #0284c7;
     border: 1px solid #bae6fd;
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    font-size: 0.72rem;
+    font-weight: 800;
 }
 
-/* Compact API Key Group in Header */
 .header-key-group {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 4px;
 }
@@ -240,272 +238,152 @@ body {
     width: 90px;
     padding: 5px 8px;
     border-radius: 12px;
-    border: 1px solid #fed7aa;
-    background: #ffffff;
-    font-family: var(--font-body);
+    border: 1px solid #ddd6fe;
+    background: #f5f3ff;
+    color: #4c1d95;
     font-size: 0.78rem;
+    font-weight: 600;
     outline: none;
-    transition: width 0.2s ease, border-color 0.2s ease;
 }
 
 .header-key-input:focus {
-    width: 140px;
-    border-color: #ea580c;
-}
-
-.btn-key {
-    background: #2563eb;
-    padding: 6px 12px;
-    font-size: 0.8rem;
+    border-color: #8b5cf6;
+    background: #ffffff;
 }
 
 .action-btn {
+    padding: 5px 12px;
+    border-radius: 14px;
+    border: none;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 7px 16px;
-    border: none;
-    border-radius: 20px;
-    font-family: var(--font-body);
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #ffffff;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    gap: 4px;
+    transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 .action-btn:hover {
     transform: translateY(-1px);
-    filter: brightness(1.05);
 }
 
-.action-btn:active {
-    transform: translateY(2px) scale(0.97);
-}
+.btn-key { background: #8b5cf6; color: #ffffff; }
+.btn-orange { background: #f97316; color: #ffffff; }
+.btn-red { background: #dc2626; color: #ffffff; }
 
-.btn-orange {
-    background: #f97316;
-}
-.btn-red {
-    background: #dc2626;
-}
-
-/* Main Chat Viewport - Darker background tone for distinct chat area boundary (Ver2.7) */
+/* Main Chat Scroll Viewport */
 .chat-viewport {
     flex: 1 1 0%;
     min-height: 0;
-    overflow: hidden;
-    position: relative;
-    background: var(--chat-viewport-bg);
-    box-shadow: var(--chat-viewport-shadow);
     display: flex;
     flex-direction: column;
+    background: #fffcfa;
+    position: relative;
+    overflow: hidden;
 }
 
 .chat-scroll-area {
     flex: 1 1 0%;
     min-height: 0;
     overflow-y: auto;
-    padding: 16px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     scroll-behavior: smooth;
 }
 
-/* Footer Section */
+/* Footer Bar & Input Wrapper */
 .app-footer-bar {
-    display: flex;
-    align-items: center;
-    padding: 10px 14px;
+    padding: 12px 20px;
     background: #ffffff;
     border-top: 1px solid #f0e4d8;
-    gap: 8px;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .footer-input-wrapper {
     flex: 1;
-    min-width: 0;
+    display: flex;
+    align-items: center;
 }
 
 .footer-chat-input {
     width: 100%;
-    padding: 10px 16px;
-    border: 2px solid #fdba74;
-    border-radius: 26px;
+    padding: 12px 18px;
+    border-radius: 24px;
+    border: 1.5px solid #e7e5e4;
+    background: #fafaf9;
     font-family: var(--font-body);
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     color: #1c1917;
-    background: #ffffff;
     outline: none;
-    transition: border-color 0.2s ease;
-}
-
-.footer-chat-input::placeholder {
-    color: #94a3b8;
+    transition: all 0.2s ease;
 }
 
 .footer-chat-input:focus {
     border-color: #ea580c;
+    background: #ffffff;
     box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
 }
 
 .footer-btns-wrapper {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+    gap: 8px;
 }
 
 .footer-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 9px 16px;
-    border: none;
+    padding: 10px 18px;
     border-radius: 22px;
+    border: none;
     font-family: var(--font-body);
     font-size: 0.88rem;
-    font-weight: 700;
-    color: #ffffff;
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.15s ease;
-    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .footer-btn:hover {
     transform: translateY(-1px);
 }
 
-.footer-btn:active {
-    transform: translateY(2px) scale(0.96);
-}
-
 .btn-send {
-    background: var(--btn-orange-grad);
-    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
 }
 
 .btn-mic {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     padding: 0;
     border-radius: 50%;
-    background: #ffedd5;
+    background: #fff7ed;
     color: #ea580c;
-    font-size: 1.1rem;
-}
-
-.btn-mic:hover {
-    background: #fed7aa;
+    border: 1.5px solid #fed7aa;
+    justify-content: center;
 }
 
 .btn-mic.recording {
-    background: #fee2e2;
-    color: #dc2626;
-    animation: micPulse 1.2s infinite alternate;
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #dc2626;
+    animation: pulseMic 1.2s infinite;
 }
 
-@keyframes micPulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.2); }
+@keyframes pulseMic {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
-/* Retry Countdown Badge Styling - High contrast readable style */
-.retry-countdown-badge {
-    font-size: 0.76rem;
-    font-weight: 700;
-    color: #0369a1;
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin-left: 2px;
-}
-
-/* ==========================================
-   MOBILE & TABLET RESPONSIVE STYLES
-   ========================================== */
-@media (max-width: 768px) {
-    body {
-        padding: 0;
-        height: 100dvh;
-    }
-
-    .app-viewport {
-        height: 100dvh;
-        max-width: 100%;
-    }
-
-    .app-card {
-        border-radius: 0;
-        border: none;
-    }
-
-    /* Mobile Header Layout */
-    .app-header-bar {
-        padding: 8px 10px;
-        gap: 6px;
-    }
-
-    .brand-title {
-        font-size: 1.1rem;
-    }
-
-    .version-badge {
-        font-size: 0.68rem;
-        padding: 2px 6px;
-    }
-
-    .nav-tab {
-        padding: 5px 10px;
-        font-size: 0.8rem;
-    }
-
-    .badge-pill {
-        padding: 3px 8px;
-        font-size: 0.78rem;
-    }
-
-    .header-select {
-        max-width: 120px;
-        font-size: 0.75rem;
-        padding: 4px 6px;
-    }
-
-    .header-key-input {
-        width: 70px;
-    }
-
-    .action-btn {
-        padding: 5px 10px;
-        font-size: 0.78rem;
-    }
-
-    /* Mobile Chat & Footer Layout */
-    .chat-scroll-area {
-        padding: 12px 10px;
-    }
-
-    .app-footer-bar {
-        padding: 8px 10px;
-        gap: 6px;
-    }
-
-    .footer-chat-input {
-        padding: 9px 14px;
-        font-size: 0.88rem;
-    }
-
-    .footer-btn {
-        padding: 8px 12px;
-        font-size: 0.82rem;
-    }
-
-    .btn-mic {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
+.hidden {
+    display: none !important;
 }
