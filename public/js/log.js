@@ -1,102 +1,95 @@
-// System Execution & Environment Diagnostic Logger - LingoBot2 Ver1.30 Implementation
+// System Logger Module - LingoBot2 Ver1.76 Implementation
 window.LingoLog = {
     logs: [],
-
+    
     init() {
-        this.captureSystemDiagnostics();
-        this.add("Khởi tạo hệ thống LingoBotWebApp thành công.");
+        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        this.logs.push(`[${timeStr}] Khởi tạo hệ thống LingoBotWebApp thành công.`);
+        this.render();
     },
 
-    captureSystemDiagnostics() {
-        try {
-            const ua = navigator.userAgent || "Unknown UA";
-            const platform = navigator.platform || "Unknown Platform";
-            const lang = navigator.language || "Unknown Lang";
-            const languages = (navigator.languages || [lang]).join(", ");
-            const screenRes = `${window.screen.width}x${window.screen.height} (Color: ${window.screen.colorDepth}-bit)`;
-            const viewportSize = `${window.innerWidth}x${window.innerHeight}`;
-            const isOnline = navigator.onLine ? "Online" : "Offline";
-            const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : "Unknown Cores";
-            const memory = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : "Unknown Memory";
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown TZ";
-
-            let connectionInfo = "Standard Network";
-            if (navigator.connection || navigator.mozConnection || navigator.webkitConnection) {
-                const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-                connectionInfo = `Type: ${conn.effectiveType || "N/A"}, RTT: ${conn.rtt || "N/A"}ms, Downlink: ${conn.downlink || "N/A"}Mbps`;
-            }
-
-            const sysInfoBlock = [
-                "==================================================",
-                "🖥️ CLIENT SYSTEM & BROWSER DIAGNOSTICS:",
-                `- User-Agent: ${ua}`,
-                `- Platform / OS: ${platform}`,
-                `- Browser Language: ${lang} (Preferred: ${languages})`,
-                `- Screen Resolution: ${screenRes}`,
-                `- Viewport Size: ${viewportSize}`,
-                `- Hardware: ${cores} | Memory: ${memory}`,
-                `- Network Status: ${isOnline} (${connectionInfo})`,
-                `- Timezone: ${tz}`,
-                "=================================================="
-            ].join("\n");
-
-            this.logs.push(sysInfoBlock);
-        } catch (e) {
-            console.error("Error capturing system diagnostics:", e);
-        }
-    },
-
-    add(message) {
-        const timestamp = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-        const logLine = `[${timestamp}] ${message}`;
+    add(msg) {
+        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const logLine = `[${timeStr}] ${msg}`;
         this.logs.push(logLine);
-        console.log(logLine);
+        console.log(`%c[LingoLog]`, "color: #ea580c; font-weight: bold;", logLine);
+        this.render();
+    },
 
-        const logOutput = document.getElementById("logOutput");
-        if (logOutput) {
-            logOutput.textContent = this.logs.join("\n");
-            logOutput.scrollTop = logOutput.scrollHeight;
+    getClientDiagnostics() {
+        const ua = navigator.userAgent;
+        const platform = navigator.platform || "Unknown";
+        const language = navigator.language || "Unknown";
+        const languages = navigator.languages ? navigator.languages.join(", ") : language;
+        const screenRes = `${window.screen.width}x${window.screen.height} (Color: ${window.screen.colorDepth}-bit)`;
+        const viewportSize = `${window.innerWidth}x${window.innerHeight}`;
+        const hardwareCores = navigator.hardwareConcurrency || "Unknown";
+        const memory = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : "Unknown";
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const networkType = connection ? `${connection.effectiveType || ''} (${connection.saveData ? 'SaveData On' : 'Standard Network'})` : "Online";
+
+        return `==================================================
+🖥️ CLIENT SYSTEM & BROWSER DIAGNOSTICS:
+- User-Agent: ${ua}
+- Platform / OS: ${platform}
+- Browser Language: ${language} (Preferred: ${languages})
+- Screen Resolution: ${screenRes}
+- Viewport Size: ${viewportSize}
+- Hardware: ${hardwareCores} Cores | Memory: ${memory}
+- Network Status: ${networkType}
+- Timezone: ${timeZone}
+==================================================`;
+    },
+
+    render() {
+        const consoleEl = document.getElementById("logOutput");
+        if (consoleEl) {
+            const diagHeader = this.getClientDiagnostics();
+            consoleEl.textContent = diagHeader + "\n" + this.logs.join("\n");
+            consoleEl.scrollTop = consoleEl.scrollHeight;
         }
     },
 
     openModal() {
         const modal = document.getElementById("logModal");
-        const logOutput = document.getElementById("logOutput");
-        if (logOutput) {
-            logOutput.textContent = this.logs.join("\n");
-            logOutput.scrollTop = logOutput.scrollHeight;
-        }
         if (modal) {
             modal.classList.remove("hidden");
+            this.render();
             this.add("Đã mở Cửa sổ Nhật ký hệ thống (System Logs Modal).");
         }
     },
 
     closeModal() {
         const modal = document.getElementById("logModal");
-        if (modal) modal.classList.add("hidden");
+        if (modal) {
+            modal.classList.add("hidden");
+        }
     },
 
     copy() {
-        const text = this.logs.join("\n");
-        navigator.clipboard.writeText(text).then(() => {
-            alert("Đã sao chép toàn bộ Nhật ký hệ thống vào bộ nhớ tạm! / システムログをクリップボードにコピーしました！");
+        const consoleEl = document.getElementById("logOutput");
+        const fullLogs = consoleEl ? consoleEl.textContent : this.getClientDiagnostics() + "\n" + this.logs.join("\n");
+        
+        navigator.clipboard.writeText(fullLogs).then(() => {
+            alert("Đã sao chép toàn bộ Nhật ký hệ thống & Thông tin cấu hình máy vào Khay nhớ tạm (Clipboard)!\n(システムログとPC診断情報をクリップボードにコピーしました)");
         }).catch(err => {
-            alert("Lỗi sao chép log: " + err);
+            alert("Lỗi khi sao chép log: " + err.message);
         });
     },
 
     download() {
-        const text = this.logs.join("\n");
-        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
+        const consoleEl = document.getElementById("logOutput");
+        const fullLogs = consoleEl ? consoleEl.textContent : this.getClientDiagnostics() + "\n" + this.logs.join("\n");
+        
+        const blob = new Blob([fullLogs], { type: "text/plain;charset=utf-8" });
         const a = document.createElement("a");
-        a.href = url;
-        a.download = `LingoBot2_System_Log_${new Date().toISOString().slice(0,10)}.txt`;
+        a.href = URL.createObjectURL(blob);
+        a.download = `lingobot_system_logs_${Date.now()}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        this.add("Đã tải xuống tệp Nhật ký hệ thống (.txt).");
     }
 };
 

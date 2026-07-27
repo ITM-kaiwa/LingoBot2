@@ -31,6 +31,11 @@ PRIMARY_MODELS = [
 ]
 
 SCENARIO_FALLBACK_REPLIES = {
+    "自由会話": [
+        "こんにちは！今日はどんなことについてお話ししましょうか？自由になんでも聞いたり話したりしてくださいね。",
+        "お疲れ様です！最近楽しかったことや興味のあるトピックなど、何でも気軽に話しかけてください！",
+        "何か話したいテーマはありますか？どんな日常の会話でも大歓迎ですよ。"
+    ],
     "空港のチェックイン会話": [
         "かしこまりました。パスポートとお手荷物を確認させていただきますね。ご搭乗券を発行いたします。",
         "承知いたしました。窓側のお席と通路側のお席のどちらがご希望でしょうか？",
@@ -267,7 +272,7 @@ def chat():
 @app.route("/api/tts", methods=["POST"])
 def tts():
     """
-    Multi-Tier Fallback TTS Endpoint (Ver1.70)
+    Multi-Tier Fallback TTS Endpoint (Ver1.76)
     Order of Fallback: Chirp -> Neural -> Wavenet / Standard -> General (Browser Native)
     """
     try:
@@ -277,7 +282,6 @@ def tts():
         text = data.get("text", "").strip()
         requested_voice = data.get("voice_name", "ja-JP-Chirp3-HD-F")
 
-        # Explicit return if user chose General (browser-native)
         if requested_voice == "browser-native":
             return jsonify({
                 "fallback_browser": True,
@@ -291,7 +295,6 @@ def tts():
         parts = requested_voice.split("-")
         lang_code = f"{parts[0]}-{parts[1]}" if len(parts) >= 2 else "ja-JP"
         
-        # Strict Multi-Tier Fallback Order: Chirp -> Neural -> WaveNet -> Standard
         candidate_voices = [requested_voice]
         
         if "ja-JP" in lang_code:
@@ -314,7 +317,6 @@ def tts():
                 seen.add(v)
                 clean_candidate_voices.append(v)
 
-        # METHOD 1: OAuth2 Token (Tries Chirp -> Neural -> Wavenet -> Standard)
         oauth_token, oauth_err = get_gcp_oauth2_token()
 
         if oauth_token:
@@ -350,7 +352,6 @@ def tts():
                 except Exception as e:
                     continue
 
-        # METHOD 2: API Key Fallback (Tries Neural -> Wavenet -> Standard if Chirp fails)
         api_key = resolve_api_key(client_key)
 
         if api_key:
@@ -383,7 +384,6 @@ def tts():
                 except Exception as e:
                     continue
 
-        # METHOD 3: Final Fallback -> General (Web Speech API)
         return jsonify({
             "error": "Tự động chuyển sang giọng đọc chuẩn General (Web Speech API)",
             "fallback_browser": True,

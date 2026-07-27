@@ -1,11 +1,11 @@
-// Main Application Controller - LingoBot2 Ver1.75 Implementation
+// Main Application Controller - LingoBot2 Ver1.76 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
     uiLang: "tiếng Việt",
     targetLang: "jp 日本語", // Default target language: Japanese
     level: "Sơ cấp (CEFR A1, A2)",
-    scenario: "自己紹介の会話",
+    scenario: "自由会話",
     filterLang: "all",
     filterLevel: "all",
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
@@ -25,12 +25,13 @@ window.LingoApp = {
             placeholder: "Nhập tin nhắn hoặc nói bằng micro...",
             scenarioTitle: "🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:",
             levelLabel: "Trình độ:",
-            scenarioLabel: "Tình huống (20 chủ đề):",
+            scenarioLabel: "Tình huống (21 chủ đề):",
             level1: "Sơ cấp A1-A2",
             level2: "Trung cấp B1-B2",
             level3: "Cao cấp C1-C2",
 
-            catDaily: "💬 Giao tiếp hằng ngày",
+            catDaily: "💬 Giao tiếp hằng ngày & Tự do",
+            scenFreeTalk: "💬 Trò chuyện tự do",
             scenSelfIntro: "👋 Tự giới thiệu bản thân",
             scenDirections: "🗺️ Hỏi và chỉ đường",
             scenSmallTalk: "☀️ Thời tiết & Trò chuyện",
@@ -70,7 +71,6 @@ window.LingoApp = {
             aiThinking: "AI đang suy nghĩ...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
 
-            // Inner Chat & Pronunciation Buttons (PLAYING button standardized per user directive)
             btnPlay: "▶ Phát",
             btnPlaying: "▶ Đang phát",
             btnStop: "⏹ STOP",
@@ -78,7 +78,6 @@ window.LingoApp = {
             btnSamplePlay: "▶ Nghe mẫu",
             btnSampleRecord: "🎙️ Thu âm & Chấm điểm",
 
-            // Summary Modal
             summaryModalTitle: "📊 Báo cáo & Lời khuyên tổng kết bài học",
             btnPrint: "In báo cáo",
             btnPdf: "Tải PDF",
@@ -95,12 +94,13 @@ window.LingoApp = {
             placeholder: "メッセージを入力、またはマイクで話してください...",
             scenarioTitle: "🎯 レベル(CEFR)と対話シチュエーションの選択:",
             levelLabel: "レベル:",
-            scenarioLabel: "場面 (全20テーマ):",
+            scenarioLabel: "場面 (全21テーマ):",
             level1: "初級 A1-A2",
             level2: "中級 B1-B2",
             level3: "上級 C1-C2",
 
-            catDaily: "💬 日常会話",
+            catDaily: "💬 日常会話・自由会話",
+            scenFreeTalk: "💬 自由会話",
             scenSelfIntro: "👋 自己紹介の会話",
             scenDirections: "🗺️ 道案内の会話",
             scenSmallTalk: "☀️ 天気・世間話の会話",
@@ -140,7 +140,6 @@ window.LingoApp = {
             aiThinking: "AIが思考中です...",
             aiSummarizing: "AIがまとめています...",
 
-            // Inner Chat & Pronunciation Buttons (PLAYING button standardized to "▶ 再生中")
             btnPlay: "▶ 再生",
             btnPlaying: "▶ 再生中",
             btnStop: "⏹ STOP",
@@ -148,7 +147,6 @@ window.LingoApp = {
             btnSamplePlay: "▶ お手本を聞く",
             btnSampleRecord: "🎙️ 録音＆判定",
 
-            // Summary Modal
             summaryModalTitle: "📊 レッスン総括レポート＆アドバイス",
             btnPrint: "レポートを印刷",
             btnPdf: "PDF保存",
@@ -165,12 +163,13 @@ window.LingoApp = {
             placeholder: "Type a message or speak into mic...",
             scenarioTitle: "🎯 Choose CEFR Level & Scenario:",
             levelLabel: "Level:",
-            scenarioLabel: "Scenario (20 Topics):",
+            scenarioLabel: "Scenario (21 Topics):",
             level1: "Beginner A1-A2",
             level2: "Intermediate B1-B2",
             level3: "Advanced C1-C2",
 
-            catDaily: "💬 Daily Conversation",
+            catDaily: "💬 Daily & Free Conversation",
+            scenFreeTalk: "💬 Free Conversation",
             scenSelfIntro: "👋 Self-Introduction",
             scenDirections: "🗺️ Asking & Giving Directions",
             scenSmallTalk: "☀️ Weather & Small Talk",
@@ -210,7 +209,6 @@ window.LingoApp = {
             aiThinking: "AI is thinking...",
             aiSummarizing: "AI is summarizing...",
 
-            // Inner Chat & Pronunciation Buttons (PLAYING button standardized)
             btnPlay: "▶ Play",
             btnPlaying: "▶ Playing",
             btnStop: "⏹ STOP",
@@ -218,7 +216,6 @@ window.LingoApp = {
             btnSamplePlay: "▶ Play Sample",
             btnSampleRecord: "🎙️ Record & Grade",
 
-            // Summary Modal
             summaryModalTitle: "📊 Lesson Summary & Advice Report",
             btnPrint: "Print Report",
             btnPdf: "Download PDF",
@@ -327,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.75]. Nút phát đổi sang ▶ 再生中 / ▶ Đang phát & Đồng bộ nhãn General tự động.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver1.76]. Thêm chủ đề '自由会話' & Điều chỉnh nền khung chat tối hơn.");
     },
 
     updateUiLanguage(lang) {
@@ -363,7 +360,8 @@ window.LingoApp = {
         setTxt("catBusiness", dict.catBusiness);
         setTxt("catTrouble", dict.catTrouble);
 
-        // 20 Scenarios
+        // Scenarios
+        setTxt("scenFreeTalk", dict.scenFreeTalk);
         setTxt("scenSelfIntro", dict.scenSelfIntro);
         setTxt("scenDirections", dict.scenDirections);
         setTxt("scenSmallTalk", dict.scenSmallTalk);
@@ -790,6 +788,11 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     buildSystemPrompt() {
+        let scenarioRules = `Đóng vai đối phương chuẩn xác trong tình huống "${this.scenario}".`;
+        if (this.scenario === "自由会話") {
+            scenarioRules = `Bạn và người học đang tham gia một buổi trò chuyện tự do (自由会話 / Free Talk). Hãy trò chuyện tự nhiên, thân thiện, mở rộng bất kỳ chủ đề nào người học đưa ra.`;
+        }
+
         return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh.
 
 Cấu hình hội thoại:
@@ -800,7 +803,7 @@ Cấu hình hội thoại:
 - Tình huống: ${this.scenario}
 
 Quy tắc ứng xử:
-1. Đóng vai đối phương chuẩn xác trong tình huống "${this.scenario}". Trả lời chính bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）để hiển thị thẻ ruby cho người học dễ đọc.
+1. ${scenarioRules} Trả lời chính bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）để hiển thị thẻ ruby cho người học dễ đọc.
 2. Nếu người dùng nói sai ngữ pháp hoặc từ vựng, nhẹ nhàng sửa lỗi bằng ${this.uiLang} ở đầu tin nhắn.
 3. Đặt 1 câu hỏi tương tác ngắn ở cuối để duy trì nhịp độ giao tiếp tự nhiên trong tình huống "${this.scenario}".
 4. Trả lời ngắn gọn (2-3 câu) để phản hồi siêu nhanh.`;

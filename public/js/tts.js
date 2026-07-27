@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver1.75 Implementation
+// TTS Engine Module - LingoBot2 Ver1.76 Implementation
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
