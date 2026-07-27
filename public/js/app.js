@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.9 Implementation (Forced Universal Font Enforcement & Footer Pronunciation Status Banner)
+// Main Application Controller - LingoBot2 Ver5.0 Implementation (Updated Footer Pronunciation Status Banner Text)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -76,7 +76,7 @@ window.LingoApp = {
             aiThinking: "AI đang phân tích giọng nói...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
 
-            pronounceIdleMsg: "🎙️ Hãy nói qua Micro (Vui lòng chọn câu mẫu bên dưới)",
+            pronounceIdleMsg: "🎙️ Hãy nói qua Micro (Vui lòng chọn câu mẫu ở trên)",
             pronounceRecordingMsg: "🔴 Micro đang thu âm... (Hãy nói)",
             pronounceAnalyzingMsg: "🤖 AI đang phân tích phát âm...",
 
@@ -146,7 +146,7 @@ window.LingoApp = {
 
             startBtn: "🚀 会話を開始する",
             pronounceTitle: "🎯 発音・シャドーイング練習",
-            pronounceSub: "下の例文（初級・中級・上級の計100文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
+            pronounceSub: "上の例文（初級・中級・上級の計100文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
             pronounceFeedbackTitle: "📊 AI発音分析結果:",
             filterLang: "言語:",
             filterLevel: "レベル:",
@@ -154,7 +154,7 @@ window.LingoApp = {
             aiThinking: "AIが音声分析中です...",
             aiSummarizing: "AIがまとめています...",
 
-            pronounceIdleMsg: "🎙️ マイクで話してください (下から例文を選択してください)",
+            pronounceIdleMsg: "🎙️ マイクで話してください (上の例文から文を選択してください)",
             pronounceRecordingMsg: "🔴 マイクが収録中… (発声してください)",
             pronounceAnalyzingMsg: "🤖 AIが発音を分析中…",
 
@@ -232,7 +232,7 @@ window.LingoApp = {
             aiThinking: "AI is analyzing voice...",
             aiSummarizing: "AI is summarizing...",
 
-            pronounceIdleMsg: "🎙️ Please speak into the mic (Select a sample below)",
+            pronounceIdleMsg: "🎙️ Please speak into the mic (Select a sample above)",
             pronounceRecordingMsg: "🔴 Microphone is recording... (Speak now)",
             pronounceAnalyzingMsg: "🤖 AI is analyzing pronunciation...",
 
@@ -275,7 +275,7 @@ window.LingoApp = {
             "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
             "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（こうかん）させて いただけますか？",
             "会議での意見表明会話": "💡 会議の会話です！\nそれでは、次（つぎ）の アジェンダについて 議論（ぎろん）を 始（はじ）めます。ご意見（いけん）の ある方（かた）は いらっしゃいますか？",
-            "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうしわけ）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
+            "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうし分け）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
             "採用面接の会話": "💡 採用面接の会話です！\n本日は 面接（めんせつ）に お越しいただき ありがとうございます。まず 簡単（かんたん）な 自己PR（じこピーアール）から お願（ねが）いできますか？",
 
             "病院・薬局での会話": "💡 病院・薬局の会話です！\nこんにちは。今日（きょう）は どのような 症状（しょうじょう）が ございますか？",
@@ -399,7 +399,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.9]. Forced Universal Font Enforcement & Footer Pronunciation Status Banner.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.0]. Updated Footer Pronunciation Status Banner Text.");
     },
 
     openFeedbackPage() {
@@ -630,7 +630,7 @@ window.LingoApp = {
             const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
             const statusTxt = document.getElementById("txtPronounceStatus");
             if (pronounceFooterStatus) pronounceFooterStatus.className = "pronounce-footer-status";
-            if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (Hãy nói qua Micro)";
+            if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
 
             window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode) -> Chuyển thanh Footer thành Status Banner hiển thị trạng thái Mic.");
         } else {
@@ -969,7 +969,7 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                 } finally {
                     // RESET FOOTER STATUS BANNER TO IDLE STATE
                     if (banner) banner.className = "pronounce-footer-status";
-                    if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (Hãy nói qua Micro)";
+                    if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
                 }
             });
         }
