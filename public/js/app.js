@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.2 Implementation
+// Main Application Controller - LingoBot2 Ver2.3 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -324,7 +324,12 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.2]. 優先: 環境変数Key ➔ 予備: 画面入力Key (Indigo Bubble Theme).");
+        
+        // Ensure setupBubbleRow (🔑 Google Gemini API Key Setup) is strictly hidden at initialization
+        const setupRow = document.getElementById("setupBubbleRow");
+        if (setupRow) setupRow.classList.add("hidden");
+
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.3]. Restored scenario layout & hidden API setup bubble by default.");
     },
 
     updateUiLanguage(lang) {
@@ -503,7 +508,6 @@ window.LingoApp = {
     setApiKey(key) {
         const cleanKey = (key || "").trim().replace(/^["']|["']$/g, '');
         this.apiKey = cleanKey;
-        // Safely store user-inputted API key in Web Browser localStorage per user requirement
         localStorage.setItem("lingobot_api_key", cleanKey);
         window.LingoLog.add("Đã lưu Google API Key nhập thủ công an toàn vào trình duyệt (localStorage).");
     },
@@ -791,8 +795,11 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
 
         const langGuideRow = document.getElementById("langGuideBubbleRow");
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
+        const setupRow = document.getElementById("setupBubbleRow");
+
         if (langGuideRow) langGuideRow.classList.remove("hidden");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.remove("hidden");
+        if (setupRow) setupRow.classList.add("hidden"); // Keep setup bubble hidden on reset
 
         window.LingoLog.add("Đã đặt lại cuộc trò chuyện.");
     },
@@ -868,7 +875,8 @@ Quy tắc ứng xử:
                 
                 const aiBubbleEl = this.appendMessage("model", reply, modelUsed, retrySeconds);
 
-                if (data.api_key_required || data.api_key_invalid) {
+                // Only show setup prompt if server explicitly flags API key is invalid/required AND env key is missing
+                if ((data.api_key_required || data.api_key_invalid) && data.used_model === "local-fallback" && !apiKey) {
                     this.showSetupPromptRow();
                 }
 

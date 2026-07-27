@@ -1,65 +1,413 @@
-/* Components Styling - Indigo Theme setup bubbles (Ver2.2) */
+/* Components Styling - Indigo Theme Setup Bubbles & Beautiful Scenario Selector (Ver2.3) */
 
+/* ==========================================
+   1. SETUP PROMPT BUBBLE (INDIGO THEME)
+   ========================================== */
 .setup-prompt-bubble {
     background: #f5f3ff !important; /* Indigo light tint background */
     border: 1px solid #c7d2fe !important; /* Indigo border */
     border-left: 5px solid #4f46e5 !important; /* Deep Indigo left bar */
     color: #3730a3 !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+    border-radius: 18px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.1) !important;
 }
 
 .setup-prompt-bubble .setup-title {
-    font-size: 1.05rem;
-    font-weight: 800;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
     color: #4338ca !important; /* Indigo title */
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
 }
 
 .setup-prompt-bubble .setup-text-vn,
 .setup-prompt-bubble .setup-text-jp {
-    color: #3730a3;
-    font-size: 0.9rem;
-    line-height: 1.45;
+    color: #3730a3 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
 }
 
 .setup-prompt-bubble .bubble-key-input {
     border: 2px solid #c7d2fe !important;
-    border-radius: 12px;
-    padding: 8px 12px;
-    font-size: 0.88rem;
-    color: #1e1b4b;
-    background: #ffffff;
-    outline: none;
-    transition: border-color 0.2s ease;
+    border-radius: 12px !important;
+    padding: 8px 14px !important;
+    font-size: 0.88rem !important;
+    color: #1e1b4b !important;
+    background: #ffffff !important;
+    outline: none !important;
+    transition: border-color 0.2s ease !important;
 }
 
 .setup-prompt-bubble .bubble-key-input:focus {
     border-color: #4f46e5 !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
 }
 
 .setup-prompt-bubble .bubble-key-btn {
     background: #4f46e5 !important; /* Indigo action button */
     color: #ffffff !important;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    padding: 8px 18px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    padding: 8px 18px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
 }
 
 .setup-prompt-bubble .bubble-key-btn:hover {
     background: #4338ca !important;
-    transform: translateY(-1px);
+    transform: translateY(-1px) !important;
 }
 
 .setup-prompt-bubble .sender-tag {
-    color: #6366f1;
+    color: #6366f1 !important;
+    font-weight: 700 !important;
+}
+
+
+/* ==========================================
+   2. GENERAL CHAT BUBBLE & LAYOUT STYLING
+   ========================================== */
+.chat-row {
+    display: flex !important;
+    width: 100% !important;
+    margin-bottom: 12px !important;
+}
+
+.chat-row.hidden {
+    display: none !important;
+}
+
+.user-row {
+    justify-content: flex-end !important;
+}
+
+.ai-row {
+    justify-content: flex-start !important;
+}
+
+.chat-bubble {
+    max-width: 88% !important;
+    padding: 14px 18px !important;
+    border-radius: 18px !important;
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+    position: relative !important;
+    word-break: break-word !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.04) !important;
+}
+
+.user-row .chat-bubble {
+    background: #059669 !important; /* User Emerald Green */
+    color: #ffffff !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+.ai-row .chat-bubble {
+    background: #1d4ed8 !important; /* AI Blue */
+    color: #ffffff !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+.bubble-text {
+    margin-bottom: 6px !important;
+}
+
+.message-meta, .setup-meta {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 0.78rem !important;
+    opacity: 0.88 !important;
+    margin-top: 6px !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+.audio-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.audio-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    border-radius: 14px !important;
+    padding: 3px 10px !important;
+    color: #ffffff !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.audio-btn:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+}
+
+
+/* ==========================================
+   3. SCENARIO SELECTION CARD (FULLY RESTORED)
+   ========================================== */
+.scenario-prompt-bubble {
+    background: #ffffff !important;
+    border: 2px solid #fed7aa !important;
+    border-left: 6px solid #ea580c !important;
+    border-radius: 18px !important;
+    color: #1c1917 !important;
+    width: 100% !important;
+    max-width: 900px !important;
+    padding: 18px 22px !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.12) !important;
+}
+
+.scenario-title {
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    color: #ea580c !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid #ffedd5 !important;
+    padding-bottom: 8px !important;
+}
+
+.selection-group {
+    margin-bottom: 14px !important;
+}
+
+.selection-label {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    color: #78350f !important;
+    margin-bottom: 8px !important;
+}
+
+.pill-options {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.pill-opt {
+    padding: 7px 16px !important;
+    border-radius: 20px !important;
+    border: 1px solid #fed7aa !important;
+    background: #fffaf5 !important;
+    color: #44403c !important;
+    font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03) !important;
+}
+
+.pill-opt:hover {
+    border-color: #f97316 !important;
+    background: #ffedd5 !important;
+    color: #ea580c !important;
+    transform: translateY(-1px) !important;
+}
+
+.pill-opt.active {
+    background: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #ea580c !important;
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35) !important;
+}
+
+/* Categorized Scenarios Container & Blocks */
+.scenario-categories-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-top: 8px !important;
+}
+
+.cat-block {
+    background: #fffcf8 !important;
+    border: 1px solid #ffedd5 !important;
+    border-radius: 14px !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02) !important;
+}
+
+.cat-title {
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    color: #c2410c !important;
+    margin-bottom: 8px !important;
+}
+
+.scenario-action-row {
+    margin-top: 16px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+}
+
+.btn-start-chat {
+    padding: 12px 28px !important;
+    border-radius: 26px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    color: #ffffff !important;
+    font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif) !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 16px rgba(234, 88, 12, 0.4) !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-start-chat:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5) !important;
+}
+
+.btn-start-chat:active {
+    transform: translateY(1px) !important;
+}
+
+
+/* ==========================================
+   4. PRONUNCIATION PRACTICE MODE
+   ========================================== */
+.pronounce-viewport {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.pronounce-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.pronounce-header h2 {
+    font-size: 1.2rem;
+    color: #ea580c;
+    margin-bottom: 6px;
+}
+
+.pronounce-header p {
+    font-size: 0.88rem;
+    color: #78716c;
+    margin-bottom: 14px;
+}
+
+.pronounce-filter-bar {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: #fff8f0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #fed7aa;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
     font-weight: 700;
+    color: #78350f;
+}
+
+.filter-chip {
+    padding: 4px 10px;
+    border-radius: 14px;
+    border: 1px solid #fed7aa;
+    background: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-chip.active {
+    background: #ea580c;
+    color: #ffffff;
+    border-color: #ea580c;
+}
+
+.sample-sentences-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+.sample-sentence-item {
+    background: #fffbf7;
+    border: 1px solid #fed7aa;
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sentence-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #c2410c;
+    margin-bottom: 4px;
+}
+
+.sentence-main {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1c1917;
+    margin-bottom: 4px;
+}
+
+.sentence-sub {
+    font-size: 0.82rem;
+    color: #78716c;
+    margin-bottom: 10px;
+}
+
+.sentence-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sample {
+    padding: 5px 12px;
+    border-radius: 14px;
+    border: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-sample-play {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.btn-sample-record {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+/* Ruby Furigana Styling */
+ruby {
+    ruby-align: center;
+}
+
+rt {
+    font-size: 0.65em;
+    color: inherit;
+    opacity: 0.9;
 }
 
 /* Modal styling */
