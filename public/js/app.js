@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.3 Implementation
+// Main Application Controller - LingoBot2 Ver2.4 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -325,11 +325,10 @@ window.LingoApp = {
         this.renderPronounceSamples();
         this.showScenarioCard();
         
-        // Ensure setupBubbleRow (🔑 Google Gemini API Key Setup) is strictly hidden at initialization
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.3]. Restored scenario layout & hidden API setup bubble by default.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.4]. UI Matched: Emerald User Bubble & Soft Indigo AI Bubble.");
     },
 
     updateUiLanguage(lang) {
@@ -761,6 +760,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) {
             setupRow.classList.remove("hidden");
+            setupRow.style.setProperty("display", "flex", "important");
             setupRow.scrollIntoView({ behavior: 'smooth' });
         }
         const headerInput = document.getElementById("headerApiKeyInput");
@@ -774,7 +774,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         const setupRow = document.getElementById("setupBubbleRow");
         const langGuideRow = document.getElementById("langGuideBubbleRow");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.add("hidden");
-        if (setupRow) setupRow.classList.add("hidden");
+        if (setupRow) {
+            setupRow.classList.add("hidden");
+            setupRow.style.setProperty("display", "none", "important");
+        }
         if (langGuideRow) langGuideRow.classList.add("hidden");
 
         window.LingoLog.add(`Bắt đầu hội thoại. Trình độ: ${this.level} | Tình huống: ${this.scenario}`);
@@ -799,7 +802,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
 
         if (langGuideRow) langGuideRow.classList.remove("hidden");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.remove("hidden");
-        if (setupRow) setupRow.classList.add("hidden"); // Keep setup bubble hidden on reset
+        if (setupRow) {
+            setupRow.classList.add("hidden");
+            setupRow.style.setProperty("display", "none", "important");
+        }
 
         window.LingoLog.add("Đã đặt lại cuộc trò chuyện.");
     },
@@ -875,7 +881,6 @@ Quy tắc ứng xử:
                 
                 const aiBubbleEl = this.appendMessage("model", reply, modelUsed, retrySeconds);
 
-                // Only show setup prompt if server explicitly flags API key is invalid/required AND env key is missing
                 if ((data.api_key_required || data.api_key_invalid) && data.used_model === "local-fallback" && !apiKey) {
                     this.showSetupPromptRow();
                 }
@@ -1018,7 +1023,7 @@ Quy tắc ứng xử:
         const thinkingMsg = dict.aiThinking || "AI đang suy nghĩ...";
 
         row.innerHTML = `
-            <div class="chat-bubble" style="background:#1d4ed8; color:#fff;">
+            <div class="chat-bubble" style="background:linear-gradient(135deg, #4f46e5, #4338ca); color:#fff;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <div class="spinner" style="width:16px; height:16px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
                     <span style="font-size:0.85rem;">${thinkingMsg}</span>

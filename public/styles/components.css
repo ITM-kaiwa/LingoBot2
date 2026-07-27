@@ -1,12 +1,12 @@
-/* Components Styling - Indigo Theme Setup Bubbles & Beautiful Scenario Selector (Ver2.3) */
+/* Components Styling - Indigo Theme Setup Bubbles, Restored Scenario Selector & Matched Chat Bubbles (Ver2.4) */
 
 /* ==========================================
-   1. SETUP PROMPT BUBBLE (INDIGO THEME)
+   1. SETUP PROMPT BUBBLE (SOFT INDIGO MATCHED WITH SCREENSHOT)
    ========================================== */
 .setup-prompt-bubble {
-    background: #f5f3ff !important; /* Indigo light tint background */
-    border: 1px solid #c7d2fe !important; /* Indigo border */
-    border-left: 5px solid #4f46e5 !important; /* Deep Indigo left bar */
+    background: #f3f0ff !important; /* Soft Lavender / Indigo Tint from screenshot */
+    border: 1px solid #c7d2fe !important; /* Indigo light border */
+    border-left: 5px solid #4f46e5 !important; /* Deep Indigo accent bar */
     color: #3730a3 !important;
     border-radius: 18px !important;
     padding: 16px 20px !important;
@@ -16,7 +16,7 @@
 .setup-prompt-bubble .setup-title {
     font-size: 1.05rem !important;
     font-weight: 800 !important;
-    color: #4338ca !important; /* Indigo title */
+    color: #4338ca !important; /* Soft Indigo title */
     margin-bottom: 8px !important;
     display: flex !important;
     align-items: center !important;
@@ -47,7 +47,7 @@
 }
 
 .setup-prompt-bubble .bubble-key-btn {
-    background: #4f46e5 !important; /* Indigo action button */
+    background: #4f46e5 !important; /* Indigo action button matching screenshot */
     color: #ffffff !important;
     border: none !important;
     border-radius: 12px !important;
@@ -98,19 +98,23 @@
     line-height: 1.55 !important;
     position: relative !important;
     word-break: break-word !important;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.04) !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
 }
 
+/* User Bubble: Premium Emerald Green */
 .user-row .chat-bubble {
-    background: #059669 !important; /* User Emerald Green */
+    background: linear-gradient(135deg, #059669, #047857) !important; /* Emerald Gradient */
     color: #ffffff !important;
     border-bottom-right-radius: 4px !important;
+    box-shadow: 0 3px 10px rgba(4, 120, 87, 0.2) !important;
 }
 
+/* AI Model Bubble: Premium Soft Indigo (Matched with User's Screenshot) */
 .ai-row .chat-bubble {
-    background: #1d4ed8 !important; /* AI Blue */
+    background: linear-gradient(135deg, #4f46e5, #4338ca) !important; /* Soft Indigo Gradient */
     color: #ffffff !important;
     border-bottom-left-radius: 4px !important;
+    box-shadow: 0 3px 10px rgba(67, 56, 202, 0.2) !important;
 }
 
 .bubble-text {

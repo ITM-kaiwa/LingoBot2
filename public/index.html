@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver2.3 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver2.3 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver2.4 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver2.4 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=2.3">
-    <link rel="stylesheet" href="styles/components.css?v=2.3">
+    <link rel="stylesheet" href="styles/main.css?v=2.4">
+    <link rel="stylesheet" href="styles/components.css?v=2.4">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver2.3 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver2.4 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver2.3</span>
+                    <span class="version-badge">Ver2.4</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -92,7 +92,7 @@
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
 
-                    <!-- Language Setup Prompt Guide Bubble (Styled in Beautiful Indigo Theme) -->
+                    <!-- Language Setup Prompt Guide Bubble (Styled in Beautiful Indigo Theme Matched with Screenshot) -->
                     <div class="chat-row ai-row" id="langGuideBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
@@ -149,7 +149,7 @@
                         </div>
                     </div>
 
-                    <!-- Scenario Selection Card INSIDE CHAT BUBBLE with Categorized Scenarios (BEAUTIFULLY RESTORED) -->
+                    <!-- Scenario Selection Card INSIDE CHAT BUBBLE with Categorized Scenarios -->
                     <div class="chat-row ai-row" id="scenarioBubbleRow">
                         <div class="chat-bubble scenario-prompt-bubble">
                             <div class="scenario-title" id="txtScenarioTitle">🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:</div>
@@ -210,7 +210,7 @@
                                             <button type="button" id="scenPhone" class="pill-opt" data-scenario="電話対応の会話">📞 電話対応</button>
                                             <button type="button" id="scenCard" class="pill-opt" data-scenario="名刺交換・挨拶の会話">📇 名刺交換・挨拶</button>
                                             <button type="button" id="scenMeeting" class="pill-opt" data-scenario="会議での意見表明会話">🗣️ 会議での意見表明</button>
-                                            <button type="button" id="scenComplaint" class="pill-opt" data-scenario="クレーム対応の会話">⚠️ クレーム対応</button>
+                                            <button type="button" id="scenComplaint" class="pill-opt" data-scenario="クレーム対応の会話">⚠️ Xử lý Khiếu nại</button>
                                             <button type="button" id="scenInterview" class="pill-opt" data-scenario="採用面接の会話">💼 Phỏng vấn Xin việc</button>
                                         </div>
                                     </div>
@@ -357,10 +357,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=2.3"></script>
-    <script src="js/tts.js?v=2.3"></script>
-    <script src="js/stt.js?v=2.3"></script>
-    <script src="js/summary.js?v=2.3"></script>
-    <script src="js/app.js?v=2.3"></script>
+    <script src="js/log.js?v=2.4"></script>
+    <script src="js/tts.js?v=2.4"></script>
+    <script src="js/stt.js?v=2.4"></script>
+    <script src="js/summary.js?v=2.4"></script>
+    <script src="js/app.js?v=2.4"></script>
 </body>
 </html>
