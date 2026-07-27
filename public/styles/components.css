@@ -1,4 +1,4 @@
-/* Components Styling - Maximum Legibility & Clean Advanced Header Toggle Panel (Ver3.2) */
+/* Components Styling - Maximum Legibility & Clean Advanced Header Toggle Panel (Ver3.6) */
 
 /* Advanced Header Toggle Button & Collapsible Panel */
 .btn-advanced {
@@ -34,6 +34,19 @@
 
 .header-btns-group.hidden {
     display: none !important;
+}
+
+/* Ruby Furigana Alignment & Positioning Fix (Ver3.6) */
+ruby {
+    ruby-align: space-around !important;
+    ruby-position: over !important;
+}
+
+rt {
+    font-size: 0.68em !important;
+    font-weight: 700 !important;
+    color: #0284c7 !important;
+    text-align: center !important;
 }
 
 /* ==========================================
@@ -107,7 +120,7 @@
 
 
 /* ==========================================
-   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER3.2 HIGH CONTRAST)
+   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER3.6 HIGH CONTRAST)
    ========================================== */
 .chat-row {
     display: flex !important;
@@ -483,16 +496,6 @@
 .btn-sample-record {
     background: #ffedd5;
     color: #ea580c;
-}
-
-/* Ruby Furigana Styling */
-ruby {
-    ruby-align: center;
-}
-
-rt {
-    font-size: 0.68em;
-    color: inherit;
 }
 
 /* Modal styling */

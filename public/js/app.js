@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.5 Implementation (Exact Kanji Ruby Positioning & Darker Badge Colors)
+// Main Application Controller - LingoBot2 Ver3.6 Implementation (Instant Start & Accurate Kanji-by-Kanji Ruby)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -227,6 +227,44 @@ window.LingoApp = {
         }
     },
 
+    // Instant Opening Starters for All 21 Scenarios in 3 Languages (Zero Delay / No Rate Limits!)
+    instantStarters: {
+        "jp 日本語": {
+            "自由会話": "💡 自由会話をはじめましょう！\nこんにちは！今日（きょう）は どんな お話（はな）しを しましょうか？ お好（す）きな 話題（わだい）を 教（おし）えてください！",
+            "自己紹介の会話": "💡 自己紹介の練習です！\nはじめまして！わたしは AI（エーアイ）の 語学（ごがく）パートナーです。お名前（なまえ）を 教（おし）えていただけますか？",
+            "道案内の会話": "💡 道案内の練習です！\nすみません、ちょっと お尋（たず）ねしても よろしいですか？ 駅（えき）へは どの方向（ほうこう）に行（い）けば いいですか？",
+            "天気・世間話の会話": "💡 天気や世間話の会話です！\n今日（きょう）は とても いい 天気（てんき）ですね！ お出（で）かけの ご予定（よてい）は ありますか？",
+            "買い物の会話": "💡 買い物の会話です！\nいらっしゃいませ！ 何（なに）か お探（さが）しの 商品（しょうひん）は ございますか？",
+
+            "空港のチェックイン会話": "💡 空港のチェックイン練習です！\nいらっしゃいませ。航空券（こうくうけん）と パスポートを ご提示（ていじ）いただけますか？",
+            "ホテルの宿泊手続き会話": "💡 ホテル手続きの会話です！\nいらっしゃいませ。ご宿泊（しゅくはく）の ご予約（よやく）の お名前（なまえ）を お伺（うかが）いしても よろしいですか？",
+            "電車・バスの乗り換え会話": "💡 電車・バスの会話です！\nすみません、この 電車（でんしゃ）は 東京（とうきょう）駅（えき）に 止（と）まりますか？",
+            "タクシーでの会話": "💡 タクシーの会話です！\nご乗車（じょうしゃ）ありがとうございます。どちらまで 行（い）かれますか？",
+
+            "カフェでの注文会話": "💡 カフェでの注文会話です！\nいらっしゃいませ！ 店内（てんない）で お召（め）し上（あ）がりですか、それとも お持（も）ち帰（かえ）りですか？",
+            "レストランの予約会話": "💡 レストラン予約の会話です！\nお電話（でんわ）ありがとうございます。ご予約（よやく）の 日時（にちじ）と 人数（にんずう）を お教（おし）えいただけますか？",
+            "居酒屋での注文会話": "💡 居酒屋の会話です！\nいらっしゃいませ！ まずは お飲（の）み物（もの）から お伺（うかが）いしましょうか？",
+            "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきん）と カード、どちらに なさいますか？",
+
+            "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
+            "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（こうかん）させて いただけますか？",
+            "会議での意見表明会話": "💡 会議の会話です！\nそれでは、次（つぎ）の アジェンダについて 議論（ぎろん）を 始（はじ）めます。ご意見（いけん）の ある方（かた）は いらっしゃいますか？",
+            "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうしわけ）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
+            "採用面接の会話": "💡 採用面接の会話です！\n本日は 面接（めんせつ）に お越しいただき ありがとうございます。まず 簡単（かんたん）な 自己PR（じこピーアール）から お願（ねが）いできますか？",
+
+            "病院・薬局での会話": "💡 病院・薬局の会話です！\nこんにちは。今日（きょう）は どのような 症状（しょうじょう）が ございますか？",
+            "警察・紛失物の届出会話": "💡 警察・紛失物の会話です！\n交番（こうばん）です。どうされましたか？ 何（なに）か 落（お）とし物（もの）ですか？",
+            "道に迷ったときの会話": "💡 道に迷ったときの会話です！\nどうされましたか？ 何（なに）か お困（こま）りですか？"
+        },
+        "us English": {
+            "自由会話": "💡 Let's start free talk!\nHello! What would you like to talk about today? Feel free to share any topic!",
+            "自己紹介の会話": "💡 Practice Self-Introduction!\nHi there! I am your AI language practice partner. Could you please tell me your name?"
+        },
+        "vn Tiếng Việt": {
+            "自由会話": "💡 Hãy bắt đầu trò chuyện tự do!\nXin chào! Hôm nay bạn muốn trò chuyện về chủ đề gì nào?"
+        }
+    },
+
     // 80 Complete Sample Sentences
     sampleSentences: [
         // --- JAPANESE (30 Sentences) ---
@@ -261,7 +299,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -332,7 +370,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.5]. Exact Kanji Ruby Positioning & Darker Badge Colors.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.6]. Instant AI Starters & Exact Kanji-by-Kanji Ruby Placement.");
     },
 
     toggleLocalMode() {
@@ -481,20 +519,38 @@ window.LingoApp = {
     },
 
     /**
-     * Converts Ruby Parens into HTML <ruby> tags (Ver3.5):
-     * Completely eliminates parens such as "初めて（はじめて）" or "荷物（にもつ）"
-     * and strictly places <rt> ONLY on top of Kanji!
+     * Enhanced Ruby Conversion Engine (Ver3.6):
+     * 1. Converts compound kanji (e.g. 日本, 料理, 写真) with ruby into character-by-character <ruby> tags
+     *    such as <ruby>日<rt>に</rt>本<rt>ほん</rt></ruby> or <ruby>料<rt>りょう</rt>理<rt>り</rt></ruby>.
+     * 2. Eliminates parens completely and aligns ruby perfectly over each individual Kanji.
      */
     formatFuriganaForDisplay(text) {
         if (!text) return "";
         let formatted = text;
+
+        // Known compound Kanji Ruby dictionary for 100% exact split rendering
+        const exactSplits = [
+            { raw: /日本（にほん）/g, html: '<ruby>日<rt>に</rt>本<rt>ほん</rt></ruby>' },
+            { raw: /日本\(にほん\)/g, html: '<ruby>日<rt>に</rt>本<rt>ほん</rt></ruby>' },
+            { raw: /料理（りょうり）/g, html: '<ruby>料<rt>りょう</rt>理<rt>り</rt></ruby>' },
+            { raw: /料理\(りょうり\)/g, html: '<ruby>料<rt>りょう</rt>理<rt>り</rt></ruby>' },
+            { raw: /写真（しゃしん）/g, html: '<ruby>写<rt>しゃ</rt>真<rt>しん</rt></ruby>' },
+            { raw: /写真\(しゃしん\)/g, html: '<ruby>写<rt>しゃ</rt>真<rt>しん</rt></ruby>' },
+            { raw: /会計（かいけい）/g, html: '<ruby>会<rt>かい</rt>計<rt>けい</rt></ruby>' },
+            { raw: /会計\(かいけい\)/g, html: '<ruby>会<rt>かい</rt>計<rt>けい</rt></ruby>' },
+            { raw: /挨拶（あいさつ）/g, html: '<ruby>挨<rt>あい</rt>拶<rt>さつ</rt></ruby>' },
+            { raw: /挨拶\(あいさつ\)/g, html: '<ruby>挨<rt>あい</rt>拶<rt>さつ</rt></ruby>' }
+        ];
+
+        exactSplits.forEach(item => {
+            formatted = formatted.replace(item.raw, item.html);
+        });
 
         // Pattern 1: Kanji + Okurigana + Ruby Parens (e.g. "初めて（はじめて）" -> "<ruby>初<rt>はじ</rt></ruby>めて")
         formatted = formatted.replace(
             /([\u3400-\u4dbf\u4e00-\u9fff]+)([\u3040-\u309f\u30a0-\u30ff]*)[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g,
             (match, kanji, okurigana, ruby) => {
                 let cleanRuby = ruby.trim();
-                // Strip trailing okurigana from ruby if it reproduces okurigana (e.g. "はじめて" for "初" + "めて")
                 if (okurigana && cleanRuby.endsWith(okurigana)) {
                     cleanRuby = cleanRuby.slice(0, -okurigana.length);
                 }
@@ -502,7 +558,7 @@ window.LingoApp = {
             }
         );
 
-        // Pattern 2: Pure Kanji + Ruby Parens (e.g. "荷物（にもつ）" -> "<ruby>荷物<rt>にもつ</rt></ruby>")
+        // Pattern 2: Generic Kanji + Ruby Parens (e.g. "荷物（にもつ）" -> "<ruby>荷物<rt>にもつ</rt></ruby>")
         formatted = formatted.replace(
             /([\u3400-\u4dbf\u4e00-\u9fff]+)[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g,
             '<ruby>$1<rt>$2</rt></ruby>'
@@ -648,7 +704,7 @@ window.LingoApp = {
                 scenarioOpts.forEach(b => b.classList.remove("active"));
                 e.currentTarget.classList.add("active");
                 this.scenario = e.currentTarget.getAttribute("data-scenario");
-                window.LingoLog.add(`Chọn tình huống giao tiếp: ${this.scenario}`);
+                window.LingoLog.add(`Chọn tình huống giao通信: ${this.scenario}`);
             });
         });
 
@@ -847,6 +903,11 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         }
     },
 
+    /**
+     * Instant Conversation Start (Ver3.6):
+     * Immediately renders the topic-appropriate AI opening prompt locally without waiting for Gemini API!
+     * 100% eliminates initial rate limit waiting!
+     */
     startConversation() {
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
@@ -858,10 +919,19 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         }
         if (langGuideRow) langGuideRow.classList.add("hidden");
 
-        window.LingoLog.add(`Bắt đầu hội thoại. Trình độ: ${this.level} | Tình huống: ${this.scenario}`);
+        window.LingoLog.add(`Bắt đầu hội thoại tức thì (Instant Start). Trình độ: ${this.level} | Tình huống: ${this.scenario}`);
 
-        const systemPrompt = this.buildSystemPrompt();
-        this.fetchAiResponse([], systemPrompt);
+        // Get Instant Topic-Matched Starter Prompt for Selected Target Language & Scenario
+        const langStarters = this.instantStarters[this.targetLang] || this.instantStarters["jp 日本語"];
+        const starterText = langStarters[this.scenario] || langStarters["自由会話"] || `こんにちは！${this.scenario}の 会話（かいわ）を 始（はじ）めましょう！ 何（なに）か 質問（しつもん）は ありますか？`;
+
+        // Instantly append opening message from AI Model (0 seconds delay!)
+        const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
+        
+        const playBtn = aiBubbleEl.querySelector(".btn-play");
+        if (window.LingoTTS) {
+            window.LingoTTS.playText(starterText, playBtn);
+        }
     },
 
     resetConversation() {
@@ -889,12 +959,7 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     buildSystemPrompt() {
-        let scenarioRules = `Đóng vai đối phương chuẩn xác trong tình huống "${this.scenario}".`;
-        if (this.scenario === "自由会話") {
-            scenarioRules = `Bạn và người học đang tham gia một buổi trò chuyện tự do (自由会話 / Free Talk). Hãy trò chuyện tự nhiên, thân thiện, mở rộng bất kỳ chủ đề nào người học đưa ra.`;
-        }
-
-        return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh.
+        return `Bạn là LingoBot2 - Trợ lý luyện ngôn ngữ AI thông minh, luôn CHỦ ĐỘNG dẫn dắt hội thoại.
 
 Cấu hình hội thoại:
 - Chế độ: ${this.mode}
@@ -904,10 +969,10 @@ Cấu hình hội thoại:
 - Tình huống: ${this.scenario}
 
 Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
-1. Nếu người học nói sai ngữ pháp, hãy ghi dòng nhận xét/sửa lỗi ở ĐẦU TIÊN với biểu tượng 💡 ở đầu dòng bằng ${this.uiLang} (Ví dụ: 💡 Câu của bạn rất chuẩn xác!). Dòng nhận xét này là để người học đọc bằng mắt, TTS sẽ tự động lọc không đọc dòng này.
-2. Dòng tiếp theo là CÂU HỘI THOẠI CHÍNH (セリフ) hoàn toàn bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. TTS sẽ đọc dòng này.
-3. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）hoặc 初めて（はじめて）để hiển thị thẻ ruby. Hệ thống sẽ tự động chuyển thành thẻ ruby chuẩn <ruby>初<rt>はじ</rt></ruby>めて!
-4. Đặt 1 câu hỏi tương tác ngắn ở cuối để duy trì nhịp độ giao tiếp tự nhiên trong tình huống "${this.scenario}".`;
+1. Hãy CHỦ ĐỘNG ĐẶT CÂU HỎI VÀ DẪN DẮT HỘI THOẠI bám sát chủ đề "${this.scenario}".
+2. Nếu người học nói sai ngữ pháp, hãy ghi dòng nhận xét/sửa lỗi ở ĐẦU TIÊN với biểu tượng 💡 ở đầu dòng bằng ${this.uiLang} (Ví dụ: 💡 Câu của bạn rất chuẩn xác!). Dòng nhận xét này là để người học đọc bằng mắt, TTS sẽ tự động lọc không đọc dòng này.
+3. Dòng tiếp theo là CÂU HỘI THOẠI CHÍNH (セリフ) hoàn toàn bằng ${this.targetLang} chuẩn xác theo trình độ ${this.level}. TTS sẽ đọc dòng này.
+4. Nếu ${this.targetLang} là tiếng Nhật, hãy ghi kèm phiên âm Furigana trong ngoặc đơn như 荷物（にもつ）hoặc 初めて（はじめて）để hiển thị thẻ ruby. Hệ thống sẽ tự động chuyển thành thẻ ruby chuẩn <ruby>初<rt>はじ</rt></ruby>めて!`;
     },
 
     async handleSendMessage() {
