@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver4.9 (Forced Universal Font Enforcement & Footer Pronunciation Status Banner) */
+/* Main Layout & Theme System - LingoBot2 Ver5.2 (Universal Multi-Language Font Stack & Fixed Advanced Button) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -8,7 +8,7 @@
     --border-color: #cbd5e1;
     --text-primary: #1c1917;
     --text-secondary: #64748b;
-    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'UD Digi Kyokasho NK-R', 'UD Digi Kyokasho N-R', 'BIZ UDPGothic', 'UDP Gothic', 'Plus Jakarta Sans', 'Times New Roman', Times, serif;
 }
 
 * {
@@ -23,28 +23,22 @@ html, body {
     height: 100%;
     height: 100dvh;
     overflow: hidden;
-    font-family: var(--font-body);
+    font-family: var(--font-body) !important;
     background-color: var(--bg-warm-light);
     color: var(--text-primary);
 }
 
-/* STRICT UNIVERSAL FONT ENFORCEMENT ON ALL ELEMENTS & DESCENDANTS */
-/* 1. English UI Font: UDP Gothic / BIZ UDPGothic */
-body[data-ui-lang="tiếng Anh"],
+/* UNIVERSAL MULTI-LANGUAGE FONT STACK FOR ALL UI LANGUAGES */
+/* 
+  1. Japanese characters (Kanji/Hiragana/Katakana) -> UD Digi Kyokasho NK-R / BIZ UDPGothic
+  2. English/Latin characters -> UDP Gothic / Plus Jakarta Sans
+  3. Vietnamese accent characters -> Times New Roman
+*/
+body, body *,
+body[data-ui-lang="tiếng Việt"] *,
+body[data-ui-lang="tiếng Nhật"] *,
 body[data-ui-lang="tiếng Anh"] * {
-    font-family: 'BIZ UDPGothic', 'UDP Gothic', 'Yu Gothic', sans-serif !important;
-}
-
-/* 2. Japanese UI Font: UD Digi Kyokasho NK-R / BIZ UDPGothic */
-body[data-ui-lang="tiếng Nhật"],
-body[data-ui-lang="tiếng Nhật"] * {
-    font-family: 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho NK-R', 'BIZ UDPGothic', 'Meiryo', sans-serif !important;
-}
-
-/* 3. Vietnamese UI Font: Times New Roman */
-body[data-ui-lang="tiếng Việt"],
-body[data-ui-lang="tiếng Việt"] * {
-    font-family: 'Times New Roman', Times, Georgia, serif !important;
+    font-family: 'UD Digi Kyokasho NK-R', 'UD Digi Kyokasho N-R', 'BIZ UDPGothic', 'UDP Gothic', 'Plus Jakarta Sans', 'Times New Roman', Times, serif !important;
 }
 
 /* UNIVERSAL BUTTON ACTIVE PRESS EFFECT FOR ALL BUTTONS */
@@ -211,6 +205,34 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     outline: none;
 }
 
+/* ADVANCED TOGGLE BUTTON STYLING */
+.btn-advanced {
+    padding: 5px 12px;
+    border-radius: 14px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.btn-advanced:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.btn-advanced.active {
+    background: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #c2410c !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
 /* 2nd Row: Advanced Collapsible Controls Panel */
 .header-btns-group {
     display: flex;
@@ -220,6 +242,10 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     padding-top: 8px;
     border-top: 1px dashed #cbd5e1;
     margin-top: 2px;
+}
+
+.header-btns-group.hidden {
+    display: none !important;
 }
 
 .action-btn {
@@ -238,6 +264,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 .btn-orange { background: #f97316; color: #ffffff; }
 .btn-red { background: #dc2626; color: #ffffff; }
 .btn-key { background: #0284c7; color: #ffffff; }
+.btn-purple { background: #8b5cf6; color: #ffffff; }
 
 .header-select {
     padding: 4px 8px;

@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.1 Implementation (Dynamic AI Pronunciation Coach with Level-Specific Prompting)
+// Main Application Controller - LingoBot2 Ver5.2 Implementation (Fixed Advanced Panel Toggle & Universal Multi-Language Font Stack)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -317,7 +317,7 @@ window.LingoApp = {
         { id: 116, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "来週（らいしゅう）の会議（かいぎ）のスケジュールを調整（ちょうせい）していただけますか。", translation: "Bạn có thể điều chỉnh lịch họp tuần sau giúp tôi không?" },
         { id: 117, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "日本（にほん）の習慣（しゅうかん）についてもっと詳（くわ）しく知（し）りたいです。", translation: "Tôi muốn tìm hiểu kỹ hơn về tập quan Nhật Bản." },
         { id: 118, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "あいにくあしたは先約（せんやく）がありまして、出席（しゅっせき）できません。", translation: "Nuối tiếc là ngày mai tôi có hẹn trước nên không thể tham dự." },
-        { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "ご迷惑（めいわく）をおかけして大変（たいへん）申し訳（もうしわけ）ございません。", translation: "Rất xin lỗi vì đã làm phiền quý vị." },
+        { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "ご迷惑（めいわく）をおかけして大変（たいへん）申し訳（もうし分け）ございません。", translation: "Rất xin lỗi vì đã làm phiền quý vị." },
         { id: 120, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "この問題（もんだい）について、皆様（みなさま）のご意見（いけん）をお聞（き）かせください。", translation: "Xin hãy cho tôi nghe ý kiến của mọi người về vấn đề này." },
         { id: 121, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "新（あたら）しいプロジェクトの進捗（しんちょく）状況（じょうきょう）を報告（ほうこく）します。", translation: "Tôi xin báo cáo tiến độ của dự án mới." },
         { id: 122, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "おかげさまで、無事（ぶじ）に目標（もくひょう）を達成（たっせい）することができました。", translation: "Nhờ sự hỗ trợ của bạn, chúng tôi đã đạt mục tiêu an toàn." },
@@ -399,7 +399,13 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.1]. Dynamic AI Pronunciation Coach with Level-Specific Prompting.");
+        // Ensure Advanced Panel is initially HIDDEN
+        const advPanel = document.getElementById("advancedPanel");
+        const advBtn = document.getElementById("btnAdvanced");
+        if (advPanel) advPanel.classList.add("hidden");
+        if (advBtn) advBtn.classList.remove("active");
+
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.2]. Fixed Advanced Panel Toggle & Universal Multi-Language Font Stack.");
     },
 
     openFeedbackPage() {
@@ -440,6 +446,7 @@ window.LingoApp = {
         }
     },
 
+    // ADVANCED PANEL TOGGLE CONTROL
     toggleAdvancedPanel() {
         const panel = document.getElementById("advancedPanel");
         const btn = document.getElementById("btnAdvanced");
@@ -461,7 +468,6 @@ window.LingoApp = {
         this.uiLang = lang;
         localStorage.setItem("lingobot_ui_lang", lang);
 
-        // FORCED UNIVERSAL FONT ENFORCEMENT ON BODY ELEMENT
         document.body.setAttribute('data-ui-lang', lang);
 
         const dict = this.i18n[lang] || this.i18n["tiếng Việt"];
@@ -1050,7 +1056,11 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
             setupRow.style.setProperty("display", "flex", "important");
             setupRow.scrollIntoView({ behavior: 'smooth' });
         }
-        this.toggleAdvancedPanel();
+        // ONLY OPEN ADVANCED PANEL IF IT IS CURRENTLY HIDDEN AND API KEY IS ABSENT
+        const advPanel = document.getElementById("advancedPanel");
+        if (advPanel && advPanel.classList.contains("hidden")) {
+            this.toggleAdvancedPanel();
+        }
         const headerInput = document.getElementById("headerApiKeyInput");
         if (headerInput) {
             headerInput.focus();

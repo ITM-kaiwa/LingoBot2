@@ -1,4 +1,4 @@
-// Lesson Summary & Advice Report Generator Module - LingoBot2 Ver5.1 Implementation
+// Lesson Summary & Advice Report Generator Module - LingoBot2 Ver5.2 Implementation
 window.LingoSummary = {
     currentReportMarkdown: "",
 
