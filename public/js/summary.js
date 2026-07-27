@@ -1,4 +1,4 @@
-// Lesson Summary & Advice Report Generator Module - LingoBot2 Ver4.4 Implementation
+// Lesson Summary & Advice Report Generator Module - LingoBot2 Ver4.5 Implementation
 window.LingoSummary = {
     currentReportMarkdown: "",
 
@@ -145,7 +145,7 @@ window.LingoSummary = {
         win.document.close();
         win.focus();
         setTimeout(() => { win.print(); win.close(); }, 500);
-        window.LingoLog.add("In Báo cáo tổng結 bài học.");
+        window.LingoLog.add("In Báo cáo tổng kết bài học.");
     },
 
     downloadPDF() {

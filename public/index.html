@@ -3,72 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver4.4 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver4.4 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver4.5 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver4.5 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=4.4">
-    <link rel="stylesheet" href="styles/components.css?v=4.4">
+    <link rel="stylesheet" href="styles/main.css?v=4.5">
+    <link rel="stylesheet" href="styles/components.css?v=4.5">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver4.4 & Advanced Collapsible Controls Panel -->
+            <!-- Header with Single Row Main Controls & Advanced Collapsible Panel -->
             <header class="app-header-bar">
-                <div class="brand-group">
-                    <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
-                    <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver4.4</span>
-                </div>
-
-                <!-- Navigation Mode Tabs -->
-                <div class="nav-tabs-group">
-                    <button type="button" class="nav-tab active" id="tabGiaoTiep" onclick="window.LingoApp.switchMode('GiaoTiep')">
-                        <span class="tab-icon">💭</span> <span id="txtTabGiaoTiep">Giao tiếp</span>
-                    </button>
-                    <button type="button" class="nav-tab" id="tabPhatAm" onclick="window.LingoApp.switchMode('PhatAm')">
-                        <span class="tab-icon">🎯</span> <span id="txtTabPhatAm">Phát âm</span>
-                    </button>
-                </div>
-
-                <!-- Status Badges with Default UI: VN & Default Target: JP -->
-                <div class="badges-group">
-                    <!-- UI Language Selectable Dropdown (Default: VN) -->
-                    <div class="badge-pill badge-ui">
-                        <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
-                        <select id="uiLangSelect" class="badge-select">
-                            <option value="tiếng Việt" selected>VN</option>
-                            <option value="tiếng Nhật">JP</option>
-                            <option value="tiếng Anh">EN</option>
-                        </select>
+                <!-- 1st Row: All Main Controls in Single Line when Width is Sufficient -->
+                <div class="header-main-row">
+                    <div class="brand-group">
+                        <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
+                        <span class="brand-title">LingoBot2</span>
+                        <span class="version-badge">Ver4.5</span>
                     </div>
 
-                    <!-- Target Language Dropdown (Default: JP) -->
-                    <div class="badge-pill badge-target">
-                        <span class="badge-prefix" id="lblTargetLang">Mục tiêu:</span>
-                        <select id="targetLangSelect" class="badge-select">
-                            <option value="jp 日本語" selected>JP</option>
-                            <option value="us English">EN</option>
-                            <option value="vn Tiếng Việt">VN</option>
-                        </select>
+                    <!-- Navigation Mode Tabs -->
+                    <div class="nav-tabs-group">
+                        <button type="button" class="nav-tab active" id="tabGiaoTiep" onclick="window.LingoApp.switchMode('GiaoTiep')">
+                            <span class="tab-icon">💭</span> <span id="txtTabGiaoTiep">Giao tiếp</span>
+                        </button>
+                        <button type="button" class="nav-tab" id="tabPhatAm" onclick="window.LingoApp.switchMode('PhatAm')">
+                            <span class="tab-icon">🎯</span> <span id="txtTabPhatAm">Phát âm</span>
+                        </button>
                     </div>
 
-                    <!-- Advanced Toggle Button placed cleanly right next to Target Language badge -->
-                    <button type="button" id="btnAdvanced" class="btn-advanced" onclick="window.LingoApp.toggleAdvancedPanel()" title="Mở / Đóng bảng điều khiển nâng cao (Bật/Tắt cài đặt)">
-                        ⚙️ <span id="txtBtnAdvanced">Advanced</span>
-                    </button>
+                    <!-- Status Badges with Default UI: VN & Default Target: JP -->
+                    <div class="badges-group">
+                        <!-- UI Language Selectable Dropdown -->
+                        <div class="badge-pill badge-ui">
+                            <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
+                            <select id="uiLangSelect" class="badge-select">
+                                <option value="tiếng Việt" selected>VN</option>
+                                <option value="tiếng Nhật">JP</option>
+                                <option value="tiếng Anh">EN</option>
+                            </select>
+                        </div>
+
+                        <!-- Target Language Dropdown -->
+                        <div class="badge-pill badge-target">
+                            <span class="badge-prefix" id="lblTargetLang">Mục tiêu:</span>
+                            <select id="targetLangSelect" class="badge-select">
+                                <option value="jp 日本語" selected>JP</option>
+                                <option value="us English">EN</option>
+                                <option value="vn Tiếng Việt">VN</option>
+                            </select>
+                        </div>
+
+                        <!-- Advanced Toggle Button -->
+                        <button type="button" id="btnAdvanced" class="btn-advanced" onclick="window.LingoApp.toggleAdvancedPanel()" title="Mở / Đóng bảng điều khiển nâng cao (Bật/Tắt cài đặt)">
+                            ⚙️ <span id="txtBtnAdvanced">Advanced</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Advanced Collapsible Control Elements Panel (HIDDEN BY DEFAULT - Collapsed for clean UI) -->
+                <!-- 2nd Row: Advanced Collapsible Controls Panel (Only Visible when Advanced is clicked) -->
                 <div class="header-btns-group hidden" id="advancedPanel">
-                    <!-- Local Mode Toggle Button (OFF by default) -->
-                    <button type="button" id="btnToggleLocalMode" class="action-btn btn-pill-grey" onclick="window.LingoApp.toggleLocalMode()" title="Bật/Tắt chế độ dự phòng Local (Chỉ bật khi muốn dùng câu trả lời mẫu khi bận)">
+                    <!-- Local Mode Toggle Button -->
+                    <button type="button" id="btnToggleLocalMode" class="action-btn btn-pill-grey" onclick="window.LingoApp.toggleLocalMode()" title="Bật/Tắt chế độ dự phòng Local">
                         🏠 <span id="txtLocalModeStatus">ローカル併用: OFF</span>
                     </button>
 
-                    <!-- Dropdown with EdgeTTS as Default and General (Web Speech API) placed at bottom -->
+                    <!-- Dropdown with EdgeTTS as Default -->
                     <select id="ttsModelSelect" class="header-select" title="Chọn mô hình giọng đọc TTS">
                         <option value="ja-JP-Chirp3-HD-F" selected>TTS: EdgeTTS (ja-JP Nữ)</option>
                         <option value="ja-JP-Chirp3-HD-M">TTS: EdgeTTS (ja-JP Nam)</option>
@@ -78,12 +81,12 @@
                         <option value="browser-native">General</option>
                     </select>
 
-                    <!-- Abbreviated Active Running TTS Model Badge -->
-                    <span id="activeTtsBadge" class="active-tts-badge" title="Mô hình giọng đọc TTS đang hoạt động (Active Running TTS Model)">EdgeTTS(♀)</span>
+                    <!-- Active TTS Badge -->
+                    <span id="activeTtsBadge" class="active-tts-badge" title="Mô hình giọng đọc TTS đang hoạt động">EdgeTTS(♀)</span>
 
-                    <!-- Compact API Key Input Group in Header (between TTS Model & Reset button) -->
+                    <!-- Compact API Key Input Group -->
                     <div class="header-key-group">
-                        <input type="password" id="headerApiKeyInput" class="header-key-input" placeholder="Key..." title="Google Gemini API Key (Cần thiết khi chưa có環境変数Key)" />
+                        <input type="password" id="headerApiKeyInput" class="header-key-input" placeholder="Key..." title="Google Gemini API Key" />
                         <button type="button" id="headerKeyBtn" class="action-btn btn-key" onclick="window.LingoApp.saveHeaderApiKey()" title="Lưu Google API Key mới">Key</button>
                     </div>
 
@@ -91,7 +94,7 @@
                         <span>🔄</span> <span id="txtResetBtn">Đặt lại</span>
                     </button>
 
-                    <!-- New Feedback Button in Advanced Panel (Replaced End button) -->
+                    <!-- Feedback Button -->
                     <button type="button" id="headerFeedbackBtn" class="action-btn btn-purple" title="Mở trang Gợi ý cải tiến (改善提案)" onclick="window.LingoApp.openFeedbackPage()">
                         <span>💡</span> <span id="txtFeedbackBtn">Gợi ý cải tiến</span>
                     </button>
@@ -103,7 +106,7 @@
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
 
-                    <!-- Language Setup Prompt Guide Bubble (Styled in Soft Violet Theme) -->
+                    <!-- Language Setup Prompt Guide Bubble -->
                     <div class="chat-row ai-row" id="langGuideBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
@@ -121,7 +124,7 @@
                         </div>
                     </div>
                     
-                    <!-- Dedicated API Key Setup Prompt Bubble (HIDDEN BY DEFAULT - Strictly hidden unless required) -->
+                    <!-- Dedicated API Key Setup Prompt Bubble -->
                     <div class="chat-row ai-row hidden" id="setupBubbleRow" style="display: none !important;">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
@@ -370,10 +373,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=4.4"></script>
-    <script src="js/tts.js?v=4.4"></script>
-    <script src="js/stt.js?v=4.4"></script>
-    <script src="js/summary.js?v=4.4"></script>
-    <script src="js/app.js?v=4.4"></script>
+    <script src="js/log.js?v=4.5"></script>
+    <script src="js/tts.js?v=4.5"></script>
+    <script src="js/stt.js?v=4.5"></script>
+    <script src="js/summary.js?v=4.5"></script>
+    <script src="js/app.js?v=4.5"></script>
 </body>
 </html>

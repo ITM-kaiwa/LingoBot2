@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.4 Implementation (Restored Classic Bubble Colors, Aligned Footer Button Heights, Manual Pronunciation Audio)
+// Main Application Controller - LingoBot2 Ver4.5 Implementation (Single Row Header Layout & Darker Gray Chat Viewport)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -323,7 +323,7 @@ window.LingoApp = {
         { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (34 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "My favorite hobby is playing the acoustic guitar in my free time.", translation: "Sở thích của tôi là chơi đàn guitar vào thời gian rảnh." },
@@ -387,7 +387,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.4]. Restored Classic Bubble Colors, Aligned Footer Button Heights, Manual Pronunciation Audio.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.5]. Single Line Header Layout & Darker Gray Chat Viewport.");
     },
 
     openFeedbackPage() {
@@ -823,7 +823,6 @@ window.LingoApp = {
         });
     },
 
-    // REVISED PRONUNCIATION ADVISOR: Strictly manual (No auto-play of sample audio upon clicking record button)
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
@@ -897,7 +896,6 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                     const data = await res.json();
                     if (data.reply) {
                         feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
-                        // Manual Flow: Do NOT auto-play audio here. Let user click Play manually if desired.
                     } else {
                         feedbackText.innerHTML = `<div style="padding:10px; background:#fff7ed; border-radius:10px;">
                             <h3>📊 発音判定結果 (AI Pronunciation Score): ⭐⭐⭐⭐⭐ (${score}/100点)</h3>
