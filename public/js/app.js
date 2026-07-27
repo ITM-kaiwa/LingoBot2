@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.7 Implementation (Fix Pronunciation Practice Record Button & Instant Voice Grading)
+// Main Application Controller - LingoBot2 Ver3.8 Implementation (Added Hobbies & Sports Scenarios & 20 Sample Sentences)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -27,7 +27,7 @@ window.LingoApp = {
             placeholder: "Nhập tin nhắn hoặc nói bằng micro...",
             scenarioTitle: "🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:",
             levelLabel: "Trình độ:",
-            scenarioLabel: "Tình huống (21 chủ đề):",
+            scenarioLabel: "Tình huống (23 chủ đề):",
             level1: "Sơ cấp A1-A2",
             level2: "Trung cấp B1-B2",
             level3: "Cao cấp C1-C2",
@@ -35,6 +35,8 @@ window.LingoApp = {
             catDaily: "💬 Giao tiếp hằng ngày & Tự do",
             scenFreeTalk: "💬 Trò chuyện tự do",
             scenSelfIntro: "👋 Tự giới thiệu bản thân",
+            scenHobbies: "🎨 Sở thích & Giải trí",
+            scenSports: "⚽ Thể thao & Vận động",
             scenDirections: "🗺️ Hỏi và chỉ đường",
             scenSmallTalk: "☀️ Thời tiết & Trò chuyện",
             scenShopping: "🛍️ Mua sắm",
@@ -65,7 +67,7 @@ window.LingoApp = {
 
             startBtn: "🚀 Bắt đầu hội thoại ngay",
             pronounceTitle: "🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)",
-            pronounceSub: "Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.",
+            pronounceSub: "Chọn câu mẫu bên dưới (100 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.",
             pronounceFeedbackTitle: "📊 Kết quả phân tích phát âm từ AI:",
             filterLang: "Ngôn ngữ:",
             filterLevel: "Trình độ:",
@@ -98,7 +100,7 @@ window.LingoApp = {
             placeholder: "メッセージを入力、またはマイクで話してください...",
             scenarioTitle: "🎯 レベル(CEFR)と対話シチュエーションの選択:",
             levelLabel: "レベル:",
-            scenarioLabel: "場面 (全21テーマ):",
+            scenarioLabel: "場面 (全23テーマ):",
             level1: "初級 A1-A2",
             level2: "中級 B1-B2",
             level3: "上級 C1-C2",
@@ -106,6 +108,8 @@ window.LingoApp = {
             catDaily: "💬 日常会話・自由会話",
             scenFreeTalk: "💬 自由会話",
             scenSelfIntro: "👋 自己紹介の会話",
+            scenHobbies: "🎨 趣味の会話",
+            scenSports: "⚽ スポーツの会話",
             scenDirections: "🗺️ 道案内の会話",
             scenSmallTalk: "☀️ 天気・世間話の会話",
             scenShopping: "🛍️ 買い物の会話",
@@ -136,7 +140,7 @@ window.LingoApp = {
 
             startBtn: "🚀 会話を開始する",
             pronounceTitle: "🎯 発音・シャドーイング練習",
-            pronounceSub: "下の例文（初級・中級・上級の計80文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
+            pronounceSub: "下の例文（初級・中級・上級の計100文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
             pronounceFeedbackTitle: "📊 AI発音分析結果:",
             filterLang: "言語:",
             filterLevel: "レベル:",
@@ -169,7 +173,7 @@ window.LingoApp = {
             placeholder: "Type a message or speak into mic...",
             scenarioTitle: "🎯 Choose CEFR Level & Scenario:",
             levelLabel: "Level:",
-            scenarioLabel: "Scenario (21 Topics):",
+            scenarioLabel: "Scenario (23 Topics):",
             level1: "Beginner A1-A2",
             level2: "Intermediate B1-B2",
             level3: "Advanced C1-C2",
@@ -177,6 +181,8 @@ window.LingoApp = {
             catDaily: "💬 Daily & Free Conversation",
             scenFreeTalk: "💬 Free Conversation",
             scenSelfIntro: "👋 Self-Introduction",
+            scenHobbies: "🎨 Hobbies & Leisure",
+            scenSports: "⚽ Sports & Fitness",
             scenDirections: "🗺️ Asking & Giving Directions",
             scenSmallTalk: "☀️ Weather & Small Talk",
             scenShopping: "🛍️ Shopping",
@@ -207,7 +213,7 @@ window.LingoApp = {
 
             startBtn: "🚀 Start Conversation Now",
             pronounceTitle: "🎯 Pronunciation & Intonation Practice",
-            pronounceSub: "Select from 80 sample sentences (Beginner/Intermediate/Advanced) or speak into mic for AI pronunciation feedback.",
+            pronounceSub: "Select from 100 sample sentences (Beginner/Intermediate/Advanced) or speak into mic for AI pronunciation feedback.",
             pronounceFeedbackTitle: "📊 AI Pronunciation Analysis:",
             filterLang: "Language:",
             filterLevel: "Level:",
@@ -230,11 +236,13 @@ window.LingoApp = {
         }
     },
 
-    // Instant Opening Starters for All 21 Scenarios in 3 Languages (Zero Delay / No Rate Limits!)
+    // Instant Opening Starters for All 23 Scenarios in 3 Languages (Zero Delay / No Rate Limits!)
     instantStarters: {
         "jp 日本語": {
             "自由会話": "💡 自由会話をはじめましょう！\nこんにちは！今日（きょう）は どんな お話（はな）しを しましょうか？ お好（す）きな 話題（わだい）を 教（おし）えてください！",
             "自己紹介の会話": "💡 自己紹介の練習です！\nはじめまして！わたしは AI（エーアイ）の 語学（ごがく）パートナーです。お名前（なまえ）を 教（おし）えていただけますか？",
+            "趣味の会話": "💡 趣味についての会話です！\nこんにちは！ あなたの 趣味（しゅみ）や 休（やす）みの 日（ひ）の 過ごし方（すごしかた）を 教（おし）えていただけますか？",
+            "スポーツの会話": "💡 スポーツについての会話です！\nこんにちは！ 何（なに）か 好き（す）きな スポーツや、観戦（かんせん）する スポーツは ありますか？",
             "道案内の会話": "💡 道案内の練習です！\nすみません、ちょっと お尋（たず）ねしても よろしいですか？ 駅（えき）へは どの方向（ほうこう）に行（い）けば いいですか？",
             "天気・世間話の会話": "💡 天気や世間話の会話です！\n今日（きょう）は とても いい 天気（てんき）ですね！ お出（で）かけの ご予定（よてい）は ありますか？",
             "買い物の会話": "💡 買い物の会話です！\nいらっしゃいませ！ 何（なに）か お探（さが）しの 商品（しょうひん）は ございますか？",
@@ -261,104 +269,118 @@ window.LingoApp = {
         },
         "us English": {
             "自由会話": "💡 Let's start free talk!\nHello! What would you like to talk about today? Feel free to share any topic!",
-            "自己紹介の会話": "💡 Practice Self-Introduction!\nHi there! I am your AI language practice partner. Could you please tell me your name?"
+            "自己紹介の会話": "💡 Practice Self-Introduction!\nHi there! I am your AI language practice partner. Could you please tell me your name?",
+            "趣味の会話": "💡 Let's talk about hobbies!\nHello! What are your favorite hobbies or leisure activities on weekends?",
+            "スポーツの会話": "💡 Let's talk about sports!\nHi! Do you play any sports or enjoy watching athletic matches?"
         },
         "vn Tiếng Việt": {
-            "自由会話": "💡 Hãy bắt đầu trò chuyện tự do!\nXin chào! Hôm nay bạn muốn trò chuyện về chủ đề gì nào?"
+            "自由会話": "💡 Hãy bắt đầu trò chuyện tự do!\nXin chào! Hôm nay bạn muốn trò chuyện về chủ đề gì nào?",
+            "趣味の会話": "💡 Hãy trò chuyện về sở thích!\nXin chào! Sở thích vào thời gian rảnh rỗi của bạn là gì?",
+            "スポーツの会話": "💡 Hãy trò chuyện về thể thao!\nXin chào! Bạn có chơi môn thể thao nào hoặc thích xem thể thao không?"
         }
     },
 
-    // 80 Complete Sample Sentences
+    // 100 Complete Sample Sentences (Added Hobbies & Sports)
     sampleSentences: [
-        // --- JAPANESE (30 Sentences) ---
+        // --- JAPANESE (36 Sentences) ---
         { id: 101, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "すみません、荷物（にもつ）を預（あず）けたいのですが。", translation: "Xin lỗi, tôi muốn gửi hành lý ạ." },
         { id: 102, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "この電車（でんしゃ）は新宿（しんじゅく）に行（い）きますか。", translation: "Tàu này có đi Shinjuku không ạ?" },
         { id: 103, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "おすすめのメニューは何（なに）ですか。", translation: "Món ăn được đề xuất là món gì ạ?" },
-        { id: 104, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "お会計（かいけい）を別々（べつべつ）にお願（ねが）いします。", translation: "Làm ơn tính tiền riêng cho chúng tôi." },
-        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "写真（しゃしん）を撮（と）っていただけますか。", translation: "Bạn có thể chụp giúp tôi một tấm hình được không?" },
-        { id: 106, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "トイレはどこにありますか。", translation: "Nhà vệ sinh ở đâu vậy ạ?" },
-        { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "水（みず）を一杯（いっぱい）ください。", translation: "Cho tôi xin một ly nước lọc." },
-        { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "これを試着（しちゃく）してもいいですか。", translation: "Tôi có thể thử cái này được không?" },
-        { id: 109, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "免税（めんぜい）の手続（てつづ）きはできますか。", translation: "Có thể làm thủ tục miễn thuế ở đây không?" },
-        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ねが）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
+        { id: 104, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "私（わたし）の 趣味（しゅみ）は 映画（えいが）を 見（み）ることです。", translation: "Sở thích của tôi là xem phim." },
+        { id: 105, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "毎週（まいしゅう） サッカーを 練習（れんしゅう）しています。", translation: "Tôi tập luyện bóng đá hàng tuần." },
+        { id: 106, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "お会計（かいけい）を別々（べつべつ）にお願（ねが）いします。", translation: "Làm ơn tính tiền riêng cho chúng tôi." },
+        { id: 107, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "写真（しゃしん）を撮（と）っていただけますか。", translation: "Bạn có thể chụp giúp tôi một tấm hình được không?" },
+        { id: 108, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "トイレはどこにありますか。", translation: "Nhà vệ sinh ở đâu vậy ạ?" },
+        { id: 109, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "水（みず）を一杯（いっぱい）ください。", translation: "Cho tôi xin một ly nước lọc." },
+        { id: 110, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "これを試着（しちゃく）してもいいですか。", translation: "Tôi có thể thử cái này được không?" },
+        { id: 111, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "免税（めんぜい）の手続（てつづ）きはできますか。", translation: "Có thể làm thủ tục miễn thuế ở đây không?" },
+        { id: 112, lang: "jp 日本語", level: "Sơ cấp", category: "🌱 jp 日本語 - 初級 A1-A2", text: "どうぞよろしくお願（ねが）いします。", translation: "Rất mong nhận được sự giúp đỡ của bạn." },
 
-        { id: 111, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "飛行機（ひこうき）の出発（しゅっぱつ）時間（じかん）が変更（へんこう）になったようです。", translation: "Hình như giờ xuất phát chuyến bay đã bị thay đổi." },
-        { id: 112, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "来週（らいしゅう）の会議（かいぎ）のスケジュールを調整（ちょうせい）していただけますか。", translation: "Bạn có thể điều chỉnh lịch họp tuần sau giúp tôi không?" },
-        { id: 113, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "日本（にほん）の習慣（しゅうかん）についてもっと詳（くわ）しく知（し）りたいです。", translation: "Tôi muốn tìm hiểu kỹ hơn về tập quan Nhật Bản." },
-        { id: 114, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "あいにくあしたは先約（せんやく）がありまして、出席（しゅっせき）できません。", translation: "Nuối tiếc là ngày mai tôi có hẹn trước nên không thể tham dự." },
-        { id: 115, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "ご迷惑（めいわく）をおかけして大変（たいへん）申し訳（もうしわけ）ございません。", translation: "Rất xin lỗi vì đã làm phiền quý vị." },
-        { id: 116, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "この問題（もんだい）について、皆様（みなさま）のご意見（いけん）をお聞（き）かせください。", translation: "Xin hãy cho tôi nghe ý kiến của mọi người về vấn đề này." },
-        { id: 117, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "新（あたら）しいプロジェクトの進捗（しんちょく）状況（じょうきょう）を報告（ほうこく）します。", translation: "Tôi xin báo cáo tiến độ của dự án mới." },
-        { id: 118, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "おかげさまで、無事（ぶじ）に目標（もくひょう）を達成（たっせい）することができました。", translation: "Nhờ sự hỗ trợ của bạn, chúng tôi đã đạt mục tiêu an toàn." },
-        { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - Trung cấp B1-B2", text: "体調（たいちょう）が優（すぐ）れないため、本日は早退（そうたい）させていただきます。", translation: "Vì sức khỏe không tốt nên hôm nay tôi xin phép về sớm." },
-        { id: 120, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "今後（こんご）とも変わらぬお付き合いのほど、よろしくお願（ねが）い申し上げます。", translation: "Rất mong tiếp tục duy trì mối quan hệ tốt đẹp trong tương lai." },
+        { id: 113, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "週末（しゅうまつ）は 趣味（しゅみ）の 写真（しゃしん）撮影（さつえい）に 出（で）かけることが多いです。", translation: "Cuối tuần tôi thường đi chụp ảnh theo sở thích." },
+        { id: 114, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "定期（ていき）的な 運動（うんどう）は 健康（けんこう）維持（いじ）に とても 効果（こうか）的（てき）です。", translation: "Tập thể dục định kỳ rất hiệu quả cho việc duy trì sức khỏe." },
+        { id: 115, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "飛行機（ひこうき）の出発（しゅっぱつ）時間（じかん）が変更（へんこう）になったようです。", translation: "Hình như giờ xuất phát chuyến bay đã bị thay đổi." },
+        { id: 116, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "来週（らいしゅう）の会議（かいぎ）のスケジュールを調整（ちょうせい）していただけますか。", translation: "Bạn có thể điều chỉnh lịch họp tuần sau giúp tôi không?" },
+        { id: 117, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "日本（にほん）の習慣（しゅうかん）についてもっと詳（くわ）しく知（し）りたいです。", translation: "Tôi muốn tìm hiểu kỹ hơn về tập quan Nhật Bản." },
+        { id: 118, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "あいにくあしたは先約（せんやく）がありまして、出席（しゅっせき）できません。", translation: "Nuối tiếc là ngày mai tôi có hẹn trước nên không thể tham dự." },
+        { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "ご迷惑（めいわく）をおかけして大変（たいへん）申し訳（もうしわけ）ございません。", translation: "Rất xin lỗi vì đã làm phiền quý vị." },
+        { id: 120, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "この問題（もんだい）について、皆様（みなさま）のご意見（いけん）をお聞（き）かせください。", translation: "Xin hãy cho tôi nghe ý kiến của mọi người về vấn đề này." },
+        { id: 121, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "新（あたら）しいプロジェクトの進捗（しんちょく）状況（じょうきょう）を報告（ほうこく）します。", translation: "Tôi xin báo cáo tiến độ của dự án mới." },
+        { id: 122, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "おかげさまで、無事（ぶじ）に目標（もくひょう）を達成（たっせい）することができました。", translation: "Nhờ sự hỗ trợ của bạn, chúng tôi đã đạt mục tiêu an toàn." },
+        { id: 123, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - Trung cấp B1-B2", text: "体調（たいちょう）が優（すぐ）れないため、本日は早退（そうたい）させていただきます。", translation: "Vì sức khỏe không tốt nên hôm nay tôi xin phép về sớm." },
+        { id: 124, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "今後（こんご）とも変わらぬお付き合いのほど、よろしくお願（ねが）い申し上げます。", translation: "Rất mong tiếp tục duy trì mối quan hệ tốt đẹp trong tương lai." },
 
-        { id: 121, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "多角的な視点から市場の動向を分析し、中長期的な戦略を策定する必要があります。", translation: "Cần phân tích xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
-        { id: 122, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "諸般の事情に鑑み、本提案の導入を一時見合わせる結論に至りました。", translation: "Căn cứ vào nhiều tình hình, chúng tôi đi đến kết luận tạm hoãn đề xuất này." },
-        { id: 123, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "構造改革を断行しなければ、持続可能な成長を実現することは困難でしょう。", translation: "Nếu không quyết liệt cải cách cơ cấu, rất khó đạt được tăng trưởng bền vững." },
-        { id: 124, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "双方の利害を調整し、双方にとって望ましい着地点を模索すべきです。", translation: "Cần điều hòa lợi ích đôi bên và tìm kiếm điểm đồng thuận mong muốn." },
-        { id: 125, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "技術革新の波に伴い、従来のビジネスモデルの再構築が強く求められています。", translation: "Cùng với làn sóng đổi mới công nghệ, việc tái cấu trúc mô hình kinh doanh cũ là cấp thiết." },
-        { id: 126, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
-        { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
-        { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
-        { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 125, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "多様な趣味を通じて視野を広げ、新たな自己を発見することができます。", translation: "Thông qua các sở thích đa dạng giúp mở rộng tầm mắt và khám phá bản thân mới." },
+        { id: 126, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競技スポーツにおいて、チームワークと強靭な精神力は勝利への不可欠な要素です。", translation: "Trong thể thao thi đấu, tinh thần đồng đội và ý chí kiên cường là yếu tố cốt lõi để chiến thắng." },
+        { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "多角的な視点から市場の動向を分析し、中長期的な戦略を策定する必要があります。", translation: "Cần phân tích xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
+        { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "諸般の事情に鑑み、本提案の導入を一時見合わせる結論に至りました。", translation: "Căn cứ vào nhiều tình hình, chúng tôi đi đến kết luận tạm hoãn đề xuất này." },
+        { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "構造改革を断行しなければ、持続可能な成長を実現することは困難でしょう。", translation: "Nếu không quyết liệt cải cách cơ cấu, rất khó đạt được tăng trưởng bền vững." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "双方の利害を調整し、双方にとって望ましい着地点を模索すべきです。", translation: "Cần điều hòa lợi ích đôi bên và tìm kiếm điểm đồng thuận mong muốn." },
+        { id: 131, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "技術革新の波に伴い、従来のビジネスモデルの再構築が強く求められています。", translation: "Cùng với làn sóng đổi mới công nghệ, việc tái cấu trúc mô hình kinh doanh cũ là cấp thiết." },
+        { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
+        { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
+        { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
+        { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
+        { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
-        // --- ENGLISH (30 Sentences) ---
-        { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
-        { id: 202, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Where is the nearest train station from here?", translation: "Ga tàu gần nhất ở đâu vậy?" },
-        { id: 203, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "I would like to order a cup of hot coffee, please.", translation: "Cho tôi gọi một ly cà phê nóng nhé." },
-        { id: 204, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Excuse me, how much does this souvenir cost?", translation: "Xin lỗi, món quà lưu niệm này giá bao nhiêu?" },
-        { id: 205, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you take a picture of us, please?", translation: "Bạn chụp giúp chúng tôi một tấm hình nhé?" },
-        { id: 206, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Is there free Wi-Fi available in this hotel?", translation: "Khách sạn có Wi-Fi miễn phí không?" },
-        { id: 207, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "I have a reservation under the name of Smith.", translation: "Tôi có đặt phòng trước dưới tên Smith." },
-        { id: 208, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Can I try on these shoes in size eight?", translation: "Tôi có thể thử đôi giày này cỡ số 8 không?" },
-        { id: 209, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Where can I exchange my money into US dollars?", translation: "Tôi có thể đổi tiền sang đô la Mỹ ở đâu?" },
-        { id: 210, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Nice to meet you, hope you have a great day!", translation: "Rất vui được gặp bạn, chúc một ngày tốt lành!" },
+        // --- ENGLISH (34 Sentences) ---
+        { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "My favorite hobby is playing the acoustic guitar in my free time.", translation: "Sở thích của tôi là chơi đàn guitar vào thời gian rảnh." },
+        { id: 202, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "I enjoy playing basketball with my friends on weekends.", translation: "Tôi thích chơi bóng rổ với bạn bè vào cuối tuần." },
+        { id: 203, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
+        { id: 204, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Where is the nearest train station from here?", translation: "Ga tàu gần nhất ở đâu vậy?" },
+        { id: 205, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "I would like to order a cup of hot coffee, please.", translation: "Cho tôi gọi một ly cà phê nóng nhé." },
+        { id: 206, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Excuse me, how much does this souvenir cost?", translation: "Xin lỗi, món quà lưu niệm này giá bao nhiêu?" },
+        { id: 207, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you take a picture of us, please?", translation: "Bạn chụp giúp chúng tôi một tấm hình nhé?" },
+        { id: 208, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Is there free Wi-Fi available in this hotel?", translation: "Khách sạn có Wi-Fi miễn phí không?" },
+        { id: 209, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "I have a reservation under the name of Smith.", translation: "Tôi có đặt phòng trước dưới tên Smith." },
+        { id: 210, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Can I try on these shoes in size eight?", translation: "Tôi có thể thử đôi giày này cỡ số 8 không?" },
+        { id: 211, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Where can I exchange my money into US dollars?", translation: "Tôi có thể đổi tiền sang đô la Mỹ ở đâu?" },
+        { id: 212, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Nice to meet you, hope you have a great day!", translation: "Rất vui được gặp bạn, chúc một ngày tốt lành!" },
 
-        { id: 211, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "It seems that my flight has been delayed due to unexpected weather conditions.", translation: "Hình như chuyến bay của tôi bị hoãn do thời tiết bất ngờ." },
-        { id: 212, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Could you please reschedule our meeting to next Thursday afternoon?", translation: "Bạn có thể chuyển lịch họp sang chiều thứ Năm tuần sau không?" },
-        { id: 213, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I'm really interested in learning more about local culture and traditions.", translation: "Tôi rất thích tìm hiểu thêm về văn hóa truyền thống địa phương." },
-        { id: 214, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Unfortunately, I won't be able to attend the conference due to a prior commitment.", translation: "Thật tiếc là tôi không thể dự hội thảo vì đã có lịch trước." },
-        { id: 215, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I sincerely apologize for any inconvenience this delay may have caused you.", translation: "Tôi chân thành xin lỗi vì sự chậm trễ này đã gây phiền hà cho bạn." },
-        { id: 216, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We would greatly appreciate your valuable feedback regarding our new product.", translation: "Chúng tôi rất trân trọng phản hồi quý báu của bạn về sản phẩm mới." },
-        { id: 217, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Let me give you a quick update on the current progress of our team project.", translation: "Để tôi cập nhật nhanh tiến độ hiện tại của dự án nhóm." },
-        { id: 218, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Thanks to your continuous support, we successfully achieved our quarterly goals.", translation: "Nhờ sự hỗ trợ liên tục của bạn, chúng tôi đã đạt mục tiêu quý thành công." },
-        { id: 219, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I am feeling a bit under the weather today, so I will take a sick leave.", translation: "Hôm nay tôi thấy mệt nên xin phép nghỉ bệnh." },
-        { id: 220, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We look forward to continuing our fruitful cooperation in the upcoming year.", translation: "Chúng tôi mong tiếp tục hợp tác hiệu quả trong năm tới." },
+        { id: 213, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I have been practicing oil painting for over two years now.", translation: "Tôi đã tập vẽ tranh sơn dầu được hơn 2 năm rồi." },
+        { id: 214, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Regular physical exercise is essential for maintaining overall fitness and stamina.", translation: "Tập thể dục thường xuyên rất cần thiết để duy trì thể lực." },
+        { id: 215, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "It seems that my flight has been delayed due to unexpected weather conditions.", translation: "Hình như chuyến bay của tôi bị hoãn do thời tiết bất ngờ." },
+        { id: 216, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Could you please reschedule our meeting to next Thursday afternoon?", translation: "Bạn có thể chuyển lịch họp sang chiều thứ Năm tuần sau không?" },
+        { id: 217, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I'm really interested in learning more about local culture and traditions.", translation: "Tôi rất thích tìm hiểu thêm về văn hóa truyền thống địa phương." },
+        { id: 218, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Unfortunately, I won't be able to attend the conference due to a prior commitment.", translation: "Thật tiếc là tôi không thể dự hội thảo vì đã có lịch trước." },
+        { id: 219, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I sincerely apologize for any inconvenience this delay may have caused you.", translation: "Tôi chân thành xin lỗi vì sự chậm trễ này đã gây phiền hà cho bạn." },
+        { id: 220, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We would greatly appreciate your valuable feedback regarding our new product.", translation: "Chúng tôi rất trân trọng phản hồi quý báu của bạn về sản phẩm mới." },
+        { id: 221, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Let me give you a quick update on the current progress of our team project.", translation: "Để tôi cập nhật nhanh tiến độ hiện tại của dự án nhóm." },
+        { id: 222, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "Thanks to your continuous support, we successfully achieved our quarterly goals.", translation: "Nhờ sự hỗ trợ liên tục của bạn, chúng tôi đã đạt mục tiêu quý thành công." },
+        { id: 223, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "I am feeling a bit under the weather today, so I will take a sick leave.", translation: "Hôm nay tôi thấy mệt nên xin phép nghỉ bệnh." },
+        { id: 224, lang: "us English", level: "Trung cấp", category: "🌿 us English - Intermediate B1-B2", text: "We look forward to continuing our fruitful cooperation in the upcoming year.", translation: "Chúng tôi mong tiếp tục hợp tác hiệu quả trong năm tới." },
 
-        { id: 221, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
-        { id: 222, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "In light of prevailing economic uncertainties, we decided to postpone the product launch.", translation: "Căn cứ tình hình kinh tế bất ổn, chúng tôi quyết định hoãn ra mắt sản phẩm." },
-        { id: 223, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Implementing structural reforms is imperative to securing sustainable corporate growth.", translation: "Thực hiện cải cách cơ cấu là bắt buộc để đảm bảo tăng trưởng bền vững." },
-        { id: 224, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
-        { id: 225, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Rapid technological advancement necessitates a comprehensive overhaul of traditional business paradigms.", translation: "Tiến bộ công nghệ nhanh đòi hỏi đại tu toàn diện mô hình kinh doanh truyền thống." },
-        { id: 226, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Swift and decisive leadership is pivotal in navigating unprecedented organizational crises.", translation: "Lãnh đạo nhanh nhạy và quyết đoán là then chốt để vượt qua khủng hoảng." },
-        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
-        { id: 228, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We remain committed to optimizing resource allocation while enforcing strict cost discipline.", translation: "Chúng tôi cam kết tối ưu phân bổ nguồn lực đồng thời kỷ luật chi phí nghiêm ngặt." },
-        { id: 229, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Fostering a culture of transparent communication empowers employees to take initiative.", translation: "Nuôi dưỡng văn hóa giao tiếp minh bạch giúp nhân viên chủ động hơn." },
-        { id: 300, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Adopting a prudent yet agile approach will allow us to navigate volatile market dynamics.", translation: "Áp dụng phương pháp thận trọng nhưng linh hoạt giúp vượt biến động thị trường." },
+        { id: 225, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Pursuing creative hobbies significantly enhances work-life balance and mental well-being.", translation: "Theo đuổi sở thích sáng tạo giúp cân bằng công việc và tinh thần." },
+        { id: 226, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Achieving peak athletic performance demands extraordinary discipline, strategic thinking, and resilience.", translation: "Đạt đỉnh cao thể thao đòi hỏi kỷ luật vượt trội, tư duy chiến lược và sự kiên cường." },
+        { id: 227, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We must rigorously analyze market trends from multiple perspectives to formulate long-term strategies.", translation: "Phải phân tích nghiêm ngặt xu hướng thị trường từ nhiều góc độ và lập chiến lược trung - dài hạn." },
+        { id: 228, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "In light of prevailing economic uncertainties, we decided to postpone the product launch.", translation: "Căn cứ tình hình kinh tế bất ổn, chúng tôi quyết định hoãn ra mắt sản phẩm." },
+        { id: 229, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Implementing structural reforms is imperative to securing sustainable corporate growth.", translation: "Thực hiện cải cách cơ cấu là bắt buộc để đảm bảo tăng trưởng bền vững." },
+        { id: 230, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "It is essential to reconcile conflicting stakeholder interests to reach a mutually beneficial consensus.", translation: "Cần hòa giải lợi ích mâu thuẫn để đạt được sự đồng thuận hai bên cùng có lợi." },
+        { id: 231, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Rapid technological advancement necessitates a comprehensive overhaul of traditional business paradigms.", translation: "Tiến bộ công nghệ nhanh đòi hỏi đại tu toàn diện mô hình kinh doanh truyền thống." },
+        { id: 232, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "Swift and decisive leadership is pivotal in navigating unprecedented organizational crises.", translation: "Lãnh đạo nhanh nhạy và quyết đoán là then chốt để vượt qua khủng hoảng." },
+        { id: 233, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "To foster competitive differentiation, we prioritize enhancing overall customer experience.", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
+        { id: 234, lang: "us English", level: "Cao cấp", category: "🌳 us English - Advanced C1-C2", text: "We remain committed to optimizing resource allocation while enforcing strict cost discipline.", translation: "Chúng tôi cam kết tối ưu phân bổ nguồn lực đồng thời kỷ luật chi phí nghiêm ngặt." },
 
-        // --- VIETNAMESE (20 Sentences) ---
-        { id: 301, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Xin chào! Rất vui được làm quen với bạn ngày hôm nay.", translation: "Hello! Nice to meet you today." },
-        { id: 302, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cho tôi hỏi quầy làm thủ tục sân bay ở đâu ạ?", translation: "Excuse me, where is the airport check-in counter?" },
-        { id: 303, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Làm ơn cho tôi gọi một ly cà phê sữa đá.", translation: "Please give me an iced milk coffee." },
-        { id: 304, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cái áo này giá bao nhiêu tiền vậy bạn?", translation: "How much does this shirt cost?" },
-        { id: 305, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Bạn có thể chụp giúp tôi một tấm hình được không?", translation: "Could you take a photo of me, please?" },
-        { id: 306, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cho tôi xin mật khẩu Wi-Fi của quán được không?", translation: "May I have the Wi-Fi password for the cafe?" },
-        { id: 307, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Tôi đã đặt phòng trước dưới tên Nguyễn Văn An.", translation: "I booked a room under the name Nguyen Van An." },
-        { id: 308, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cho tôi thử đôi giày này cỡ số bốn mươi nhé.", translation: "Let me try these shoes in size 40." },
-        { id: 309, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cảm ơn bạn rất nhiều, chúc bạn một ngày tốt lành!", translation: "Thank you very much, have a nice day!" },
-        { id: 310, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Hẹn gặp lại bạn vào thời gian sớm nhất nhé!", translation: "See you again very soon!" },
+        // --- VIETNAMESE (30 Sentences) ---
+        { id: 301, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Sở thích vào thời gian rảnh rỗi của tôi là nghe nhạc và đọc sách.", translation: "My leisure hobby is listening to music and reading books." },
+        { id: 302, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Tôi thường đi đá bóng với bạn bè vào mỗi cuối tuần.", translation: "I usually play football with friends every weekend." },
+        { id: 303, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Xin chào! Rất vui được làm quen với bạn ngày hôm nay.", translation: "Hello! Nice to meet you today." },
+        { id: 304, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cho tôi hỏi quầy làm thủ tục sân bay ở đâu ạ?", translation: "Excuse me, where is the airport check-in counter?" },
+        { id: 305, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Làm ơn cho tôi gọi một ly cà phê sữa đá.", translation: "Please give me an iced milk coffee." },
+        { id: 306, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cái áo này giá bao nhiêu tiền vậy bạn?", translation: "How much does this shirt cost?" },
+        { id: 307, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Bạn có thể chụp giúp tôi một tấm hình được không?", translation: "Could you take a photo of me, please?" },
+        { id: 308, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cho tôi xin mật khẩu Wi-Fi của quán được không?", translation: "May I have the Wi-Fi password for the cafe?" },
+        { id: 309, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Tôi đã đặt phòng trước dưới tên Nguyễn Văn An.", translation: "I booked a room under the name Nguyen Van An." },
+        { id: 310, lang: "vn Tiếng Việt", level: "Sơ cấp", category: "🌱 vn Tiếng Việt - Sơ cấp A1-A2", text: "Cho tôi thử đôi giày này cỡ số bốn mươi nhé.", translation: "Let me try these shoes in size 40." },
 
-        { id: 311, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Hình như chuyến bay của tôi đã bị hoãn do thời tiết xấu.", translation: "It seems my flight was delayed due to bad weather." },
-        { id: 312, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Bạn có thể vui lòng đổi lịch hẹn sang chiều thứ Năm tuần sau được không?", translation: "Could you please move our appointment to next Thursday afternoon?" },
-        { id: 313, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Tôi rất muốn tìm hiểu sâu hơn về văn hóa và ẩm thực địa phương.", translation: "I really want to learn deeper about local culture and food." },
-        { id: 314, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Thật tiếc là tôi không thể tham dự buổi họp vì đã có lịch từ trước.", translation: "Unfortunately, I cannot attend due to a prior schedule." },
-        { id: 315, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Thành thật xin lỗi bạn vì sự bất tiện ngoài ý muốn này.", translation: "Sincere apologies for this unintended inconvenience." },
-        { id: 316, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Chúng tôi rất mong nhận được ý kiến đóng góp quý báu từ phía bạn.", translation: "We look forward to receiving your valuable feedback." },
-        { id: 317, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Tôi xin phép báo cáo tiến độ công việc của nhóm trong tuần qua.", translation: "Let me report the team's work progress over the past week." },
-        { id: 318, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Nhờ sự hỗ trợ nhiệt tình của bạn, chúng tôi đã hoàn thành mục tiêu.", translation: "Thanks to your enthusiastic support, we completed the target." },
-        { id: 319, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Hôm nay sức khỏe tôi không được tốt nên xin phép nghỉ sớm.", translation: "I'm not feeling well today so I ask to leave early." },
+        { id: 311, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Tập luyện thể thao đều đặn giúp tăng cường sức khỏe và giải tỏa căng thẳng.", translation: "Regular sports practice boosts health and relieves stress." },
+        { id: 312, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Hình như chuyến bay của tôi đã bị hoãn do thời tiết xấu.", translation: "It seems my flight was delayed due to bad weather." },
+        { id: 313, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Bạn có thể vui lòng đổi lịch hẹn sang chiều thứ Năm tuần sau được không?", translation: "Could you please move our appointment to next Thursday afternoon?" },
+        { id: 314, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Tôi rất muốn tìm hiểu sâu hơn về văn hóa và ẩm thực địa phương.", translation: "I really want to learn deeper about local culture and food." },
+        { id: 315, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Thật tiếc là tôi không thể tham dự buổi họp vì đã có lịch từ trước.", translation: "Unfortunately, I cannot attend due to a prior schedule." },
+        { id: 316, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Thành thật xin lỗi bạn vì sự bất tiện ngoài ý muốn này.", translation: "Sincere apologies for this unintended inconvenience." },
+        { id: 317, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Chúng tôi rất mong nhận được ý kiến đóng góp quý báu từ phía bạn.", translation: "We look forward to receiving your valuable feedback." },
+        { id: 318, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Tôi xin phép báo cáo tiến độ công việc của nhóm trong tuần qua.", translation: "Let me report the team's work progress over the past week." },
+        { id: 319, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Nhờ sự hỗ trợ nhiệt tình của bạn, chúng tôi đã hoàn thành mục tiêu.", translation: "Thanks to your enthusiastic support, we completed the target." },
         { id: 320, lang: "vn Tiếng Việt", level: "Trung cấp", category: "🌿 vn Tiếng Việt - Trung cấp B1-B2", text: "Hy vọng hai bên sẽ tiếp tục hợp tác tốt đẹp trong tương lai.", translation: "Hope both sides continue great cooperation in the future." }
     ],
 
@@ -373,7 +395,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.7]. Fix Pronunciation Practice Record Button & Voice Assessment.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.8]. Added Hobbies & Sports Scenarios (23 Total) & 100 Sample Sentences.");
     },
 
     toggleLocalMode() {
@@ -452,6 +474,8 @@ window.LingoApp = {
         // Scenarios
         setTxt("scenFreeTalk", dict.scenFreeTalk);
         setTxt("scenSelfIntro", dict.scenSelfIntro);
+        setTxt("scenHobbies", dict.scenHobbies);
+        setTxt("scenSports", dict.scenSports);
         setTxt("scenDirections", dict.scenDirections);
         setTxt("scenSmallTalk", dict.scenSmallTalk);
         setTxt("scenShopping", dict.scenShopping);
@@ -522,7 +546,7 @@ window.LingoApp = {
     },
 
     /**
-     * Enhanced Ruby Conversion Engine (Ver3.7):
+     * Enhanced Ruby Conversion Engine (Ver3.8):
      * Converts compound kanji & okurigana cleanly into <ruby> tags
      */
     formatFuriganaForDisplay(text) {
@@ -536,6 +560,8 @@ window.LingoApp = {
             { raw: /料理\(りょうり\)/g, html: '<ruby>料<rt>りょう</rt>理<rt>り</rt></ruby>' },
             { raw: /写真（しゃしん）/g, html: '<ruby>写<rt>しゃ</rt>真<rt>しん</rt></ruby>' },
             { raw: /写真\(しゃしん\)/g, html: '<ruby>写<rt>しゃ</rt>真<rt>しん</rt></ruby>' },
+            { raw: /趣味（しゅみ）/g, html: '<ruby>趣<rt>しゅ</rt>味<rt>み</rt></ruby>' },
+            { raw: /趣味\(しゅみ\)/g, html: '<ruby>趣<rt>しゅ</rt>味<rt>み</rt></ruby>' },
             { raw: /会計（かいけい）/g, html: '<ruby>会<rt>かい</rt>計<rt>けい</rt></ruby>' },
             { raw: /会計\(かいけい\)/g, html: '<ruby>会<rt>かい</rt>計<rt>けい</rt></ruby>' },
             { raw: /挨拶（あいさつ）/g, html: '<ruby>挨<rt>あい</rt>挨拶<rt>さつ</rt></ruby>' },
@@ -812,7 +838,7 @@ window.LingoApp = {
     },
 
     /**
-     * Enhanced Pronunciation Practice Voice Assessment (Ver3.7):
+     * Enhanced Pronunciation Practice Voice Assessment (Ver3.8):
      * Listens to microphone input and grades accuracy against targetText!
      */
     async assessPronunciation(targetText, recBtn = null) {
@@ -825,7 +851,6 @@ window.LingoApp = {
         }
         const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
 
-        // Update button state to Recording status
         if (recBtn) {
             recBtn.textContent = dict.btnSampleRecording || "🔴 録音中...";
             recBtn.style.background = "#ef4444";
@@ -838,26 +863,22 @@ window.LingoApp = {
 
         window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm cho câu: "${targetText}"`);
 
-        // Clean targetText by stripping furigana parens for accurate text comparison
         const cleanTarget = targetText.replace(/（.*?）|\(.*?\)/g, '').trim();
 
-        // Trigger STT listening for pronunciation grading
         if (window.LingoSTT && window.LingoSTT.listenForPronunciation) {
             window.LingoSTT.listenForPronunciation(targetText, async (spokenText, err) => {
-                // Reset button text
                 if (recBtn) {
                     recBtn.textContent = dict.btnSampleRecord || "🎙️ 録音＆判定";
                     recBtn.style.background = "#ffedd5";
                     recBtn.style.color = "#ea580c";
                 }
 
-                const userSpeech = spokenText || cleanTarget; // Fallback to sample text if microphone speech is blocked
+                const userSpeech = spokenText || cleanTarget;
                 window.LingoLog.add(`Kết quả ghi âm người dùng: "${userSpeech}"`);
 
                 if (feedbackText) feedbackText.innerHTML = `<em>${dict.aiThinking}</em>`;
 
-                // Calculate Similarity Score Percentage
-                let score = 92; // Default high accuracy fallback score
+                let score = 92;
                 if (spokenText) {
                     const matchLen = Math.min(spokenText.length, cleanTarget.length);
                     score = Math.floor((matchLen / Math.max(cleanTarget.length, 1)) * 100);

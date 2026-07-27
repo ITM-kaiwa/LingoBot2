@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver3.7 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver3.7 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver3.8 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver3.8 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=3.7">
-    <link rel="stylesheet" href="styles/components.css?v=3.7">
+    <link rel="stylesheet" href="styles/main.css?v=3.8">
+    <link rel="stylesheet" href="styles/components.css?v=3.8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver3.7 & Advanced Collapsible Controls Panel -->
+            <!-- Header with Version Badge Ver3.8 & Advanced Collapsible Controls Panel -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver3.7</span>
+                    <span class="version-badge">Ver3.8</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -159,7 +159,7 @@
                         </div>
                     </div>
 
-                    <!-- Scenario Selection Card INSIDE CHAT BUBBLE with Categorized Scenarios -->
+                    <!-- Scenario Selection Card INSIDE CHAT BUBBLE with Categorized Scenarios (23 Topics) -->
                     <div class="chat-row ai-row" id="scenarioBubbleRow">
                         <div class="chat-bubble scenario-prompt-bubble">
                             <div class="scenario-title" id="txtScenarioTitle">🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:</div>
@@ -174,17 +174,19 @@
                                 </div>
                             </div>
 
-                            <!-- Categorized Scenarios including Free Talk -->
+                            <!-- Categorized Scenarios including Free Talk, Hobbies, and Sports -->
                             <div class="selection-group">
                                 <div class="selection-label" id="txtScenarioLabel">Tình huống:</div>
                                 <div class="scenario-categories-container" id="scenarioOptions">
                                     
-                                    <!-- 1. Daily Conversation & Free Talk -->
+                                    <!-- 1. Daily Conversation & Free Talk, Hobbies & Sports -->
                                     <div class="cat-block">
                                         <div class="cat-title" id="catDaily">💬 日常会話・自由会話</div>
                                         <div class="pill-options">
                                             <button type="button" id="scenFreeTalk" class="pill-opt active" data-scenario="自由会話">💬 自由会話</button>
                                             <button type="button" id="scenSelfIntro" class="pill-opt" data-scenario="自己紹介の会話">👋 自己紹介</button>
+                                            <button type="button" id="scenHobbies" class="pill-opt" data-scenario="趣味の会話">🎨 趣味の会話</button>
+                                            <button type="button" id="scenSports" class="pill-opt" data-scenario="スポーツの会話">⚽ スポーツの会話</button>
                                             <button type="button" id="scenDirections" class="pill-opt" data-scenario="道案内の会話">🗺️ 道案内</button>
                                             <button type="button" id="scenSmallTalk" class="pill-opt" data-scenario="天気・世間話の会話">☀️ 天気・世間話</button>
                                             <button type="button" id="scenShopping" class="pill-opt" data-scenario="買い物の会話">🛍️ 買い物</button>
@@ -252,7 +254,7 @@
                     <div class="pronounce-card">
                         <div class="pronounce-header">
                             <h2 id="txtPronounceTitle">🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)</h2>
-                            <p id="txtPronounceSub">Chọn câu mẫu bên dưới (80 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.</p>
+                            <p id="txtPronounceSub">Chọn câu mẫu bên dưới (100 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.</p>
                             
                             <!-- Filters for Pronunciation Sentences - Default Active: JP + Sơ cấp (Japanese + Beginner) -->
                             <div class="pronounce-filter-bar">
@@ -367,10 +369,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=3.7"></script>
-    <script src="js/tts.js?v=3.7"></script>
-    <script src="js/stt.js?v=3.7"></script>
-    <script src="js/summary.js?v=3.7"></script>
-    <script src="js/app.js?v=3.7"></script>
+    <script src="js/log.js?v=3.8"></script>
+    <script src="js/tts.js?v=3.8"></script>
+    <script src="js/stt.js?v=3.8"></script>
+    <script src="js/summary.js?v=3.8"></script>
+    <script src="js/app.js?v=3.8"></script>
 </body>
 </html>
