@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.5 Implementation (Single-Line Header Main Row for PC)
+// Main Application Controller - LingoBot2 Ver5.6 Implementation (Removed Lang Guide & Show More Scenarios Toggle)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -13,6 +13,7 @@ window.LingoApp = {
     customSystemPrompt: null,   // Stores dynamic user-edited System Prompt
     messages: [],
     isProcessing: false,
+    areMoreScenariosExpanded: false, // State for Show More scenarios toggle
 
     // I18N Dictionary translating 100% of UI elements
     i18n: {
@@ -66,6 +67,9 @@ window.LingoApp = {
             scenHospital: "🏥 Bệnh viện & Nhà thuốc",
             scenPolice: "👮 Cảnh sát & Thất lạc đồ",
             scenLost: "❓ Bị lạc đường",
+
+            btnShowMore: "👇 Xem thêm",
+            btnShowLess: "👆 Thu gọn",
 
             startBtn: "🚀 Bắt đầu hội thoại ngay",
             pronounceTitle: "🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)",
@@ -145,6 +149,9 @@ window.LingoApp = {
             scenPolice: "👮 警察・紛失物の届出会話",
             scenLost: "❓ 道に迷ったときの会話",
 
+            btnShowMore: "👇 もっと見る",
+            btnShowLess: "👆 閉じる",
+
             startBtn: "🚀 会話を開始する",
             pronounceTitle: "🎯 発音・シャドーイング練習",
             pronounceSub: "上の例文（初級・中級・上級の計100文）を選択するかマイクで話して、AIによる発音指導を受けましょう。",
@@ -222,6 +229,9 @@ window.LingoApp = {
             scenHospital: "🏥 Hospital & Pharmacy",
             scenPolice: "👮 Police & Lost Items",
             scenLost: "❓ Getting Lost",
+
+            btnShowMore: "👇 Show More",
+            btnShowLess: "👆 Show Less",
 
             startBtn: "🚀 Start Conversation Now",
             pronounceTitle: "🎯 Pronunciation & Intonation Practice",
@@ -416,7 +426,29 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.5]. Single-Line Header Main Row for PC.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.6]. Removed Lang Guide & Show More Scenarios Toggle.");
+    },
+
+    // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
+    toggleMoreScenarios() {
+        const container = document.getElementById("moreScenariosContainer");
+        const btnTxt = document.getElementById("txtBtnShowMore");
+        if (!container) return;
+
+        this.areMoreScenariosExpanded = !this.areMoreScenariosExpanded;
+        const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+
+        if (this.areMoreScenariosExpanded) {
+            container.style.setProperty("display", "block", "important");
+            container.classList.remove("hidden");
+            if (btnTxt) btnTxt.textContent = dict.btnShowLess || "👆 Thu gọn";
+            window.LingoLog.add("Mở rộng danh sách tất cả tình huống giao tiếp (Hiển thị 23 chủ đề).");
+        } else {
+            container.style.setProperty("display", "none", "important");
+            container.classList.add("hidden");
+            if (btnTxt) btnTxt.textContent = dict.btnShowMore || "👇 Xem thêm";
+            window.LingoLog.add("Thu gọn danh sách tình huống giao tiếp (Chỉ hiển thị 日常会話・自由会話).");
+        }
     },
 
     // PROMPT EDITOR POPOUT FLOATING MODAL CONTROLS
@@ -538,6 +570,12 @@ window.LingoApp = {
         setTxt("txtLevelLabel", dict.levelLabel);
         setTxt("txtScenarioLabel", dict.scenarioLabel);
         
+        // Show More / Show Less Button Label Update
+        const btnTxt = document.getElementById("txtBtnShowMore");
+        if (btnTxt) {
+            btnTxt.textContent = this.areMoreScenariosExpanded ? dict.btnShowLess : dict.btnShowMore;
+        }
+
         // Levels
         setTxt("optLevel1", dict.level1);
         setTxt("optLevel2", dict.level2);
@@ -1107,13 +1145,11 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
     startConversation() {
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
-        const langGuideRow = document.getElementById("langGuideBubbleRow");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.add("hidden");
         if (setupRow) {
             setupRow.classList.add("hidden");
             setupRow.style.setProperty("display", "none", "important");
         }
-        if (langGuideRow) langGuideRow.classList.add("hidden");
 
         window.LingoLog.add(`Bắt đầu hội thoại tức thì (Instant Start). Trình độ: ${this.level} | Tình huống: ${this.scenario}`);
 
@@ -1134,15 +1170,13 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
         
         const container = document.getElementById("chatContainer");
         if (container) {
-            const rows = container.querySelectorAll(".chat-row:not(#langGuideBubbleRow):not(#setupBubbleRow):not(#scenarioBubbleRow)");
+            const rows = container.querySelectorAll(".chat-row:not(#setupBubbleRow):not(#scenarioBubbleRow)");
             rows.forEach(r => r.remove());
         }
 
-        const langGuideRow = document.getElementById("langGuideBubbleRow");
         const scenarioBubbleRow = document.getElementById("scenarioBubbleRow");
         const setupRow = document.getElementById("setupBubbleRow");
 
-        if (langGuideRow) langGuideRow.classList.remove("hidden");
         if (scenarioBubbleRow) scenarioBubbleRow.classList.remove("hidden");
         if (setupRow) {
             setupRow.classList.add("hidden");

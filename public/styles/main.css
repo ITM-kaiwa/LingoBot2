@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver5.5 (Single-Line Header Main Row for PC) */
+/* Main Layout & Theme System - LingoBot2 Ver5.6 (Removed Lang Guide Bubble & Added Show More Scenarios Toggle) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -37,14 +37,14 @@ body[data-ui-lang="tiếng Anh"] * {
 }
 
 /* UNIVERSAL BUTTON ACTIVE PRESS EFFECT FOR ALL BUTTONS */
-button, .action-btn, .footer-btn, .pill-opt, .btn-sample, .audio-btn, .filter-chip, .modal-btn, .btn-advanced, .logo-badge-btn {
+button, .action-btn, .footer-btn, .pill-opt, .btn-sample, .audio-btn, .filter-chip, .modal-btn, .btn-advanced, .logo-badge-btn, .btn-show-more {
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
     transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease !important;
 }
 
-button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sample:active, .audio-btn:active, .filter-chip:active, .modal-btn:active, .btn-advanced:active, .logo-badge-btn:active {
+button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sample:active, .audio-btn:active, .filter-chip:active, .modal-btn:active, .btn-advanced:active, .logo-badge-btn:active, .btn-show-more:active {
     transform: translateY(3px) scale(0.95) !important;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.25) !important;
 }
@@ -330,6 +330,33 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     flex-direction: column;
     gap: 12px;
     background-color: var(--bg-chat-dark-gray) !important;
+}
+
+/* SHOW MORE SCENARIOS BUTTON STYLING */
+.show-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+.btn-show-more-scenarios {
+    padding: 6px 16px;
+    border-radius: 18px;
+    border: 1.5px solid #fdba74;
+    background: #fff7ed;
+    color: #ea580c;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.12);
+}
+
+.btn-show-more-scenarios:hover {
+    background: #ffedd5;
+    border-color: #f97316;
 }
 
 /* Footer Bar Styling */
