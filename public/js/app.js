@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver4.6 Implementation (Times New Roman for Vietnamese UI & Fixed Pronunciation Recording)
+// Main Application Controller - LingoBot2 Ver4.7 Implementation (Language Fonts: UDP Gothic / UD Digi Kyokasho NK-R / Times New Roman & 3s Silence Auto-OFF & Top Status Banner for Pronunciation Mode)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -76,6 +76,10 @@ window.LingoApp = {
             aiThinking: "AI đang phân tích giọng nói...",
             aiSummarizing: "AI đang tổng hợp báo cáo bài học...",
 
+            pronounceIdleMsg: "🎙️ Hãy nói qua Micro (Vui lòng chọn câu mẫu bên dưới)",
+            pronounceRecordingMsg: "🔴 Micro đang thu âm... (Hãy nói)",
+            pronounceAnalyzingMsg: "🤖 AI đang phân tích phát âm...",
+
             btnPlay: "▶ Phát",
             btnPlaying: "▶ Đang phát",
             btnStop: "⏹ STOP",
@@ -150,6 +154,10 @@ window.LingoApp = {
             aiThinking: "AIが音声分析中です...",
             aiSummarizing: "AIがまとめています...",
 
+            pronounceIdleMsg: "🎙️ マイクで話してください (下から例文を選択してください)",
+            pronounceRecordingMsg: "🔴 マイクが収録中… (発声してください)",
+            pronounceAnalyzingMsg: "🤖 AIが発音を分析中…",
+
             btnPlay: "▶ 再生",
             btnPlaying: "▶ 再生中",
             btnStop: "⏹ STOP",
@@ -223,6 +231,10 @@ window.LingoApp = {
             filterAll: "All",
             aiThinking: "AI is analyzing voice...",
             aiSummarizing: "AI is summarizing...",
+
+            pronounceIdleMsg: "🎙️ Please speak into the mic (Select a sample below)",
+            pronounceRecordingMsg: "🔴 Microphone is recording... (Speak now)",
+            pronounceAnalyzingMsg: "🤖 AI is analyzing pronunciation...",
 
             btnPlay: "▶ Play",
             btnPlaying: "▶ Playing",
@@ -387,7 +399,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.6]. Times New Roman for Vietnamese UI & Fixed Pronunciation Recording.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.7]. Fonts: UDP Gothic / UD Digi Kyokasho NK-R / Times New Roman & 3s Silence Auto-OFF.");
     },
 
     openFeedbackPage() {
@@ -449,7 +461,8 @@ window.LingoApp = {
         this.uiLang = lang;
         localStorage.setItem("lingobot_ui_lang", lang);
 
-        // Dynamically set data-ui-lang attribute on body for Times New Roman font switching
+        // Dynamically set data-ui-lang attribute on body for font switching:
+        // EN: UDP Gothic, JP: UD Digi Kyokasho NK-R, VN: Times New Roman
         document.body.setAttribute('data-ui-lang', lang);
 
         const dict = this.i18n[lang] || this.i18n["tiếng Việt"];
@@ -524,6 +537,9 @@ window.LingoApp = {
         setTxt("chipLevelAll", dict.filterAll);
         setTxt("txtSummaryLoading", dict.aiSummarizing);
 
+        // Status banner default text
+        setTxt("txtPronounceStatus", dict.pronounceIdleMsg);
+
         // Update Summary Modal elements
         setTxt("txtSummaryModalTitle", dict.summaryModalTitle);
         setTxt("txtPrintBtn", dict.btnPrint);
@@ -547,7 +563,7 @@ window.LingoApp = {
         // Re-render sample sentences list to update pronunciation buttons
         this.renderPronounceSamples();
 
-        window.LingoLog.add(`Cập nhật 100% văn bản & nút bấm giao diện sang: ${lang} (Font Times New Roman active: ${lang === 'tiếng Việt'})`);
+        window.LingoLog.add(`Cập nhật 100% văn bản & nút bấm giao diện sang: ${lang}`);
     },
 
     openLogModal() {
@@ -582,11 +598,13 @@ window.LingoApp = {
         return formatted;
     },
 
+    // MODE SWITCHING WITH FOOTER HIDE FOR PRONUNCIATION MODE
     switchMode(modeType) {
         const tabGiaoTiep = document.getElementById("tabGiaoTiep");
         const tabPhatAm = document.getElementById("tabPhatAm");
         const chatContainer = document.getElementById("chatContainer");
         const pronounceContainer = document.getElementById("pronounceContainer");
+        const footerBar = document.getElementById("appFooterBar");
 
         if (modeType === "PhatAm") {
             if (tabPhatAm) tabPhatAm.classList.add("active");
@@ -600,10 +618,22 @@ window.LingoApp = {
                 pronounceContainer.style.setProperty("display", "block", "important");
                 pronounceContainer.classList.remove("hidden");
             }
+            // HIDE CHAT FOOTER BAR IN PRONUNCIATION MODE
+            if (footerBar) {
+                footerBar.style.setProperty("display", "none", "important");
+            }
             
             this.mode = "Phát âm";
             this.renderPronounceSamples();
-            window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode)");
+            
+            // Set Top Status Banner to Idle
+            const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+            const banner = document.getElementById("pronounceStatusBanner");
+            const statusTxt = document.getElementById("txtPronounceStatus");
+            if (banner) banner.className = "pronounce-status-banner";
+            if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (Hãy nói qua Micro)";
+
+            window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode) -> Ẩn thanh Footer & Hiển thị Status Banner trên cùng.");
         } else {
             if (tabGiaoTiep) tabGiaoTiep.classList.add("active");
             if (tabPhatAm) tabPhatAm.classList.remove("active");
@@ -616,9 +646,13 @@ window.LingoApp = {
                 chatContainer.style.setProperty("display", "flex", "important");
                 chatContainer.classList.remove("hidden");
             }
+            // RESTORE CHAT FOOTER BAR IN CONVERSATION MODE
+            if (footerBar) {
+                footerBar.style.setProperty("display", "flex", "important");
+            }
 
             this.mode = "Giao tiếp";
-            window.LingoLog.add("Màn hình: 💭 Giao tiếp");
+            window.LingoLog.add("Màn hình: 💭 Giao tiếp -> Hiện lại thanh Footer.");
         }
     },
 
@@ -826,10 +860,12 @@ window.LingoApp = {
         });
     },
 
-    // PRONUNCIATION ADVISOR: FIXED RECORDING & AI ANALYSIS
+    // PRONUNCIATION ADVISOR: FIXED RECORDING & TOP BANNER STATUS UPDATES
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
+        const banner = document.getElementById("pronounceStatusBanner");
+        const statusTxt = document.getElementById("txtPronounceStatus");
         
         if (feedbackBox) {
             feedbackBox.classList.remove("hidden");
@@ -842,6 +878,10 @@ window.LingoApp = {
             recBtn.style.background = "#ef4444";
             recBtn.style.color = "#ffffff";
         }
+
+        // UPDATE TOP STATUS BANNER TO RECORDING STATE
+        if (banner) banner.className = "pronounce-status-banner recording";
+        if (statusTxt) statusTxt.textContent = dict.pronounceRecordingMsg || "🔴 マイクが収録中… (Đang thu âm...)";
 
         if (feedbackText) {
             feedbackText.innerHTML = `<div style="color:#ea580c; font-weight:bold; padding:12px; background:#fff7ed; border-radius:12px; border:1px solid #fed7aa;">
@@ -860,6 +900,10 @@ window.LingoApp = {
                     recBtn.style.background = "#ffedd5";
                     recBtn.style.color = "#ea580c";
                 }
+
+                // UPDATE TOP STATUS BANNER TO ANALYZING STATE
+                if (banner) banner.className = "pronounce-status-banner analyzing";
+                if (statusTxt) statusTxt.textContent = dict.pronounceAnalyzingMsg || "🤖 AIが発音を分析中… (AI đang phân tích...)";
 
                 const userSpeech = spokenText || cleanTarget;
                 window.LingoLog.add(`Kết quả ghi âm nhận diện: "${userSpeech}"`);
@@ -919,6 +963,10 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                             <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Âm tiết và ngữ điệu rất mượt mà! Hãy tiếp tục phát huy.</p>
                         </div>`;
                     }
+                } finally {
+                    // RESET TOP STATUS BANNER TO IDLE STATE
+                    if (banner) banner.className = "pronounce-status-banner";
+                    if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (Hãy nói qua Micro)";
                 }
             });
         }

@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver4.6 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver4.6 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver4.7 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver4.7 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=4.6">
-    <link rel="stylesheet" href="styles/components.css?v=4.6">
+    <link rel="stylesheet" href="styles/main.css?v=4.7">
+    <link rel="stylesheet" href="styles/components.css?v=4.7">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-<body>
+<body data-ui-lang="tiếng Việt">
     <div class="app-viewport">
         <div class="app-card">
             <!-- Header with Single Row Main Controls & Advanced Collapsible Panel -->
@@ -22,7 +22,7 @@
                     <div class="brand-group">
                         <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver4.6</span>
+                        <span class="version-badge">Ver4.7</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -255,12 +255,19 @@
 
                 <!-- 2. PRONUNCIATION PRACTICE MODE VIEW (Phát âm) -->
                 <div class="pronounce-viewport" id="pronounceContainer" style="display: none;">
+                    
+                    <!-- NEW TOP STATUS BANNER BAR AT THE VERY TOP -->
+                    <div class="pronounce-status-banner" id="pronounceStatusBanner">
+                        <span id="txtPronounceStatus">🎙️ マイクで話してください (Hãy nói qua Micro)</span>
+                    </div>
+
+                    <!-- 1st Card: Title, Description & Filters -->
                     <div class="pronounce-card">
                         <div class="pronounce-header">
                             <h2 id="txtPronounceTitle">🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)</h2>
                             <p id="txtPronounceSub">Chọn câu mẫu bên dưới (100 câu mẫu Sơ cấp/Trung cấp/Cao cấp) hoặc tự nói qua Micro để AI phân tích phát âm.</p>
                             
-                            <!-- Filters for Pronunciation Sentences - Default Active: JP + Sơ cấp (Japanese + Beginner) -->
+                            <!-- Filters for Pronunciation Sentences -->
                             <div class="pronounce-filter-bar">
                                 <div class="filter-group">
                                     <span id="lblFilterLang">Ngôn ngữ:</span>
@@ -280,6 +287,7 @@
                             </div>
                         </div>
 
+                        <!-- 2nd Section: Sample Sentences List -->
                         <div class="sample-sentences-list" id="sampleSentencesList">
                             <!-- Sample Sentences inserted dynamically -->
                         </div>
@@ -294,7 +302,7 @@
             </main>
 
             <!-- Footer Controls matching screenshot -->
-            <footer class="app-footer-bar">
+            <footer class="app-footer-bar" id="appFooterBar">
                 <div class="footer-input-wrapper">
                     <input 
                         type="text" 
@@ -373,10 +381,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=4.6"></script>
-    <script src="js/tts.js?v=4.6"></script>
-    <script src="js/stt.js?v=4.6"></script>
-    <script src="js/summary.js?v=4.6"></script>
-    <script src="js/app.js?v=4.6"></script>
+    <script src="js/log.js?v=4.7"></script>
+    <script src="js/tts.js?v=4.7"></script>
+    <script src="js/stt.js?v=4.7"></script>
+    <script src="js/summary.js?v=4.7"></script>
+    <script src="js/app.js?v=4.7"></script>
 </body>
 </html>

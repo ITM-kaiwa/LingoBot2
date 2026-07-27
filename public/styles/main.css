@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver4.6 (Times New Roman for Vietnamese UI) */
+/* Main Layout & Theme System - LingoBot2 Ver4.7 (Language Fonts: UDP Gothic / UD Digi Kyokasho NK-R / Times New Roman & 3s Silence Auto-OFF) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -28,7 +28,26 @@ html, body {
     color: var(--text-primary);
 }
 
-/* TIMES NEW ROMAN FONT EXCLUSIVELY FOR VIETNAMESE UI */
+/* STRICT FONT ASSIGNMENTS PER SYSTEM LANGUAGE */
+/* 1. English UI Font: UDP Gothic */
+body[data-ui-lang="tiếng Anh"],
+body[data-ui-lang="tiếng Anh"] button,
+body[data-ui-lang="tiếng Anh"] input,
+body[data-ui-lang="tiếng Anh"] select,
+body[data-ui-lang="tiếng Anh"] textarea {
+    font-family: 'UDP Gothic', 'BIZ UDPGothic', 'Yu Gothic', sans-serif !important;
+}
+
+/* 2. Japanese UI Font: UD Digi Kyokasho NK-R */
+body[data-ui-lang="tiếng Nhật"],
+body[data-ui-lang="tiếng Nhật"] button,
+body[data-ui-lang="tiếng Nhật"] input,
+body[data-ui-lang="tiếng Nhật"] select,
+body[data-ui-lang="tiếng Nhật"] textarea {
+    font-family: 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho NK-R', 'Meiryo', sans-serif !important;
+}
+
+/* 3. Vietnamese UI Font: Times New Roman */
 body[data-ui-lang="tiếng Việt"],
 body[data-ui-lang="tiếng Việt"] button,
 body[data-ui-lang="tiếng Việt"] input,
@@ -165,7 +184,6 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     flex-shrink: 0;
 }
 
-/* Badge High Contrast Pill Styles */
 .badge-pill {
     display: inline-flex;
     align-items: center;
@@ -281,6 +299,39 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     flex-direction: column;
     gap: 12px;
     background-color: var(--bg-chat-dark-gray) !important;
+}
+
+/* PRONUNCIATION PRACTICE MODE: TOP STATUS BANNER BAR */
+.pronounce-status-banner {
+    background: linear-gradient(135deg, #ea580c, #c2410c);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    text-align: center;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.3s ease;
+}
+
+.pronounce-status-banner.recording {
+    background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+    animation: pulseBanner 1.2s infinite;
+}
+
+.pronounce-status-banner.analyzing {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+}
+
+@keyframes pulseBanner {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
 }
 
 /* Footer Bar Styling */
