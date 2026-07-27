@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.9 Implementation (Flawless Ruby Engine & Zero Gap Text Formatting)
+// Main Application Controller - LingoBot2 Ver4.0 Implementation (Feedback Modal & Ver4.0 Updates)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -23,6 +23,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "Đặt lại",
             endBtn: "Kết thúc",
+            feedbackBtn: "Gợi ý cải tiến",
             sendBtn: "Gửi",
             placeholder: "Nhập tin nhắn hoặc nói bằng micro...",
             scenarioTitle: "🎯 Chọn trình độ (CEFR) & Tình huống giao tiếp:",
@@ -96,6 +97,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "リセット",
             endBtn: "終了",
+            feedbackBtn: "改善提案",
             sendBtn: "送信",
             placeholder: "メッセージを入力、またはマイクで話してください...",
             scenarioTitle: "🎯 レベル(CEFR)と対話シチュエーションの選択:",
@@ -169,6 +171,7 @@ window.LingoApp = {
             btnAdvanced: "Advanced",
             resetBtn: "Reset",
             endBtn: "End",
+            feedbackBtn: "Feedback",
             sendBtn: "Send",
             placeholder: "Type a message or speak into mic...",
             scenarioTitle: "🎯 Choose CEFR Level & Scenario:",
@@ -227,6 +230,7 @@ window.LingoApp = {
             btnDownload: "⬇ DL MP3",
             btnSamplePlay: "▶ Play Sample",
             btnSampleRecord: "🎙️ Record & Grade",
+            btnSampleRecording: "🔴 Record & Grade",
             btnSampleRecording: "🔴 Recording... (Speak now)",
 
             summaryModalTitle: "📊 Lesson Summary & Advice Report",
@@ -395,7 +399,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.9]. Flawless Ruby Engine & Zero Gap Text Formatting.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver4.0]. Feedback Modal & Mailto integration.");
     },
 
     toggleLocalMode() {
@@ -453,6 +457,7 @@ window.LingoApp = {
         setTxt("txtBtnAdvanced", dict.btnAdvanced);
         setTxt("txtResetBtn", dict.resetBtn);
         setTxt("txtEndBtn", dict.endBtn);
+        setTxt("txtFeedbackBtn", dict.feedbackBtn);
         setTxt("txtSendBtn", dict.sendBtn);
         setTxt("txtFooterEndBtn", dict.endBtn);
         setTxt("txtScenarioTitle", dict.scenarioTitle);
@@ -545,22 +550,14 @@ window.LingoApp = {
         }
     },
 
-    /**
-     * Flawless Ruby Parsing Engine (Ver3.9):
-     * Includes \u3005 (々 iteration mark) & handles kanji/okurigana/ruby boundaries seamlessly.
-     * Prevents text gap issues and eliminates leftover parens 100%.
-     */
     formatFuriganaForDisplay(text) {
         if (!text) return "";
         let formatted = text;
 
-        // 1. Convert Kanji + Ruby Parens including 々 (\u3005) (e.g. "別々（べつべつ）", "会計（かいけい）", "迷惑（めいわく）")
-        // Pattern matches: [Kanji or 々]+ followed by optional okurigana, then parens with Hiragana/Katakana
         formatted = formatted.replace(
             /([\u3400-\u4dbf\u4e00-\u9fff\u3005]+)([\u3040-\u309f\u30a0-\u30ff]*)[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g,
             (match, kanji, okurigana, ruby) => {
                 let cleanRuby = ruby.trim();
-                // Strip trailing okurigana from ruby if it matches trailing okurigana
                 if (okurigana && cleanRuby.endsWith(okurigana)) {
                     cleanRuby = cleanRuby.slice(0, -okurigana.length);
                 }
@@ -568,7 +565,6 @@ window.LingoApp = {
             }
         );
 
-        // 2. Generic Fallback for single Kanji Ruby parens
         formatted = formatted.replace(
             /([\u3400-\u4dbf\u4e00-\u9fff\u3005]+)[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g,
             '<ruby>$1<rt>$2</rt></ruby>'
@@ -821,9 +817,6 @@ window.LingoApp = {
         });
     },
 
-    /**
-     * Enhanced Pronunciation Practice Voice Assessment (Ver3.9)
-     */
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");

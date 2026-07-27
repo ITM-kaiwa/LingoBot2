@@ -488,6 +488,10 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
 def serve_index():
     return send_from_directory(PUBLIC_DIR, "index.html")
 
+@app.route("/feedback.html")
+def serve_feedback():
+    return send_from_directory(PUBLIC_DIR, "feedback.html")
+
 @app.route("/<path:path>")
 def serve_static(path):
     return send_from_directory(PUBLIC_DIR, path)

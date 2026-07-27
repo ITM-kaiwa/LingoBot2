@@ -1,4 +1,4 @@
-/* Components Styling - Maximum Legibility & Clean Advanced Header Toggle Panel (Ver3.9) */
+/* Components Styling - Maximum Legibility & Clean Advanced Header Toggle Panel (Ver4.0) */
 
 /* Advanced Header Toggle Button & Collapsible Panel */
 .btn-advanced {
@@ -36,9 +36,18 @@
     display: none !important;
 }
 
+.btn-purple {
+    background: #9333ea !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(147, 51, 234, 0.25) !important;
+}
+
+.btn-purple:hover {
+    background: #7e22ce !important;
+}
+
 /* ==========================================
-   FLAWLESS RUBY & FURIGANA ALIGNMENT FIX (VER3.9)
-   Prevents character separation & large empty gaps completely!
+   FLAWLESS RUBY & FURIGANA ALIGNMENT FIX (VER4.0)
    ========================================== */
 ruby {
     display: inline-ruby !important;
@@ -146,7 +155,7 @@ rt {
 
 
 /* ==========================================
-   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER3.9 HIGH CONTRAST)
+   2. GENERAL CHAT BUBBLE & LEGIBILITY STYLING (VER4.0 HIGH CONTRAST)
    ========================================== */
 .chat-row {
     display: flex !important;
@@ -177,7 +186,6 @@ rt {
     box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
 }
 
-/* User Bubble: Light Emerald Green Background + Ultra Dark Forest Text (#022c22 / #064e3b) */
 .user-row .chat-bubble {
     background: #e6f4ea !important;
     color: #022c22 !important;
@@ -203,7 +211,6 @@ rt {
     font-weight: 700 !important;
 }
 
-/* AI Model Bubble: Light Sky Blue Background + Ultra Dark Navy Blue Text (#0f172a / #034694) */
 .ai-row .chat-bubble {
     background: #e0f2fe !important;
     color: #0f172a !important;
