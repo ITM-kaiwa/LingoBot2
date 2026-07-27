@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver2.9 Implementation (Audio Playback Toggle & Interrupt Control)
+// TTS Engine Module - LingoBot2 Ver3.1 Implementation (Preserve Numbers & Exact Sentence Text for TTS)
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
@@ -55,9 +55,10 @@ window.LingoTTS = {
     },
 
     /**
-     * Clean text specifically for TTS reading:
-     * 1. Strips out AI feedback / advice / correction lines (e.g. "Câu của bạn...", "💡 Sửa lỗi...").
-     * 2. Cleans up Ruby Furigana annotations (e.g. "荷物（にもつ）" -> "荷物") so TTS reads standard Kanji without double reading.
+     * Clean text specifically for TTS reading (Ver3.1):
+     * 1. Strips out ONLY explicit AI feedback / advice lines (starting with 💡, 📝, Sửa lỗi...).
+     * 2. Preserves ALL numbers (e.g. 10000mAh, 3列, 15番, 14時30分) and text characters.
+     * 3. Removes ONLY furigana ruby annotations in parentheses (e.g. "荷物（にもつ）" -> "荷物").
      */
     cleanTextForTTS(text) {
         if (!text) return "";
@@ -70,13 +71,8 @@ window.LingoTTS = {
             let trimmed = line.trim();
             if (!trimmed) continue;
 
-            // Skip advice / feedback lines starting with markers, emojis or correction terms
+            // Skip ONLY advice / feedback lines starting with markers, emojis or correction terms
             if (/^(💡|📝|🔧|✨|👍|⚠️|Sửa lỗi|Nhận xét|Lời khuyên|Câu của bạn|Bạn nên|Lỗi:|Note:|Feedback:)/i.test(trimmed)) {
-                continue;
-            }
-            
-            // Skip lines that are entirely in parentheses or brackets (notes/translations)
-            if (/^[（\(【\[].*[）\)】\]]$/.test(trimmed)) {
                 continue;
             }
 
@@ -88,12 +84,13 @@ window.LingoTTS = {
             speechText = text; // Fallback if all lines were filtered
         }
 
-        // 2. Strip Ruby annotations: "荷物（にもつ）" -> "荷物" (removes parenthesis part)
+        // 2. Strip Ruby annotations: "荷物（にもつ）" -> "荷物", "14時（じ）" -> "14時"
+        // PRESERVES all numbers, units (mAh, 番, 時, 分), Kanji, Kana, and English characters!
         speechText = speechText
-            .replace(/([\u3400-\u4dbf\u4e00-\u9fff]+)\s*[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g, '$1')
+            .replace(/([\u3400-\u4dbf\u4e00-\u9fff0-9A-Za-z]+)\s*[（\(]([\u3040-\u309f\u30a0-\u30ff\s]+)[）\)]/g, '$1')
             .replace(/[（\(][\u3040-\u309f\u30a0-\u30ff\s]+[）\)]/g, '') // Any remaining isolated furigana parens
             .replace(/【.*?】/g, '') // Square brackets
-            .replace(/[\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u2600-\u26FF\u2700-\u27BF]/g, ''); // Emojis
+            .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ''); // Emojis
 
         return speechText.trim();
     },
@@ -123,7 +120,7 @@ window.LingoTTS = {
         const selectedVoice = ttsSelect ? ttsSelect.value : "ja-JP-Chirp3-HD-F";
         this.updateActiveTtsBadge(selectedVoice);
 
-        // Get fully cleaned text without advice lines & without ruby furigana parens
+        // Get fully cleaned text: preserves numbers & units, removes advice & furigana parens
         const cleanText = this.cleanTextForTTS(text);
 
         if (!cleanText) {
@@ -144,7 +141,7 @@ window.LingoTTS = {
         }
 
         // Option B: EdgeTTS API Call via Render Backend (/api/tts)
-        window.LingoLog.add(`Yêu cầu EdgeTTS Engine [Voice: ${selectedVoice}]: "${cleanText.substring(0, 30)}..."`);
+        window.LingoLog.add(`Yêu cầu EdgeTTS Engine [Voice: ${selectedVoice}]: "${cleanText.substring(0, 40)}..."`);
 
         try {
             const reqPayload = {

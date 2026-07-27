@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver3.0 Implementation
+// Main Application Controller - LingoBot2 Ver3.1 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -328,7 +328,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.0]. Dynamic Exact AI Model Name Tag & Dynamic Target Language TTS Switch.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.1]. Full Number & Text Preservation in TTS.");
     },
 
     updateUiLanguage(lang) {
