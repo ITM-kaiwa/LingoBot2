@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.8 Implementation
+// Main Application Controller - LingoBot2 Ver3.0 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -328,7 +328,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.8]. Pure Dialogue TTS playback without advice lines or ruby parens.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver3.0]. Dynamic Exact AI Model Name Tag & Dynamic Target Language TTS Switch.");
     },
 
     updateUiLanguage(lang) {
@@ -549,8 +549,10 @@ window.LingoApp = {
         if (targetSelect) {
             targetSelect.addEventListener("change", (e) => {
                 this.targetLang = e.target.value;
+                // Force update TTS model voice to match newly selected target language!
+                this.userSelectedTtsModel = null;
                 this.updateTtsModelForLanguage(this.targetLang);
-                window.LingoLog.add(`Ngôn ngữ mục tiêu: ${this.targetLang}`);
+                window.LingoLog.add(`Chuyển đổi Ngôn ngữ mục tiêu sang: ${this.targetLang} -> Tự động cập nhật TTS voice phù hợp.`);
             });
         }
 
@@ -730,21 +732,25 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
     },
 
     updateTtsModelForLanguage(lang) {
+        const select = document.getElementById("ttsModelSelect");
+        if (!select) return;
+
         if (this.userSelectedTtsModel) {
-            const select = document.getElementById("ttsModelSelect");
-            if (select && select.value !== this.userSelectedTtsModel) {
+            if (select.value !== this.userSelectedTtsModel) {
                 select.value = this.userSelectedTtsModel;
             }
             if (window.LingoTTS) window.LingoTTS.updateActiveTtsBadge(this.userSelectedTtsModel);
             return;
         }
 
-        const select = document.getElementById("ttsModelSelect");
-        if (!select) return;
-        
-        if (lang.includes("日本語")) select.value = "ja-JP-Chirp3-HD-F";
-        else if (lang.includes("English")) select.value = "en-US-Chirp3-HD-F";
-        else select.value = "vi-VN-Neural2-A";
+        // Dynamically select best EdgeTTS model matching newly selected target language
+        if (lang.includes("日本語")) {
+            select.value = "ja-JP-Chirp3-HD-F";
+        } else if (lang.includes("English") || lang.includes("us")) {
+            select.value = "en-US-Chirp3-HD-F";
+        } else if (lang.includes("Việt") || lang.includes("vn")) {
+            select.value = "vi-VN-Neural2-A";
+        }
 
         if (window.LingoTTS) {
             window.LingoTTS.updateActiveTtsBadge(select.value);
@@ -870,7 +876,9 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
 
             if (data.reply) {
                 const reply = data.reply;
-                let modelUsed = data.display_model || data.used_model || "Gemini-Other";
+
+                // Show EXACT real model name returned by server (e.g. gemini-2.5-flash, gemini-1.5-flash, gemini-2.0-flash, etc.)
+                let modelUsed = data.display_model || data.used_model || "Gemini";
                 let retrySeconds = data.retry_after_seconds || 0;
 
                 if (modelUsed === "Local" || data.used_model === "local-fallback" || data.is_smart_fallback) {
@@ -935,12 +943,11 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
         const timeSpan = document.createElement("span");
         timeSpan.className = "msg-time";
 
+        // Display EXACT real model name without replacing it with 'Gemini-Other'
         let formattedModelTag = usedModel;
         if (usedModel) {
             if (usedModel === "Local" || usedModel.includes("local")) {
                 formattedModelTag = "Local";
-            } else if (usedModel.includes("Gemini-Other") || (usedModel !== "gemini-3.6-flash" && usedModel !== "gemini-3.5-flash")) {
-                formattedModelTag = "Gemini-Other";
             }
         }
 
