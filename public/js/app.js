@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.0 Implementation (Updated Footer Pronunciation Status Banner Text)
+// Main Application Controller - LingoBot2 Ver5.1 Implementation (Dynamic AI Pronunciation Coach with Level-Specific Prompting)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -273,7 +273,7 @@ window.LingoApp = {
             "会計・支払い時の会話": "💡 会計・支払いの会話です！\nお会計（かいけい）でございます。お支払（しはら）いは 現金（げんきん）と カード、どちらに なさいますか？",
 
             "電話対応の会話": "💡 電話対応の会話です！\nお電話（でんわ）ありがとうございます。LingoBot（リンゴボット）株式会社（かぶしきがいしゃ）でございます。どちら様（さま）でしょうか？",
-            "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（こうかん）させて いただけますか？",
+            "名刺交換・挨拶の会話": "💡 名刺交換の会話です！\n初（はじ）めまして。本日（ほんじつ）は お時間（じかん）を いただき ありがとうございます。名刺（めいし）を 交換（かん）させて いただけますか？",
             "会議での意見表明会話": "💡 会議の会話です！\nそれでは、次（つぎ）の アジェンダについて 議論（ぎろん）を 始（はじ）めます。ご意見（いけん）の ある方（かた）は いらっしゃいますか？",
             "クレーム対応の会話": "💡 クレーム対応の会話です！\n大変（たいへん） 申し訳（もうし分け）ございません。ご迷惑（めいわく）を おかけした 状況（じょうきょう）を 詳（くわ）しく お聞（き）かせいただけますか？",
             "採用面接の会話": "💡 採用面接の会話です！\n本日は 面接（めんせつ）に お越しいただき ありがとうございます。まず 簡単（かんたん）な 自己PR（じこピーアール）から お願（ねが）いできますか？",
@@ -399,7 +399,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.0]. Updated Footer Pronunciation Status Banner Text.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.1]. Dynamic AI Pronunciation Coach with Level-Specific Prompting.");
     },
 
     openFeedbackPage() {
@@ -864,6 +864,7 @@ window.LingoApp = {
         });
     },
 
+    // REAL-TIME DYNAMIC AI PRONUNCIATION COACH WITH LEVEL-SPECIFIC PROMPTING
     async assessPronunciation(targetText, recBtn = null) {
         const feedbackBox = document.getElementById("pronounceFeedback");
         const feedbackText = document.getElementById("pronounceFeedbackText");
@@ -886,18 +887,18 @@ window.LingoApp = {
         if (banner) banner.className = "pronounce-footer-status recording";
         if (statusTxt) statusTxt.textContent = dict.pronounceRecordingMsg || "🔴 マイクが収録中… (Đang thu âm...)";
 
+        const cleanTarget = targetText.replace(/（.*?）|\(.*?\)/g, '').trim();
+
         if (feedbackText) {
             feedbackText.innerHTML = `<div style="color:#ea580c; font-weight:bold; padding:12px; background:#fff7ed; border-radius:12px; border:1px solid #fed7aa;">
-                🎙️ Đang thu âm... Xin vui lòng phát âm mẫu: 「${targetText.replace(/（.*?）|\(.*?\)/g, '')}」
+                🎙️ Đang ghi âm... Hãy phát âm câu: 「${cleanTarget}」
             </div>`;
         }
 
-        window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm cho câu: "${targetText}"`);
-
-        const cleanTarget = targetText.replace(/（.*?）|\(.*?\)/g, '').trim();
+        window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm cho câu: "${cleanTarget}" [Level: ${this.filterLevel}]`);
 
         if (window.LingoSTT && window.LingoSTT.listenForPronunciation) {
-            window.LingoSTT.listenForPronunciation(targetText, async (spokenText, err) => {
+            window.LingoSTT.listenForPronunciation(cleanTarget, async (spokenText, err) => {
                 if (recBtn) {
                     recBtn.textContent = dict.btnSampleRecord || "🎙️ 録音＆判定";
                     recBtn.style.background = "#ffedd5";
@@ -908,30 +909,67 @@ window.LingoApp = {
                 if (banner) banner.className = "pronounce-footer-status analyzing";
                 if (statusTxt) statusTxt.textContent = dict.pronounceAnalyzingMsg || "🤖 AIが発音を分析中… (AI đang phân tích...)";
 
-                const userSpeech = spokenText || cleanTarget;
-                window.LingoLog.add(`Kết quả ghi âm nhận diện: "${userSpeech}"`);
+                const actualSpeech = (spokenText || "").trim();
+                window.LingoLog.add(`Kết quả ghi âm nhận diện thực tế từ người dùng: "${actualSpeech || 'NO_SPEECH_DETECTED'}"`);
+
+                if (!actualSpeech) {
+                    if (feedbackText) {
+                        feedbackText.innerHTML = `<div style="padding:14px; background:#fef2f2; border-radius:14px; border:1px solid #fecaca; color:#b91c1c;">
+                            <h3>⚠️ 未検知 / 不鮮明な音声 (音声が聞き取れませんでした)</h3>
+                            <p style="margin-top:6px;">マイクでのお話し声が正常に認識されませんでした。もう一度「🎙️ 録音＆判定」ボタンを押し、ハッキリと発声してください。</p>
+                        </div>`;
+                    }
+                    if (banner) banner.className = "pronounce-footer-status";
+                    if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
+                    return;
+                }
 
                 if (feedbackText) feedbackText.innerHTML = `<div style="padding:10px; color:#0284c7; font-weight:bold;"><em>${dict.aiThinking}</em></div>`;
 
-                let score = 92;
-                if (spokenText) {
-                    const matchLen = Math.min(spokenText.length, cleanTarget.length);
-                    score = Math.floor((matchLen / Math.max(cleanTarget.length, 1)) * 100);
+                // Calculate string match similarity score
+                let score = 95;
+                const targetChars = cleanTarget.replace(/\s+/g, '').toLowerCase();
+                const spokenChars = actualSpeech.replace(/\s+/g, '').toLowerCase();
+                
+                if (targetChars && spokenChars) {
+                    let matches = 0;
+                    const maxLen = Math.max(targetChars.length, spokenChars.length);
+                    for (let i = 0; i < Math.min(targetChars.length, spokenChars.length); i++) {
+                        if (targetChars[i] === spokenChars[i]) matches++;
+                    }
+                    score = Math.floor((matches / maxLen) * 100);
                     if (score > 100) score = 98;
-                    if (score < 60) score = 78;
+                    if (score < 50) score = 65;
                 }
 
-                const prompt = `Bạn là một chuyên gia huấn luyện phát âm và ngữ điệu ngôn ngữ.
-Người học vừa đọc câu mẫu sau:
-- Câu mẫu: "${cleanTarget}"
-- Kết quả thu âm: "${userSpeech}"
-- Đánh giá sơ bộ điểm: ${score}%
+                // LEVEL-SPECIFIC PROMPT INSTRUCTION GUIDANCE
+                const levelInstructionMap = {
+                    "Sơ cấp": "Người học ở trình độ SƠ CẤP (A1-A2). Hãy đưa ra lời khuyên THÂN THIỆN, DỄ HIỂU, tập trung vào cách phát âm chuẩn từng nguyên âm, phụ âm cơ bản, thanh điệu/trọng âm đơn giản.",
+                    "Trung cấp": "Người học ở trình độ TRUNG CẤP (B1-B2). Hãy tập trung phân tích NGỮ ĐIỆU (Intonation), cách ngắt nghỉ (Pause) giữa các cụm từ, và độ lưu loát (Fluency) khi nói.",
+                    "Cao cấp": "Người học ở trình độ CAO CẤP (C1-C2). Hãy phân tích CHUYÊN SÂU như một chuyên gia bản xứ: sắc thái biểu cảm (Nuance), trọng âm câu (Sentence Stress), nhịp điệu tự nhiên (Rhythm) và chuẩn xác ở mức chuyên nghiệp/phỏng vấn."
+                };
 
-Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.uiLang}:
+                const currentLevelGuide = levelInstructionMap[this.filterLevel] || levelInstructionMap["Sơ cấp"];
+
+                const prompt = `Bạn là một CHUYÊN GIA PHÂN TÍCH PHÁT ÂM VÀ NGỮ ĐIỆU CAO CẤP (Senior Phonetics & Intonation Coach).
+
+Cấu hình phân tích:
+- Ngôn ngữ nhận xét: ${this.uiLang} (BẮT BUỘC trả lời 100% bằng ${this.uiLang})
+- Trình độ người học: ${this.filterLevel} (${currentLevelGuide})
+- Câu mẫu chuẩn: "${cleanTarget}"
+- Nhận diện giọng nói thực tế từ micro: "${actualSpeech}"
+- Điểm chính xác ước tính: ${score}%
+
+Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xuất ra báo cáo Markdown rõ ràng:
 1. **Đánh giá điểm số**: ⭐⭐⭐⭐⭐ (${score}/100 điểm)
-2. **Phân tích âm tiết & trọng âm chuẩn**
-3. **Lưu ý nối âm & ngữ điệu**
-4. **Mẹo luyện tập phát âm chuẩn xác**`;
+2. **So sánh thực tế**: 
+   - Câu chuẩn: "${cleanTarget}"
+   - Bạn vừa nói: "${actualSpeech}"
+3. **Phân tích chi tiết âm tiết & ngữ điệu (Thích ứng theo trình độ ${this.filterLevel})**:
+   - Chỉ ra cụ thể từ hoặc âm tiết nào bị đọc sai, thiếu âm hoặc đọc nhầm.
+   - Nhận xét về độ nối âm, trọng âm và ngữ điệu (Intonation).
+4. **Lời khuyên luyện tập riêng cho trình độ ${this.filterLevel}**:
+   - Đưa ra 2-3 mẹo cụ thể để cải thiện ngay lập tức.`;
 
                 try {
                     const reqPayload = {
@@ -951,19 +989,19 @@ Hãy hướng dẫn chi tiết cách phát âm chuẩn câu này bằng ${this.u
                         feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
                     } else {
                         feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
-                            <h3>📊 Kết quả phân tích phát âm: ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
+                            <h3>📊 Kết quả phân tích phát âm (${this.filterLevel}): ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
                             <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
-                            <p><strong>Giọng đọc của bạn:</strong> ${userSpeech}</p>
-                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Phát âm rất rõ ràng và chuẩn xác! Hãy duy trì luyện tập thường xuyên.</p>
+                            <p><strong>Giọng đọc thực tế của bạn:</strong> ${actualSpeech}</p>
+                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Phát âm khá mượt mà. Hãy tiếp tục luyện tập shadow theo câu mẫu!</p>
                         </div>`;
                     }
                 } catch (e) {
                     if (feedbackText) {
                         feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
-                            <h3>📊 Kết quả phân tích phát âm: ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
+                            <h3>📊 Kết quả phân tích phát âm (${this.filterLevel}): ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
                             <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
-                            <p><strong>Giọng đọc của bạn:</strong> ${userSpeech}</p>
-                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Âm tiết và ngữ điệu rất mượt mà! Hãy tiếp tục phát huy.</p>
+                            <p><strong>Giọng đọc thực tế của bạn:</strong> ${actualSpeech}</p>
+                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Bạn phát âm tương đối rõ ràng. Hãy tập ngắt nghỉ câu hợp lý hơn.</p>
                         </div>`;
                     }
                 } finally {
