@@ -1,4 +1,4 @@
-/* Main Design System - Screenshot Matched Styling with Darker Chat Viewport Background (Ver2.1) */
+/* Main Design System - Screenshot Matched Styling with Darker Chat Viewport Background (Ver2.2) */
 :root {
     --bg-page: #f9f3ec;
     --card-bg: #ffffff;
@@ -289,7 +289,7 @@ body {
     background: #dc2626;
 }
 
-/* Main Chat Viewport - Darker background tone for distinct chat area boundary (Ver2.1) */
+/* Main Chat Viewport - Darker background tone for distinct chat area boundary (Ver2.2) */
 .chat-viewport {
     flex: 1 1 0%;
     min-height: 0;

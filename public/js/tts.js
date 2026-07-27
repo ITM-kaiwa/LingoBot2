@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver2.1 Implementation (EdgeTTS & Render Support)
+// TTS Engine Module - LingoBot2 Ver2.2 Implementation (EdgeTTS & Render Support)
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,
@@ -138,7 +138,6 @@ window.LingoTTS = {
     },
 
     playBrowserNativeSpeech(text, playBtnElement = null) {
-        // Dynamically update active header badge to General when fallback to browser native speech happens
         this.updateActiveTtsBadge("browser-native");
 
         if (!('speechSynthesis' in window)) {

@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver2.1 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver2.1 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver2.2 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver2.2 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=2.1">
-    <link rel="stylesheet" href="styles/components.css?v=2.1">
+    <link rel="stylesheet" href="styles/main.css?v=2.2">
+    <link rel="stylesheet" href="styles/components.css?v=2.2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-viewport">
         <div class="app-card">
-            <!-- Header with Version Badge Ver2.1 & Active TTS Badge -->
+            <!-- Header with Version Badge Ver2.2 & Active TTS Badge -->
             <header class="app-header-bar">
                 <div class="brand-group">
                     <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                     <span class="brand-title">LingoBot2</span>
-                    <span class="version-badge">Ver2.1</span>
+                    <span class="version-badge">Ver2.2</span>
                 </div>
 
                 <!-- Navigation Mode Tabs -->
@@ -73,7 +73,7 @@
 
                     <!-- Compact API Key Input Group in Header (between TTS Model & Reset button) -->
                     <div class="header-key-group">
-                        <input type="password" id="headerApiKeyInput" class="header-key-input" placeholder="Key..." title="Google Gemini API Key" />
+                        <input type="password" id="headerApiKeyInput" class="header-key-input" placeholder="Key..." title="Google Gemini API Key (Cần thiết khi chưa có環境変数Key)" />
                         <button type="button" id="headerKeyBtn" class="action-btn btn-key" onclick="window.LingoApp.saveHeaderApiKey()" title="Lưu Google API Key mới">Key</button>
                     </div>
 
@@ -92,10 +92,10 @@
                 <!-- 1. CONVERSATION MODE VIEW -->
                 <div class="chat-scroll-area" id="chatContainer">
 
-                    <!-- Language Setup Prompt Guide Bubble ABOVE API Key Setup Bubble -->
+                    <!-- Language Setup Prompt Guide Bubble (Styled in Beautiful Indigo Theme) -->
                     <div class="chat-row ai-row" id="langGuideBubbleRow">
-                        <div class="chat-bubble setup-prompt-bubble" style="border-left: 4px solid #f97316;">
-                            <div class="setup-title" style="color: #ea580c;">
+                        <div class="chat-bubble setup-prompt-bubble">
+                            <div class="setup-title">
                                 🌐 Thiết lập Ngôn ngữ / 言語の設定:
                             </div>
                             <div class="setup-text-vn" style="margin-bottom: 6px;">
@@ -110,17 +110,17 @@
                         </div>
                     </div>
                     
-                    <!-- Dedicated API Key Setup Prompt Bubble with INLINE INPUT FIELD -->
+                    <!-- Dedicated API Key Setup Prompt Bubble (Indigo Styling Matched) -->
                     <div class="chat-row ai-row hidden" id="setupBubbleRow">
                         <div class="chat-bubble setup-prompt-bubble">
                             <div class="setup-title">
                                 🔑 Google Gemini API Key Setup:
                             </div>
                             <div class="setup-text-vn" id="setupTextVn" style="margin-bottom: 8px;">
-                                <strong>vn</strong> Vui lòng nhập Google Gemini API Key của bạn vào ô bên dưới và nhấn nút "Lưu Key":
+                                <strong>vn</strong> Khi không có API Key trong môi trường (環境変数), vui lòng nhập Google Gemini API Key vào ô bên dưới hoặc ô Key góc trên thanh Header:
                             </div>
                             <div class="setup-text-jp" id="setupTextJp" style="margin-bottom: 10px;">
-                                <strong>jp</strong> Google Gemini APIキーを下の入力欄に入力し、「設定保存」ボタンを押してください：
+                                <strong>jp</strong> 環境変数Keyが無い場合やエラー時は、下の入力欄またはヘッダーのKey欄に Google Gemini APIキーを入力し、「設定保存」ボタンを押してください：
                             </div>
                             
                             <!-- Dedicated Inline Input Form inside Chat Bubble -->
@@ -130,14 +130,13 @@
                                     id="manualApiKeyInput" 
                                     class="bubble-key-input" 
                                     placeholder="Google Gemini API Key (Ví dụ: AQ.Ab...)"
-                                    style="flex: 1; padding: 8px 12px; border: 1px solid #fdba74; border-radius: 12px; font-size: 0.88rem; outline: none;"
+                                    style="flex: 1;"
                                 />
                                 <button 
                                     type="button" 
                                     id="saveApiKeyBtn" 
                                     class="bubble-key-btn" 
                                     onclick="window.LingoApp.saveManualApiKey()"
-                                    style="padding: 8px 16px; background: #ea580c; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;"
                                 >
                                     💾 Lưu Key / 保存
                                 </button>
@@ -358,10 +357,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=2.1"></script>
-    <script src="js/tts.js?v=2.1"></script>
-    <script src="js/stt.js?v=2.1"></script>
-    <script src="js/summary.js?v=2.1"></script>
-    <script src="js/app.js?v=2.1"></script>
+    <script src="js/log.js?v=2.2"></script>
+    <script src="js/tts.js?v=2.2"></script>
+    <script src="js/stt.js?v=2.2"></script>
+    <script src="js/summary.js?v=2.2"></script>
+    <script src="js/app.js?v=2.2"></script>
 </body>
 </html>

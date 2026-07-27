@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.1 Implementation
+// Main Application Controller - LingoBot2 Ver2.2 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -242,7 +242,7 @@ window.LingoApp = {
         { id: 113, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "日本（にほん）の習慣（しゅうかん）についてもっと詳（くわ）しく知（し）りたいです。", translation: "Tôi muốn tìm hiểu kỹ hơn về tập quan Nhật Bản." },
         { id: 114, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "あいにくあしたは先約（せんやく）がありまして、出席（しゅっせき）できません。", translation: "Nuối tiếc là ngày mai tôi có hẹn trước nên không thể tham dự." },
         { id: 115, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "ご迷惑（めいわく）をおかけして大変（たいへん）申し訳（もうしわけ）ございません。", translation: "Rất xin lỗi vì đã làm phiền quý vị." },
-        { id: 116, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "この問題（もんだい）について、皆様（みなさま）のご意見（いけん）をお聞（き）かせください。", translation: "Xin hãy cho tôi nghe ý kiến của mọi người về問題 này." },
+        { id: 116, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "この問題（もんだい）について、皆様（みなさま）のご意見（いけん）をお聞（き）かせください。", translation: "Xin hãy cho tôi nghe ý kiến của mọi người về vấn đề này." },
         { id: 117, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "新（あたら）しいプロジェクトの進捗（しんちょく）状況（じょうきょう）を報告（ほうこく）します。", translation: "Tôi xin báo cáo tiến độ của dự án mới." },
         { id: 118, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - 中級 B1-B2", text: "おかげさまで、無事（ぶじ）に目標（もくひょう）を達成（たっせい）することができました。", translation: "Nhờ sự hỗ trợ của bạn, chúng tôi đã đạt mục tiêu an toàn." },
         { id: 119, lang: "jp 日本語", level: "Trung cấp", category: "🌿 jp 日本語 - Trung cấp B1-B2", text: "体調（たいちょう）が優（すぐ）れないため、本日は早退（そうたい）させていただきます。", translation: "Vì sức khỏe không tốt nên hôm nay tôi xin phép về sớm." },
@@ -324,7 +324,7 @@ window.LingoApp = {
         this.updateTtsModelForLanguage(this.targetLang);
         this.renderPronounceSamples();
         this.showScenarioCard();
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.1]. Tối ưu khởi tạo hội thoại mượt mà khi chưa có API Key.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.2]. 優先: 環境変数Key ➔ 予備: 画面入力Key (Indigo Bubble Theme).");
     },
 
     updateUiLanguage(lang) {
@@ -503,8 +503,9 @@ window.LingoApp = {
     setApiKey(key) {
         const cleanKey = (key || "").trim().replace(/^["']|["']$/g, '');
         this.apiKey = cleanKey;
+        // Safely store user-inputted API key in Web Browser localStorage per user requirement
         localStorage.setItem("lingobot_api_key", cleanKey);
-        window.LingoLog.add("Đã lưu Google API Key nhập thủ công vào trình duyệt (Đã làm sạch).");
+        window.LingoLog.add("Đã lưu Google API Key nhập thủ công an toàn vào trình duyệt (localStorage).");
     },
 
     saveManualApiKey() {
@@ -518,7 +519,7 @@ window.LingoApp = {
         inputEl.value = "";
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
-        alert("Đã lưu Google API Key thủ công thành công! / Google API Key を設定しました！");
+        alert("Đã lưu Google API Key thủ công an toàn vào trình duyệt! / Google API Key をブラウザに安全に保存しました！");
     },
 
     saveHeaderApiKey() {
@@ -530,7 +531,7 @@ window.LingoApp = {
         }
         this.setApiKey(val);
         inputEl.value = "";
-        alert("Đã lưu Google API Key mới từ thanh Header! / ヘッダーから新しいGoogle API Keyを設定しました！");
+        alert("Đã lưu Google API Key mới từ thanh Header an toàn vào trình duyệt! / ヘッダーから新しいGoogle API Keyをブラウザに安全に保存しました！");
     },
 
     bindEvents() {
@@ -758,6 +759,10 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
             setupRow.classList.remove("hidden");
             setupRow.scrollIntoView({ behavior: 'smooth' });
         }
+        const headerInput = document.getElementById("headerApiKeyInput");
+        if (headerInput) {
+            headerInput.focus();
+        }
     },
 
     startConversation() {
@@ -767,12 +772,6 @@ Xuất phản hồi ngắn gọn bằng ${this.uiLang}:
         if (scenarioBubbleRow) scenarioBubbleRow.classList.add("hidden");
         if (setupRow) setupRow.classList.add("hidden");
         if (langGuideRow) langGuideRow.classList.add("hidden");
-
-        const apiKey = this.getApiKey();
-        if (!apiKey) {
-            this.showSetupPromptRow();
-            window.LingoLog.add("API Key 未入力のため、スマートローカルモードで会話を開始します。");
-        }
 
         window.LingoLog.add(`Bắt đầu hội thoại. Trình độ: ${this.level} | Tình huống: ${this.scenario}`);
 
@@ -881,10 +880,10 @@ Quy tắc ứng xử:
                 if (data.api_key_required || data.api_key_invalid) {
                     this.showSetupPromptRow();
                     const errMsg = data.api_key_invalid 
-                        ? "Google API Key が無効です。正しいキーを入力してください。" 
-                        : (data.error || "Google API Key が必要です。");
+                        ? "Google API Key が無効です。画面上部で新しいキーを入力してください。" 
+                        : (data.error || "Google API Key が必要です。画面上部に入力してください。");
                     this.appendMessage("model", `🔑 ${errMsg}`);
-                    window.LingoLog.add("API Key 無効または未設定: " + errMsg);
+                    window.LingoLog.add("API Key 要入力/無効: " + errMsg);
                 } else {
                     const errText = data.error || "Không thể kết nối tới Gemini AI.";
                     this.appendMessage("model", `⚠️ ${errText}`);

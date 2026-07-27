@@ -61,22 +61,12 @@ DEFAULT_FALLBACK_REPLIES = [
 ]
 
 def sanitize_api_key(key):
-    """
-    API Key Sanitization / Trimming (Ver2.1)
-    """
     if not key or not isinstance(key, str):
         return ""
     return key.strip().strip('"').strip("'")
 
-def resolve_api_key(client_key):
-    sanitized_client = sanitize_api_key(client_key)
-    if sanitized_client and len(sanitized_client) > 5:
-        return sanitized_client
-    
-    env_key = sanitize_api_key(os.environ.get("GOOGLE_API_KEY", ""))
-    if env_key:
-        return env_key
-    return ""
+def get_env_api_key():
+    return sanitize_api_key(os.environ.get("GOOGLE_API_KEY", ""))
 
 def get_smart_fallback_reply(scenario_name):
     for key, replies in SCENARIO_FALLBACK_REPLIES.items():
@@ -90,7 +80,7 @@ def fetch_dynamic_gemini_models(api_key):
     try:
         res = requests.get(url, timeout=7)
         if res.status_code in [400, 403]:
-            return None, "Google API Key が無効です。正しいキーを入力してください。"
+            return None, "Google API Key が無効です。"
         
         if res.status_code == 200:
             models_data = res.json().get("models", [])
@@ -101,7 +91,6 @@ def fetch_dynamic_gemini_models(api_key):
                 methods = m.get("supportedGenerationMethods", [])
                 name_lower = name.lower()
                 
-                # Exclude non-text/non-chat models
                 if any(excluded in name_lower for excluded in ["embedding", "-tts", "imagen", "veo", "aqa", "bison"]):
                     continue
 
@@ -126,13 +115,68 @@ def fetch_dynamic_gemini_models(api_key):
         return None, str(e)
 
 
+def execute_gemini_chat(api_key, formatted_contents, system_instruction, scenario_hint):
+    """
+    Helper function to execute Gemini chat API with dynamic model discovery.
+    """
+    dynamic_models, key_err = fetch_dynamic_gemini_models(api_key)
+    if key_err:
+        return None, key_err
+
+    fallback_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    target_models = dynamic_models if dynamic_models else fallback_models
+
+    payload = {
+        "contents": formatted_contents,
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 2048
+        }
+    }
+    if system_instruction:
+        payload["systemInstruction"] = {
+            "parts": [{"text": system_instruction}]
+        }
+
+    logs = []
+    for model in target_models:
+        logs.append(f"Đang thử mô hình: {model}...")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        
+        try:
+            res = requests.post(url, headers=headers, json=payload, timeout=12)
+            if res.status_code == 200:
+                res_data = res.json()
+                candidates = res_data.get("candidates", [])
+                if candidates and "content" in candidates[0]:
+                    parts = candidates[0]["content"].get("parts", [])
+                    reply_text = "".join([p.get("text", "") for p in parts])
+                    display_name = model if "flash" in model.lower() else "Gemini-Other"
+                    return {
+                        "reply": reply_text,
+                        "used_model": model,
+                        "display_model": display_name,
+                        "logs": logs
+                    }, None
+        except Exception as e:
+            logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
+
+    return None, "Quota or model connectivity error"
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
+    """
+    Ver2.2 API Key Priority Logic:
+    1. Priority #1: Try Server Environment Variable `GOOGLE_API_KEY`.
+    2. Priority #2: Only if Env Key is unconfigured or fails (400/403/Quota), fallback to Client User-Input Key.
+    """
     try:
         data = request.get_json() or {}
-        raw_client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
-        
-        api_key = resolve_api_key(raw_client_key)
+        raw_client_key = sanitize_api_key(data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", ""))
+        env_key = get_env_api_key()
+
         messages = data.get("messages", [])
         system_instruction = data.get("system_instruction", "")
 
@@ -141,37 +185,6 @@ def chat():
             match = re.search(r'Tình huống:\s*([^\n]+)', system_instruction)
             if match:
                 scenario_hint = match.group(1).strip()
-
-        # If API Key is missing, trigger zero-wait local fallback instead of breaking app!
-        if not api_key:
-            smart_reply = get_smart_fallback_reply(scenario_hint)
-            return jsonify({
-                "reply": smart_reply,
-                "used_model": "local-fallback",
-                "display_model": "Local",
-                "api_key_required": True,
-                "is_smart_fallback": True,
-                "info": "API Key chưa được cài đặt. Đang chạy ở Chế độ Cục bộ (Local Mode). Vui lòng nhập Google API Key để mở khóa AI Gemini hoàn chỉnh.",
-                "logs": ["API Key missing -> Local fallback mode active"]
-            }), 200
-
-        # Dynamic Model Auto-Discovery via ListModels API
-        dynamic_models, key_err = fetch_dynamic_gemini_models(api_key)
-
-        if key_err and "無効" in key_err:
-            smart_reply = get_smart_fallback_reply(scenario_hint)
-            return jsonify({
-                "reply": smart_reply,
-                "used_model": "local-fallback",
-                "display_model": "Local",
-                "api_key_invalid": True,
-                "is_smart_fallback": True,
-                "error": "Google API Key が無効です。正しいキーを入力してください。",
-                "logs": [key_err]
-            }), 200
-
-        fallback_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
-        target_models = dynamic_models if dynamic_models else fallback_models
 
         formatted_contents = []
         for msg in messages:
@@ -182,63 +195,39 @@ def chat():
                 "parts": [{"text": text_content}]
             })
 
-        payload = {
-            "contents": formatted_contents,
-            "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 2048
-            }
-        }
-        if system_instruction:
-            payload["systemInstruction"] = {
-                "parts": [{"text": system_instruction}]
-            }
+        # Step 1: Try Environment Variable Key First
+        if env_key:
+            res_data, env_err = execute_gemini_chat(env_key, formatted_contents, system_instruction, scenario_hint)
+            if res_data:
+                res_data["key_source"] = "env"
+                return jsonify(res_data), 200
 
-        logs = []
-        
-        # Try models in priority order with HTTP 400 (Modality/Quota Error) auto-skip
-        for model in target_models:
-            logs.append(f"Đang thử mô hình: {model}...")
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-            headers = {"Content-Type": "application/json"}
-            
-            try:
-                res = requests.post(url, headers=headers, json=payload, timeout=12)
-                if res.status_code == 200:
-                    res_data = res.json()
-                    candidates = res_data.get("candidates", [])
-                    if candidates and "content" in candidates[0]:
-                        parts = candidates[0]["content"].get("parts", [])
-                        reply_text = "".join([p.get("text", "") for p in parts])
-                        logs.append(f"Thành công với mô hình: {model}")
-                        
-                        display_name = model
-                        if "flash" in model.lower():
-                            display_name = model
-                        else:
-                            display_name = "Gemini-Other"
+        # Step 2: Try Client UI Input Key if Env Key is missing or failed
+        if raw_client_key:
+            res_data, client_err = execute_gemini_chat(raw_client_key, formatted_contents, system_instruction, scenario_hint)
+            if res_data:
+                res_data["key_source"] = "client"
+                return jsonify(res_data), 200
+            elif client_err and "無効" in client_err:
+                smart_reply = get_smart_fallback_reply(scenario_hint)
+                return jsonify({
+                    "reply": smart_reply,
+                    "used_model": "local-fallback",
+                    "display_model": "Local",
+                    "api_key_invalid": True,
+                    "is_smart_fallback": True,
+                    "error": "Google API Key が無効です。画面上部で新しいキーを入力してください。"
+                }), 200
 
-                        return jsonify({
-                            "reply": reply_text,
-                            "used_model": model,
-                            "display_model": display_name,
-                            "logs": logs
-                        })
-                else:
-                    logs.append(f"Mô hình {model} phản hồi HTTP {res.status_code} -> Tự động chuyển sang mô hình tiếp theo")
-            except Exception as e:
-                logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
-
+        # Step 3: Neither key is valid/configured -> Return Local Fallback & Prompt for UI Key Input
         smart_reply = get_smart_fallback_reply(scenario_hint)
-        logs.append("API Quota/Error -> Zero-Wait Local Fallback (Hiển thị nhãn: Local - 要リトライ 15s).")
-
         return jsonify({
             "reply": smart_reply,
             "used_model": "local-fallback",
             "display_model": "Local",
-            "retry_after_seconds": 15,
+            "api_key_required": True,
             "is_smart_fallback": True,
-            "logs": logs
+            "info": "環境変数の API Key が未設定またはエラーとなりました。画面上部の入力欄に Google API Key を入力してください。"
         }), 200
 
     except Exception as ex:
@@ -312,7 +301,6 @@ def tts():
             )
             loop.close()
 
-            print(f"EdgeTTS Success! Voice: {edge_voice_used}")
             return jsonify({
                 "audio_url": audio_url,
                 "model_used": f"EdgeTTS ({edge_voice_used})",
@@ -320,7 +308,6 @@ def tts():
             }), 200
 
         except Exception as tts_err:
-            print("EdgeTTS Error:", tts_err)
             return jsonify({
                 "fallback_browser": True,
                 "error": f"Lỗi EdgeTTS: {str(tts_err)}",
@@ -338,8 +325,9 @@ def tts():
 def summary():
     try:
         data = request.get_json() or {}
-        raw_client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
-        api_key = resolve_api_key(raw_client_key)
+        raw_client_key = sanitize_api_key(data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", ""))
+        env_key = get_env_api_key()
+        api_key = env_key if env_key else raw_client_key
 
         messages = data.get("messages", [])
         ui_lang = data.get("ui_lang") or data.get("user_lang") or "tiếng Nhật"
@@ -493,7 +481,6 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
         return jsonify({"summary": fallback_summary, "used_model": "Local"}), 200
 
     except Exception as ex:
-        print("Summary endpoint exception:", ex)
         return jsonify({"summary": "Lỗi kết nối summary.", "used_model": "Local"}), 200
 
 
