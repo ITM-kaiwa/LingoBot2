@@ -1,4 +1,4 @@
-/* Components Styling - Soft Violet Setup Bubbles & Deep Royal Navy AI Bubbles (Ver2.5) */
+/* Components Styling - Exact Image Matched Light Blue AI Bubble & Light Emerald User Bubble (Ver2.6) */
 
 /* ==========================================
    1. SETUP PROMPT BUBBLE (SOFT LIGHT VIOLET THEME)
@@ -70,7 +70,7 @@
 
 
 /* ==========================================
-   2. GENERAL CHAT BUBBLE & LAYOUT STYLING
+   2. GENERAL CHAT BUBBLE & LAYOUT STYLING (VER2.6 IMAGE MATCHED)
    ========================================== */
 .chat-row {
     display: flex !important;
@@ -98,27 +98,44 @@
     line-height: 1.55 !important;
     position: relative !important;
     word-break: break-word !important;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.04) !important;
 }
 
-/* User Bubble: Crisp Emerald Green */
+/* User Bubble: Light Emerald Green (Exact Matched with Attached Image 2) */
 .user-row .chat-bubble {
-    background: #047857 !important; /* Crisp Emerald Green */
-    color: #ffffff !important;
+    background: #e6f4ea !important; /* Light Emerald Green */
+    color: #137333 !important; /* Deep Emerald Green Text */
+    border: 1px solid #ceebd6 !important;
+    border-right: 5px solid #137333 !important;
     border-bottom-right-radius: 4px !important;
-    box-shadow: 0 3px 10px rgba(4, 120, 87, 0.15) !important;
+    box-shadow: 0 3px 10px rgba(19, 115, 51, 0.08) !important;
 }
 
-/* AI Model Bubble: Deep Royal Navy Blue (Clean, Natural & High Contrast) */
+.user-row .chat-bubble .msg-time {
+    color: #0f5223 !important;
+    opacity: 0.85 !important;
+    font-weight: 600 !important;
+}
+
+/* AI Model Bubble: Light Sky Blue (Exact Matched with Attached Image 1) */
 .ai-row .chat-bubble {
-    background: #1e3a8a !important; /* Deep Royal Navy Blue */
-    color: #ffffff !important;
+    background: #e0f2fe !important; /* Light Sky Blue */
+    color: #0369a1 !important; /* Deep Blue Text */
+    border: 1px solid #bae6fd !important;
+    border-left: 5px solid #0284c7 !important;
     border-bottom-left-radius: 4px !important;
-    box-shadow: 0 3px 10px rgba(30, 58, 138, 0.15) !important;
+    box-shadow: 0 3px 10px rgba(2, 132, 199, 0.08) !important;
+}
+
+.ai-row .chat-bubble .msg-time {
+    color: #0369a1 !important;
+    opacity: 0.85 !important;
+    font-weight: 600 !important;
 }
 
 .bubble-text {
     margin-bottom: 6px !important;
+    font-weight: 500 !important;
 }
 
 .message-meta, .setup-meta {
@@ -126,7 +143,7 @@
     align-items: center !important;
     justify-content: space-between !important;
     font-size: 0.78rem !important;
-    opacity: 0.88 !important;
+    opacity: 0.9 !important;
     margin-top: 6px !important;
     gap: 8px !important;
     flex-wrap: wrap !important;
@@ -139,19 +156,22 @@
 }
 
 .audio-btn {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    background: #ffffff !important;
+    border: 1px solid #bae6fd !important;
     border-radius: 14px !important;
     padding: 3px 10px !important;
-    color: #ffffff !important;
+    color: #0284c7 !important;
     font-size: 0.75rem !important;
     font-weight: 700 !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
 }
 
 .audio-btn:hover {
-    background: rgba(255, 255, 255, 0.35) !important;
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0284c7 !important;
 }
 
 

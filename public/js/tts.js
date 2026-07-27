@@ -1,4 +1,4 @@
-// TTS Engine Module - LingoBot2 Ver2.5 Implementation (EdgeTTS & Render Support)
+// TTS Engine Module - LingoBot2 Ver2.6 Implementation (EdgeTTS & Render Support)
 window.LingoTTS = {
     audioElement: null,
     isPlaying: false,

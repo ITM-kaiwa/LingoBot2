@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver2.5 Implementation
+// Main Application Controller - LingoBot2 Ver2.6 Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -257,7 +257,7 @@ window.LingoApp = {
         { id: 127, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 128, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
         { id: 129, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
-        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し, 慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
+        { id: 130, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (30 Sentences) ---
         { id: 201, lang: "us English", level: "Sơ cấp", category: "🌱 us English - Beginner A1-A2", text: "Could you please help me find the check-in counter?", translation: "Bạn có thể giúp tôi tìm quầy làm thủ tục không?" },
@@ -328,7 +328,7 @@ window.LingoApp = {
         const setupRow = document.getElementById("setupBubbleRow");
         if (setupRow) setupRow.classList.add("hidden");
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.5]. Soft Light Violet Setup Bubble & Deep Royal Navy AI Bubble.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver2.6]. Image Matched: Light Sky Blue AI Bubble & Light Emerald User Bubble.");
     },
 
     updateUiLanguage(lang) {
@@ -1023,10 +1023,10 @@ Quy tắc ứng xử:
         const thinkingMsg = dict.aiThinking || "AI đang suy nghĩ...";
 
         row.innerHTML = `
-            <div class="chat-bubble" style="background:#1e3a8a; color:#fff;">
+            <div class="chat-bubble" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <div class="spinner" style="width:16px; height:16px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                    <span style="font-size:0.85rem;">${thinkingMsg}</span>
+                    <div class="spinner" style="width:16px; height:16px; border:2px solid #0369a1; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
+                    <span style="font-size:0.85rem; font-weight:600;">${thinkingMsg}</span>
                 </div>
             </div>
         `;
