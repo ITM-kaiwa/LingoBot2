@@ -1,4 +1,4 @@
-/* Main Layout & Theme System - LingoBot2 Ver5.4 (Local Button Blue/Green Toggle, FdBck, Gen, Cancel) */
+/* Main Layout & Theme System - LingoBot2 Ver5.5 (Single-Line Header Main Row for PC) */
 :root {
     --primary-orange: #ea580c;
     --primary-gradient: linear-gradient(135deg, #f97316, #ea580c);
@@ -73,32 +73,33 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     overflow: hidden;
 }
 
-/* Header Bar Styling - Single Line Header Layout */
+/* Header Bar Styling - Single Line Header Layout for PC */
 .app-header-bar {
     background: #ffffff;
     border-bottom: 1.5px solid #e2e8f0;
-    padding: 10px 16px;
+    padding: 8px 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
     z-index: 10;
 }
 
-/* 1st Row: Single Line Layout when Width is Sufficient */
+/* 1st Row: ALWAYS SINGLE LINE LAYOUT ON PC / SUFFICIENT WIDTH */
 .header-main-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    flex-wrap: wrap;
-    gap: 8px 12px;
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+    gap: 6px 8px;
 }
 
 .brand-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
@@ -106,17 +107,17 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     background: #fff7ed;
     border: 1.5px solid #fdba74;
     border-radius: 50%;
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .brand-title {
-    font-size: 1.18rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--primary-orange);
     letter-spacing: -0.5px;
@@ -125,31 +126,32 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 .version-badge {
     background: #ea580c;
     color: #ffffff;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 800;
-    padding: 2px 7px;
+    padding: 2px 6px;
     border-radius: 10px;
 }
 
 .nav-tabs-group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     flex-shrink: 0;
 }
 
 .nav-tab {
-    padding: 6px 14px;
-    border-radius: 16px;
+    padding: 5px 10px;
+    border-radius: 14px;
     border: none;
     background: #f1f5f9;
     color: #475569;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
+    white-space: nowrap;
 }
 
 .nav-tab.active {
@@ -160,18 +162,19 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 .badges-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .badge-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 14px;
-    font-size: 0.8rem;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
     font-weight: 800;
+    white-space: nowrap;
 }
 
 .badge-ui {
@@ -194,7 +197,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     background: transparent;
     border: none;
     font-weight: 800;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: inherit;
     cursor: pointer;
     outline: none;
@@ -202,18 +205,19 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 
 /* ADVANCED TOGGLE BUTTON STYLING */
 .btn-advanced {
-    padding: 5px 12px;
-    border-radius: 14px;
+    padding: 4px 10px;
+    border-radius: 12px;
     border: 1.5px solid #cbd5e1;
     background: #f8fafc;
     color: #334155;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    gap: 4px;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .btn-advanced:hover {
@@ -234,7 +238,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    padding-top: 8px;
+    padding-top: 6px;
     border-top: 1px dashed #cbd5e1;
     margin-top: 2px;
 }
@@ -253,6 +257,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
 }
 
 /* LOCAL BUTTON COLOR TOGGLE: OFF=BLUE, ON=LIME GREEN */
@@ -295,6 +300,14 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     border-radius: 12px;
     border: 1px solid #cbd5e1;
     font-size: 0.78rem;
+}
+
+/* RESPONSIVE LAYOUT FOR NARROW MOBILE SCREENS ONLY */
+@media (max-width: 640px) {
+    .header-main-row {
+        flex-wrap: wrap !important;
+        justify-content: space-between;
+    }
 }
 
 /* Chat Main Viewport */

@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver5.4 Implementation (Blue/Green Local Button, FdBck, Gen, Cancel)
+// Main Application Controller - LingoBot2 Ver5.5 Implementation (Single-Line Header Main Row for PC)
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -335,7 +335,7 @@ window.LingoApp = {
         { id: 132, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "未曾有の危機に対処すべく、迅速かつ果断な意志決定が極めて重要となります。", translation: "Để ứng phó khủng hoảng chưa từng có, việc ra quyết định nhanh chóng và quyết đoán là cực kỳ quan trọng." },
         { id: 133, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "競合他社との差別化を図るため、顧客体験の飛躍的な向上を目指します。", translation: "Để tạo sự khác biệt với đối thủ, chúng tôi hướng tới nâng cao đột phá trải nghiệm khách hàng." },
         { id: 134, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "資源の効率的な分配を図りつつ、コスト削減の徹底に邁進いたします。", translation: "Vừa phân bổ nguồn lực hiệu quả, chúng tôi vừa nỗ lực triệt để cắt giảm chi phí." },
-        { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし, 社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
+        { id: 135, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "組織の風通しを良くし、社員一人ひとりの主体的な挑戦を促進してまいります。", translation: "Tạo sự thông thoáng trong tổ chức và thúc đẩy thử thách chủ động của từng nhân viên." },
         { id: 136, lang: "jp 日本語", level: "Cao cấp", category: "🌳 jp 日本語 - 上級 C1-C2", text: "今後の経済環境の不透明感を考慮し、慎重かつ柔軟な対応に努めてまいります。", translation: "Tính đến sự bất định của môi trường kinh tế sắp tới, chúng tôi sẽ ứng phó thận trọng và linh hoạt." },
 
         // --- ENGLISH (34 Sentences) ---
@@ -416,7 +416,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.4]. Blue/Green Local Button, FdBck, Gen, and Cancel.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.5]. Single-Line Header Main Row for PC.");
     },
 
     // PROMPT EDITOR POPOUT FLOATING MODAL CONTROLS
