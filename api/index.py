@@ -62,10 +62,7 @@ DEFAULT_FALLBACK_REPLIES = [
 
 def sanitize_api_key(key):
     """
-    API キーのクリーンアップ（サニタイズ）:
-    Render の環境変数設定画面や UI から API キーを設定した際、
-    前後の不要な空白や引用符（" や '）が混入していると Google ゲートウェイ側で URL が正しく解釈されず 404 になる問題を解消するため、
-    コード側で自動的に除去するトリミング処理。
+    API Key Sanitization / Trimming (Ver2.1)
     """
     if not key or not isinstance(key, str):
         return ""
@@ -89,14 +86,6 @@ def get_smart_fallback_reply(scenario_name):
 
 
 def fetch_dynamic_gemini_models(api_key):
-    """
-    【Google 動的モデル自動検知機能の導入】
-    固定のモデル名で呼び出すのをやめ、リクエスト時に Google の ModelService.ListModels API を直接照会し、
-    お使いの API キーで「実際に利用可能なモデル一覧」をリアルタイム自動取得する仕組み。
-
-    非テキストモデルの除外フィルターを追加:
-    音声専用モデル(-tts)、埋め込みモデル(embedding)、画像生成モデル(imagen)、動画モデル(veo) などの非対話型モデルを自動除外。
-    """
     url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
     try:
         res = requests.get(url, timeout=7)
@@ -110,17 +99,15 @@ def fetch_dynamic_gemini_models(api_key):
             for m in models_data:
                 name = m.get("name", "").replace("models/", "")
                 methods = m.get("supportedGenerationMethods", [])
-                
                 name_lower = name.lower()
                 
-                # Exclude non-text/non-chat models (embedding, tts, imagen, veo, etc.)
+                # Exclude non-text/non-chat models
                 if any(excluded in name_lower for excluded in ["embedding", "-tts", "imagen", "veo", "aqa", "bison"]):
                     continue
 
                 if "generateContent" in methods and "gemini" in name_lower:
                     valid_chat_models.append(name)
 
-            # Sort preferred fast chat models to the front
             def model_priority(m_name):
                 m_lower = m_name.lower()
                 if "2.5-flash" in m_lower: return 0
@@ -146,33 +133,47 @@ def chat():
         raw_client_key = data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", "")
         
         api_key = resolve_api_key(raw_client_key)
+        messages = data.get("messages", [])
+        system_instruction = data.get("system_instruction", "")
 
+        scenario_hint = ""
+        if system_instruction:
+            match = re.search(r'Tình huống:\s*([^\n]+)', system_instruction)
+            if match:
+                scenario_hint = match.group(1).strip()
+
+        # If API Key is missing, trigger zero-wait local fallback instead of breaking app!
         if not api_key:
+            smart_reply = get_smart_fallback_reply(scenario_hint)
             return jsonify({
-                "error": "Google API Key が設定されていません。画面または環境変数で API Key を入力してください。",
+                "reply": smart_reply,
+                "used_model": "local-fallback",
+                "display_model": "Local",
                 "api_key_required": True,
-                "logs": ["API Key missing"]
-            }), 400
+                "is_smart_fallback": True,
+                "info": "API Key chưa được cài đặt. Đang chạy ở Chế độ Cục bộ (Local Mode). Vui lòng nhập Google API Key để mở khóa AI Gemini hoàn chỉnh.",
+                "logs": ["API Key missing -> Local fallback mode active"]
+            }), 200
 
         # Dynamic Model Auto-Discovery via ListModels API
         dynamic_models, key_err = fetch_dynamic_gemini_models(api_key)
 
         if key_err and "無効" in key_err:
+            smart_reply = get_smart_fallback_reply(scenario_hint)
             return jsonify({
-                "error": "Google API Key が無効です。正しいキーを入力してください。",
-                "api_key_required": True,
+                "reply": smart_reply,
+                "used_model": "local-fallback",
+                "display_model": "Local",
                 "api_key_invalid": True,
+                "is_smart_fallback": True,
+                "error": "Google API Key が無効です。正しいキーを入力してください。",
                 "logs": [key_err]
-            }), 400
+            }), 200
 
         fallback_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
         target_models = dynamic_models if dynamic_models else fallback_models
 
-        messages = data.get("messages", [])
-        system_instruction = data.get("system_instruction", "")
-
         formatted_contents = []
-        scenario_hint = ""
         for msg in messages:
             role = "user" if msg.get("role") == "user" else "model"
             text_content = msg.get("content", "")
@@ -180,11 +181,6 @@ def chat():
                 "role": role,
                 "parts": [{"text": text_content}]
             })
-
-        if system_instruction:
-            match = re.search(r'Tình huống:\s*([^\n]+)', system_instruction)
-            if match:
-                scenario_hint = match.group(1).strip()
 
         payload = {
             "contents": formatted_contents,
@@ -229,7 +225,6 @@ def chat():
                             "logs": logs
                         })
                 else:
-                    # HTTP 400 / 429 / 500 error auto-skip to next text chat model
                     logs.append(f"Mô hình {model} phản hồi HTTP {res.status_code} -> Tự động chuyển sang mô hình tiếp theo")
             except Exception as e:
                 logs.append(f"Lỗi kết nối mô hình {model}: {str(e)}")
@@ -258,28 +253,21 @@ def chat():
 
 
 EDGE_TTS_VOICE_MAP = {
-    # Japanese Voices
     "ja-JP-Chirp3-HD-F": "ja-JP-NanamiNeural",
     "ja-JP-Chirp3-HD-M": "ja-JP-KeitaNeural",
     "ja-JP-Neural2-B": "ja-JP-KeitaNeural",
     "ja-JP": "ja-JP-NanamiNeural",
 
-    # English Voices
     "en-US-Chirp3-HD-F": "en-US-JennyNeural",
     "en-US-Chirp3-HD-M": "en-US-GuyNeural",
     "en-US-Neural2-F": "en-US-JennyNeural",
     "en-US": "en-US-JennyNeural",
 
-    # Vietnamese Voices
     "vi-VN-Neural2-A": "vi-VN-HoaiMyNeural",
     "vi-VN": "vi-VN-HoaiMyNeural"
 }
 
 async def generate_edge_tts_audio_base64(text, voice_name):
-    """
-    EdgeTTS Audio Generator Integration
-    Generates high-quality speech MP3 using Microsoft Edge TTS
-    """
     edge_voice = EDGE_TTS_VOICE_MAP.get(voice_name)
     if not edge_voice:
         if "ja" in voice_name or "JP" in voice_name:
@@ -301,10 +289,6 @@ async def generate_edge_tts_audio_base64(text, voice_name):
 
 @app.route("/api/tts", methods=["POST"])
 def tts():
-    """
-    Render & EdgeTTS Endpoint (Ver2.0)
-    Uses EdgeTTS as primary high-quality free speech engine with browser native fallback
-    """
     try:
         data = request.get_json() or {}
         text = data.get("text", "").strip()
@@ -320,7 +304,6 @@ def tts():
         if not text:
             return jsonify({"error": "Nội dung văn bản trống"}), 400
 
-        # Try EdgeTTS Audio Generation
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
