@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver4.8 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver4.8 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver4.9 - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver4.9 - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=4.8">
-    <link rel="stylesheet" href="styles/components.css?v=4.8">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=4.9">
+    <link rel="stylesheet" href="styles/components.css?v=4.9">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body data-ui-lang="tiếng Việt">
@@ -22,7 +22,7 @@
                     <div class="brand-group">
                         <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver4.8</span>
+                        <span class="version-badge">Ver4.9</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -256,11 +256,6 @@
                 <!-- 2. PRONUNCIATION PRACTICE MODE VIEW (Phát âm) -->
                 <div class="pronounce-viewport" id="pronounceContainer" style="display: none;">
                     
-                    <!-- NEW TOP STATUS BANNER BAR AT THE VERY TOP -->
-                    <div class="pronounce-status-banner" id="pronounceStatusBanner">
-                        <span id="txtPronounceStatus">🎙️ マイクで話してください (Hãy nói qua Micro)</span>
-                    </div>
-
                     <!-- 1st Card: Title, Description & Filters -->
                     <div class="pronounce-card">
                         <div class="pronounce-header">
@@ -301,33 +296,41 @@
                 </div>
             </main>
 
-            <!-- Footer Controls matching screenshot -->
+            <!-- Footer Controls with Conversation Input & Pronunciation Status Banner -->
             <footer class="app-footer-bar" id="appFooterBar">
-                <div class="footer-input-wrapper">
-                    <input 
-                        type="text" 
-                        id="chatInput" 
-                        class="footer-chat-input" 
-                        placeholder="Nhập tin nhắn hoặc nói bằng micro..." 
-                        autocomplete="off"
-                    />
+                <!-- 1. Conversation Mode Input Controls (Visible in Giao tiếp mode) -->
+                <div class="footer-chat-controls" id="chatFooterControls" style="display: flex; width: 100%; gap: 8px; align-items: center;">
+                    <div class="footer-input-wrapper">
+                        <input 
+                            type="text" 
+                            id="chatInput" 
+                            class="footer-chat-input" 
+                            placeholder="Nhập tin nhắn hoặc nói bằng micro..." 
+                            autocomplete="off"
+                        />
+                    </div>
+
+                    <div class="footer-btns-wrapper">
+                        <!-- Send Button in Orange Gradient Pill -->
+                        <button type="button" id="sendBtn" class="footer-btn btn-send" onclick="window.LingoApp.handleSendMessage()">
+                            <span>🚀</span> <span id="txtSendBtn">Gửi</span>
+                        </button>
+
+                        <!-- Circular Mic Button with Recording Status Animation -->
+                        <button type="button" id="micBtn" class="footer-btn btn-mic" title="Nói bằng Micro">
+                            <span id="micIconSymbol">🎙️</span>
+                        </button>
+
+                        <!-- Red End Button (Abbreviated to 終/Fin/Kết) -->
+                        <button type="button" id="footerEndBtn" class="footer-btn btn-red" onclick="window.LingoApp.endSession()">
+                            <span>🛑</span> <span id="txtFooterEndBtn">Kết</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="footer-btns-wrapper">
-                    <!-- Send Button in Orange Gradient Pill -->
-                    <button type="button" id="sendBtn" class="footer-btn btn-send" onclick="window.LingoApp.handleSendMessage()">
-                        <span>🚀</span> <span id="txtSendBtn">Gửi</span>
-                    </button>
-
-                    <!-- Circular Mic Button with Recording Status Animation -->
-                    <button type="button" id="micBtn" class="footer-btn btn-mic" title="Nói bằng Micro">
-                        <span id="micIconSymbol">🎙️</span>
-                    </button>
-
-                    <!-- Red End Button (Abbreviated to 終/Fin/Kết) -->
-                    <button type="button" id="footerEndBtn" class="footer-btn btn-red" onclick="window.LingoApp.endSession()">
-                        <span>🛑</span> <span id="txtFooterEndBtn">Kết</span>
-                    </button>
+                <!-- 2. Pronunciation Mode Microphone Status Banner (Visible in Phát âm mode at the Footer position) -->
+                <div class="pronounce-footer-status hidden" id="pronounceFooterStatus" style="display: none; width: 100%;">
+                    <span id="txtPronounceStatus">🎙️ マイクで話してください (Hãy nói qua Micro)</span>
                 </div>
             </footer>
         </div>
@@ -381,10 +384,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=4.8"></script>
-    <script src="js/tts.js?v=4.8"></script>
-    <script src="js/stt.js?v=4.8"></script>
-    <script src="js/summary.js?v=4.8"></script>
-    <script src="js/app.js?v=4.8"></script>
+    <script src="js/log.js?v=4.9"></script>
+    <script src="js/tts.js?v=4.9"></script>
+    <script src="js/stt.js?v=4.9"></script>
+    <script src="js/summary.js?v=4.9"></script>
+    <script src="js/app.js?v=4.9"></script>
 </body>
 </html>
