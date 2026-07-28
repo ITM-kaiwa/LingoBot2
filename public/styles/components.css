@@ -385,9 +385,66 @@
 }
 
 .modal-footer {
-    padding: 12px 20px;
-    border-top: 1px solid #cbd5e1;
+    padding: 14px 20px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
+}
+
+/* HIGH-CONTRAST MODERN PILL-SHAPED MODAL & REPORT BUTTON STYLING */
+.modal-btn, .btn-report-action {
+    padding: 8px 18px !important;
+    border-radius: 24px !important;
+    border: none !important;
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12) !important;
+    transition: all 0.15s ease !important;
+}
+
+.modal-btn:hover, .btn-report-action:hover {
+    transform: translateY(-2px) !important;
+    filter: brightness(1.08) !important;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modal-btn:active, .btn-report-action:active {
+    transform: translateY(1px) scale(0.96) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-pill-grey {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1.5px solid #cbd5e1 !important;
+}
+
+.btn-pill-orange {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35) !important;
+}
+
+.btn-pill-red {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35) !important;
+}
+
+.pronounce-report-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #cbd5e1;
+    justify-content: flex-end;
 }

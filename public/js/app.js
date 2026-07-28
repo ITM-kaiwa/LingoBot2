@@ -160,7 +160,7 @@ window.LingoApp = {
             filterLevel: "レベル:",
             filterAll: "すべて",
             aiThinking: "AIが音声分析中です...",
-            aiSummarizing: "AIがまとめています...",
+            aiSummarizing: "AIがレッスンをまとめています…しばらくお待ちください。",
 
             pronounceIdleMsg: "🎙️ マイクで話してください (上の例文から文を選択してください)",
             pronounceRecordingMsg: "🔴 マイクが収録中… (発声してください)",
@@ -1068,16 +1068,31 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
                     });
 
                     const data = await res.json();
+                    let finalFeedbackHtml = "";
                     if (data.reply) {
-                        feedbackText.innerHTML = window.LingoSummary.markdownToHtml(data.reply);
+                        finalFeedbackHtml = window.LingoSummary.markdownToHtml(data.reply);
                     } else {
-                        feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
+                        finalFeedbackHtml = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
                             <h3>📊 Kết quả phân tích phát âm (${this.filterLevel}): ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
                             <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
                             <p><strong>Giọng đọc thực tế của bạn:</strong> ${actualSpeech}</p>
                             <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Phát âm khá mượt mà. Hãy tiếp tục luyện tập shadow theo câu mẫu!</p>
                         </div>`;
                     }
+
+                    // Append Action Buttons (Print & Download PDF) with Modern CSS Styling
+                    const actionButtonsHtml = `
+                        <div class="pronounce-report-actions">
+                            <button type="button" class="btn-report-action btn-pill-grey" onclick="window.LingoApp.printPronounceReport()">
+                                <span>🖨️</span> <span>${dict.btnPrint || 'In báo cáo'}</span>
+                            </button>
+                            <button type="button" class="btn-report-action btn-pill-orange" onclick="window.LingoApp.downloadPronouncePDF()">
+                                <span>📄</span> <span>${dict.btnPdf || 'Tải PDF'}</span>
+                            </button>
+                        </div>
+                    `;
+
+                    feedbackText.innerHTML = finalFeedbackHtml + actionButtonsHtml;
                 } catch (e) {
                     if (feedbackText) {
                         feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
@@ -1092,6 +1107,49 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
                     if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
                 }
             });
+        }
+    },
+
+    printPronounceReport() {
+        const feedbackText = document.getElementById("pronounceFeedbackText");
+        if (!feedbackText) return;
+
+        const clone = feedbackText.cloneNode(true);
+        const actions = clone.querySelector(".pronounce-report-actions");
+        if (actions) actions.remove();
+
+        const win = window.open('', '', 'height=700,width=900');
+        win.document.write('<html><head><title>Báo cáo Phân tích Phát âm - LingoBot2</title>');
+        win.document.write('<style>body{font-family:sans-serif; padding:20px; color:#1c1917;} h1,h2,h3{color:#ea580c;} ul{line-height:1.6;}</style>');
+        win.document.write('</head><body>');
+        win.document.write('<h1>🎯 Báo cáo Phân tích Phát âm & Ngữ điệu</h1>');
+        win.document.write(clone.innerHTML);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.focus();
+        setTimeout(() => { win.print(); win.close(); }, 500);
+        window.LingoLog.add("In Báo cáo phân tích phát âm.");
+    },
+
+    downloadPronouncePDF() {
+        const feedbackText = document.getElementById("pronounceFeedbackText");
+        if (!feedbackText) return;
+
+        const clone = feedbackText.cloneNode(true);
+        const actions = clone.querySelector(".pronounce-report-actions");
+        if (actions) actions.remove();
+
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin:       10,
+                filename:     `lingobot_pronunciation_report_${Date.now()}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(clone).save();
+            window.LingoLog.add("Tải xuống PDF Báo cáo phân tích phát âm.");
+        } else {
         }
     },
 
