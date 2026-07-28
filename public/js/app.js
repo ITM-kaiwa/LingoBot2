@@ -958,10 +958,7 @@ window.LingoApp = {
         const banner = document.getElementById("pronounceFooterStatus");
         const statusTxt = document.getElementById("txtPronounceStatus");
         
-        if (feedbackBox) {
-            feedbackBox.classList.remove("hidden");
-            feedbackBox.scrollIntoView({ behavior: 'smooth' });
-        }
+        // DO NOT scroll immediately upon pressing record button so user can read the target sentence card!
         const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
 
         if (recBtn) {
@@ -974,12 +971,6 @@ window.LingoApp = {
         if (statusTxt) statusTxt.textContent = dict.pronounceRecordingMsg || "🔴 マイクが収録中… (Đang thu âm...)";
 
         const cleanTarget = targetText.replace(/（.*?）|\(.*?\)/g, '').trim();
-
-        if (feedbackText) {
-            feedbackText.innerHTML = `<div style="color:#ea580c; font-weight:bold; padding:12px; background:#fff7ed; border-radius:12px; border:1px solid #fed7aa;">
-                🎙️ Đang ghi âm... Hãy phát âm câu: 「${cleanTarget}」
-            </div>`;
-        }
 
         window.LingoLog.add(`Bắt đầu thu âm và chấm điểm phát âm cho câu: "${cleanTarget}" [Level: ${this.filterLevel}]`);
 
@@ -997,6 +988,11 @@ window.LingoApp = {
                 const actualSpeech = (spokenText || "").trim();
                 window.LingoLog.add(`Kết quả ghi âm nhận diện thực tế từ người dùng: "${actualSpeech || 'NO_SPEECH_DETECTED'}"`);
 
+                // Show feedback box now that recording has ended
+                if (feedbackBox) {
+                    feedbackBox.classList.remove("hidden");
+                }
+
                 if (!actualSpeech) {
                     if (feedbackText) {
                         feedbackText.innerHTML = `<div style="padding:14px; background:#fef2f2; border-radius:14px; border:1px solid #fecaca; color:#b91c1c;">
@@ -1004,59 +1000,32 @@ window.LingoApp = {
                             <p style="margin-top:6px;">マイクでのお話し声が正常に認識されませんでした。もう一度「🎙️ 録音＆判定」ボタンを押し、ハッキリと発声してください。</p>
                         </div>`;
                     }
+                    if (feedbackBox) feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     if (banner) banner.className = "pronounce-footer-status";
                     if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
                     return;
                 }
 
-                if (feedbackText) feedbackText.innerHTML = `<div style="padding:10px; color:#0284c7; font-weight:bold;"><em>${dict.aiThinking}</em></div>`;
-
-                let score = 95;
-                const targetChars = cleanTarget.replace(/\s+/g, '').toLowerCase();
-                const spokenChars = actualSpeech.replace(/\s+/g, '').toLowerCase();
-                
-                if (targetChars && spokenChars) {
-                    let matches = 0;
-                    const maxLen = Math.max(targetChars.length, spokenChars.length);
-                    for (let i = 0; i < Math.min(targetChars.length, spokenChars.length); i++) {
-                        if (targetChars[i] === spokenChars[i]) matches++;
-                    }
-                    score = Math.floor((matches / maxLen) * 100);
-                    if (score > 100) score = 98;
-                    if (score < 50) score = 65;
+                if (feedbackText) {
+                    feedbackText.innerHTML = `<div style="padding:12px; color:#0284c7; font-weight:bold; background:#f0f9ff; border-radius:12px; border:1px solid #bae6fd;">
+                        <em>🤖 AIが日本語音声指導コンサルタントとしてアクセント・プロソディを分析中です…しばらくお待ちください。</em>
+                    </div>`;
                 }
 
-                const levelInstructionMap = {
-                    "Sơ cấp": "Người học ở trình độ SƠ CẤP (A1-A2). Hãy đưa ra lời khuyên THÂN THIỆN, DỄ HIỂU, tập trung vào cách phát âm chuẩn từng nguyên âm, phụ âm cơ bản, thanh điệu/trọng âm đơn giản.",
-                    "Trung cấp": "Người học ở trình độ TRUNG CẤP (B1-B2). Hãy tập trung phân tích NGỮ ĐIỆU (Intonation), cách ngắt nghỉ (Pause) giữa các cụm từ, và độ lưu loát (Fluency) khi nói.",
-                    "Cao cấp": "Người học ở trình độ CAO CẤP (C1-C2). Hãy phân tích CHUYÊN SÂU như một chuyên gia bản xứ: sắc thái biểu cảm (Nuance), trọng âm câu (Sentence Stress), nhịp điệu tự nhiên (Rhythm) và chuẩn xác ở mức chuyên nghiệp/phỏng vấn."
-                };
+                // STRICT USER SPECIFIED JAPANESE PHONETICS CONSULTANT PROMPT
+                const systemConsultantPrompt = `あなたは日本語音声指導コンサルタントです。ユーザーの録音音声を直接聴き、日本語の高低アクセント（ピッチアクセント）やリズム、イントネーションの美しさを分析してそれに対してアドバイスをしてください。何という言葉を発したか確認して、以下のフォーマットに厳密に従って出力してください。
+【重要ルール】
+1. 最初に必ず『【Tiếng Việt (Tiếng Việt)】』という見出しを付け、ベトナム語で「認識した言葉」「アクセント・プロソディの評価」「具体的なアドバイス」を200から300字程度で初心者にでも親切でわかりやすく書いてください。
+2. その次に必ず『【日本語】』という見出しを付け、全く同じ内容の評価とアドバイスを日本語で書いてください。
+ベトナム語のアドバイスは、ベトナム人の初級日本語学習者が必ず理解できるよう、優しく、アンド、できるだけ基礎的でおおまかに、「専門的すぎない」アドバイスを心がけてください。
 
-                const currentLevelGuide = levelInstructionMap[this.filterLevel] || levelInstructionMap["Sơ cấp"];
-
-                const prompt = `Bạn là một CHUYÊN GIA PHÂN TÍCH PHÁT ÂM VÀ NGỮ ĐIỆU CAO CẤP (Senior Phonetics & Intonation Coach).
-
-Cấu hình phân tích:
-- Ngôn ngữ nhận xét: ${this.uiLang} (BẮT BUỘC trả lời 100% bằng ${this.uiLang})
-- Trình độ người học: ${this.filterLevel} (${currentLevelGuide})
-- Câu mẫu chuẩn: "${cleanTarget}"
-- Nhận diện giọng nói thực tế từ micro: "${actualSpeech}"
-- Điểm chính xác ước tính: ${score}%
-
-Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xuất ra báo cáo Markdown rõ ràng:
-1. **Đánh giá điểm số**: ⭐⭐⭐⭐⭐ (${score}/100 điểm)
-2. **So sánh thực tế**: 
-   - Câu chuẩn: "${cleanTarget}"
-   - Bạn vừa nói: "${actualSpeech}"
-3. **Phân tích chi tiết âm tiết & ngữ điệu (Thích ứng theo trình độ ${this.filterLevel})**:
-   - Chỉ ra cụ thể từ hoặc âm tiết nào bị đọc sai, thiếu âm hoặc đọc nhầm.
-   - Nhận xét về độ nối âm, trọng âm và ngữ điệu (Intonation).
-4. **Lời khuyên luyện tập riêng cho trình độ ${this.filterLevel}**:
-   - Đưa ra 2-3 mẹo cụ thể để cải thiện ngay lập tức.`;
+[分析対象データ]
+- 目標の例文: "${cleanTarget}"
+- ユーザーがマイクで発声した認識文字列: "${actualSpeech}"`;
 
                 try {
                     const reqPayload = {
-                        messages: [{ role: "user", content: prompt }]
+                        messages: [{ role: "user", content: systemConsultantPrompt }]
                     };
                     const apiKey = this.getApiKey();
                     if (apiKey && apiKey.length > 5) reqPayload.api_key = apiKey;
@@ -1073,10 +1042,13 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
                         finalFeedbackHtml = window.LingoSummary.markdownToHtml(data.reply);
                     } else {
                         finalFeedbackHtml = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
-                            <h3>📊 Kết quả phân tích phát âm (${this.filterLevel}): ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
-                            <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
-                            <p><strong>Giọng đọc thực tế của bạn:</strong> ${actualSpeech}</p>
-                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Phát âm khá mượt mà. Hãy tiếp tục luyện tập shadow theo câu mẫu!</p>
+                            <h2>【Tiếng Việt (Tiếng Việt)】</h2>
+                            <p><strong>Từ nhận diện:</strong> "${actualSpeech}" (Mẫu: "${cleanTarget}")</p>
+                            <p>Phát âm của bạn rất tốt! Ngữ điệu trôi chảy, cao độ phát âm tự nhiên. Hãy tiếp tục duy trì luyện tập shadow hàng ngày nhé!</p>
+                            <hr style="margin:10px 0; border:none; border-top:1px dashed #fdba74;">
+                            <h2>【日本語】</h2>
+                            <p><strong>認識した言葉:</strong> 「${actualSpeech}」（お手本: 「${cleanTarget}」）</p>
+                            <p>とても素晴らしい発音です！アクセントも自然で聞き取りやすく、イントネーションも滑らかです。この調子で練習を続けましょう！</p>
                         </div>`;
                     }
 
@@ -1093,14 +1065,25 @@ Nhiệm vụ: Phân tích chi tiết giọng đọc của người học và xu�
                     `;
 
                     feedbackText.innerHTML = finalFeedbackHtml + actionButtonsHtml;
+                    
+                    // ONLY SCROLL AFTER AI ANALYSIS RESULTS ARE READY!
+                    if (feedbackBox) {
+                        feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
                 } catch (e) {
                     if (feedbackText) {
                         feedbackText.innerHTML = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
-                            <h3>📊 Kết quả phân tích phát âm (${this.filterLevel}): ⭐⭐⭐⭐⭐ (${score}/100 điểm)</h3>
-                            <p><strong>Câu mẫu:</strong> ${cleanTarget}</p>
-                            <p><strong>Giọng đọc thực tế của bạn:</strong> ${actualSpeech}</p>
-                            <p style="color:#047857; font-weight:bold; margin-top:8px;">💡 Đánh giá: Bạn phát âm tương đối rõ ràng. Hãy tập ngắt nghỉ câu hợp lý hơn.</p>
+                            <h2>【Tiếng Việt (Tiếng Việt)】</h2>
+                            <p><strong>Từ nhận diện:</strong> "${actualSpeech}" (Mẫu: "${cleanTarget}")</p>
+                            <p>Bạn đã phát âm câu mẫu khá rõ ràng! Hãy chú ý hạ thấp cao độ ở cuối câu để âm điệu tự nhiên hơn nhé.</p>
+                            <hr style="margin:10px 0; border:none; border-top:1px dashed #fdba74;">
+                            <h2>【日本語】</h2>
+                            <p><strong>認識した言葉:</strong> 「${actualSpeech}」（お手本: 「${cleanTarget}」）</p>
+                            <p>はっきりと発音できています！文末のイントネーションを少し下げる意識をすると、より自然な日本語になりますよ。</p>
                         </div>`;
+                    }
+                    if (feedbackBox) {
+                        feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }
                 } finally {
                     if (banner) banner.className = "pronounce-footer-status";
