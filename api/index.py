@@ -483,12 +483,11 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
     except Exception as ex:
         return jsonify({"summary": "Lỗi kết nối summary.", "used_model": "Local"}), 200
 
-
 @app.route("/api/stt", methods=["POST"])
 def stt_transcribe():
     """
     Backend STT using Gemini multimodal API.
-    Accepts raw audio bytes (audio/webm) in POST body.
+    Accepts raw audio bytes (audio/wav preferred) in POST body.
     Query params: lang (ja-JP / en-US / vi-VN)
     """
     try:
@@ -500,63 +499,60 @@ def stt_transcribe():
             return jsonify({"error": "API key missing", "text": ""}), 400
 
         audio_bytes = request.data
-        if not audio_bytes or len(audio_bytes) < 100:
+        if not audio_bytes or len(audio_bytes) < 50:
             return jsonify({"error": "Audio data too short or empty", "text": ""}), 400
 
         lang = request.args.get("lang", "ja-JP")
-        lang_map = {
-            "ja-JP": "日本語 (Japanese)",
-            "en-US": "English",
-            "vi-VN": "Tiếng Việt (Vietnamese)"
-        }
-        lang_name = lang_map.get(lang, "日本語 (Japanese)")
+        lang_name = {"ja-JP": "Japanese", "en-US": "English", "vi-VN": "Vietnamese"}.get(lang, "Japanese")
 
         audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
 
-        # Determine MIME type from Content-Type header
-        mime_type = request.content_type or "audio/webm"
-        if ";" in mime_type:
-            mime_type = mime_type.split(";")[0].strip()
-        if mime_type not in ["audio/webm", "audio/ogg", "audio/wav", "audio/mp4", "audio/mpeg"]:
-            mime_type = "audio/webm"
+        # Determine MIME type
+        raw_ct = request.content_type or "audio/wav"
+        mime_type = raw_ct.split(";")[0].strip() if ";" in raw_ct else raw_ct.strip()
+        SUPPORTED_MIME = ["audio/wav", "audio/mp3", "audio/mpeg", "audio/ogg",
+                          "audio/flac", "audio/aac", "audio/webm"]
+        if mime_type not in SUPPORTED_MIME:
+            mime_type = "audio/wav"
+
+        prompt = (
+            f"You are a speech-to-text transcriber. "
+            f"The audio is spoken in {lang_name}. "
+            f"Transcribe it accurately word-for-word. "
+            f"Output ONLY the transcribed text. "
+            f"No explanations, no translations, no extra punctuation. "
+            f"If the audio contains no speech, output nothing."
+        )
 
         payload = {
             "contents": [{
                 "parts": [
-                    {
-                        "text": (
-                            f"Please transcribe the following audio recording accurately. "
-                            f"The speaker is using {lang_name}. "
-                            f"Return ONLY the transcribed text with no explanations, "
-                            f"punctuation corrections, or translations. "
-                            f"If the audio is silent or inaudible, return an empty string."
-                        )
-                    },
-                    {
-                        "inline_data": {
-                            "mime_type": mime_type,
-                            "data": audio_b64
-                        }
-                    }
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": mime_type, "data": audio_b64}}
                 ]
             }],
-            "generationConfig": {
-                "temperature": 0.1,
-                "maxOutputTokens": 512
-            }
+            "generationConfig": {"temperature": 0.0, "maxOutputTokens": 1024}
         }
 
-        # Try audio-capable models (multimodal)
-        audio_models = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
+        # Dynamic model discovery (same as /api/chat)
+        dynamic_models, _ = fetch_dynamic_gemini_models(api_key)
+        priority_models = ["gemini-2.5-flash", "gemini-2.0-flash",
+                           "gemini-1.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-pro"]
+        if dynamic_models:
+            ordered = [m for m in priority_models if m in dynamic_models]
+            ordered += [m for m in dynamic_models if m not in priority_models]
+        else:
+            ordered = priority_models
 
-        for model in audio_models:
+        model_errors = []
+        for model in ordered[:5]:  # 最大5モデルまで試す
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             try:
                 res = requests.post(
                     url,
                     headers={"Content-Type": "application/json"},
                     json=payload,
-                    timeout=20
+                    timeout=25
                 )
                 if res.status_code == 200:
                     res_data = res.json()
@@ -564,19 +560,19 @@ def stt_transcribe():
                     if candidates and "content" in candidates[0]:
                         parts = candidates[0]["content"].get("parts", [])
                         text = "".join([p.get("text", "") for p in parts]).strip()
-                        return jsonify({
-                            "text": text,
-                            "model": model,
-                            "lang": lang
-                        }), 200
+                        return jsonify({"text": text, "model": model, "lang": lang}), 200
+                    model_errors.append(f"{model}: no candidates in response")
+                else:
+                    err_snippet = res.text[:150] if res.text else "no body"
+                    model_errors.append(f"{model}: HTTP {res.status_code} - {err_snippet}")
             except Exception as e:
-                continue
+                model_errors.append(f"{model}: {str(e)[:80]}")
 
-        return jsonify({"error": "STT transcription failed", "text": ""}), 500
+        error_detail = " | ".join(model_errors)
+        return jsonify({"error": f"All models failed: {error_detail}", "text": ""}), 500
 
     except Exception as ex:
         return jsonify({"error": str(ex), "text": ""}), 500
-
 
 
 @app.route("/")
