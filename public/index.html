@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver5.8β - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver5.8β - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
+    <title>LingoBot2 Ver6.0β - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver6.0β - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Web Speech.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=5.8b">
-    <link rel="stylesheet" href="styles/components.css?v=5.8b">
+    <link rel="stylesheet" href="styles/main.css?v=6.0b">
+    <link rel="stylesheet" href="styles/components.css?v=6.0b">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body data-ui-lang="tiếng Việt">
@@ -22,7 +22,7 @@
                     <div class="brand-group">
                         <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()">🤖</button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver5.8β</span>
+                        <span class="version-badge">Ver6.0β</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -296,32 +296,45 @@
             <!-- Footer Controls with Conversation Input & Pronunciation Status Banner -->
             <footer class="app-footer-bar" id="appFooterBar">
                 <!-- 1. Conversation Mode Input Controls (Visible in Giao tiếp mode) -->
-                <div class="footer-chat-controls" id="chatFooterControls" style="display: flex; width: 100%; gap: 8px; align-items: center;">
-                    <div class="footer-input-wrapper">
-                        <input 
-                            type="text" 
-                            id="chatInput" 
-                            class="footer-chat-input" 
-                            placeholder="Nhập tin nhắn hoặc nói bằng micro..." 
-                            autocomplete="off"
-                        />
+                <div class="footer-chat-controls" id="chatFooterControls" style="display: flex; flex-direction: column; width: 100%; gap: 6px;">
+
+                    <!-- VU Meter (マイク音量バー) — 録音中のみ表示 -->
+                    <div id="vuMeterWrap" style="display:none; align-items: center; gap: 8px; width: 100%; padding: 0 4px;">
+                        <span style="font-size:0.75rem; color:#f97316; white-space:nowrap; font-weight:600;">🎙️ MIC</span>
+                        <div style="flex:1; height:8px; background:#f1f5f9; border-radius:99px; overflow:hidden; border:1px solid #e2e8f0;">
+                            <div id="vuMeterBar" style="height:100%; width:0%; border-radius:99px; transition:width 0.08s ease; background: linear-gradient(90deg,#3b82f6,#22c55e);"></div>
+                        </div>
+                        <span style="font-size:0.7rem; color:#94a3b8;">発話後3秒で自動停止</span>
                     </div>
 
-                    <div class="footer-btns-wrapper">
-                        <!-- Send Button in Orange Gradient Pill -->
-                        <button type="button" id="sendBtn" class="footer-btn btn-send" onclick="window.LingoApp.handleSendMessage()">
-                            <span>🚀</span> <span id="txtSendBtn">Gửi</span>
-                        </button>
+                    <!-- Input row -->
+                    <div style="display:flex; width:100%; gap:8px; align-items:center;">
+                        <div class="footer-input-wrapper">
+                            <input 
+                                type="text" 
+                                id="chatInput" 
+                                class="footer-chat-input" 
+                                placeholder="Nhập tin nhắn hoặc nói bằng micro..." 
+                                autocomplete="off"
+                            />
+                        </div>
 
-                        <!-- Circular Mic Button with Recording Status Animation -->
-                        <button type="button" id="micBtn" class="footer-btn btn-mic" title="Nói bằng Micro">
-                            <span id="micIconSymbol">🎙️</span>
-                        </button>
+                        <div class="footer-btns-wrapper">
+                            <!-- Send Button in Orange Gradient Pill -->
+                            <button type="button" id="sendBtn" class="footer-btn btn-send" onclick="window.LingoApp.handleSendMessage()">
+                                <span>🚀</span> <span id="txtSendBtn">Gửi</span>
+                            </button>
 
-                        <!-- Red End Button (Abbreviated to 終/Fin/Kết) -->
-                        <button type="button" id="footerEndBtn" class="footer-btn btn-red" onclick="window.LingoApp.endSession()">
-                            <span>🛑</span> <span id="txtFooterEndBtn">Kết</span>
-                        </button>
+                            <!-- Circular Mic Button with Recording Status Animation -->
+                            <button type="button" id="micBtn" class="footer-btn btn-mic" title="Nói bằng Micro">
+                                <span id="micIconSymbol">🎙️</span>
+                            </button>
+
+                            <!-- Red End Button (Abbreviated to 終/Fin/Kết) -->
+                            <button type="button" id="footerEndBtn" class="footer-btn btn-red" onclick="window.LingoApp.endSession()">
+                                <span>🛑</span> <span id="txtFooterEndBtn">Kết</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -401,10 +414,10 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=5.8b"></script>
-    <script src="js/tts.js?v=5.8b"></script>
-    <script src="js/stt.js?v=5.8b"></script>
-    <script src="js/summary.js?v=5.8b"></script>
-    <script src="js/app.js?v=5.8b"></script>
+    <script src="js/log.js?v=6.0b"></script>
+    <script src="js/tts.js?v=6.0b"></script>
+    <script src="js/stt.js?v=6.0b"></script>
+    <script src="js/summary.js?v=6.0b"></script>
+    <script src="js/app.js?v=6.0b"></script>
 </body>
 </html>

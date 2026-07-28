@@ -396,6 +396,25 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     background: #ffffff;
 }
 
+/* REAL-TIME MIC ACTIVE VISUAL INDICATOR FOR INPUT BOX */
+.footer-chat-input.mic-active {
+    border: 2px solid #f97316 !important;
+    background: #fff7ed !important;
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.4) !important;
+    animation: pulseInput 1.2s infinite alternate ease-in-out !important;
+}
+
+@keyframes pulseInput {
+    0% {
+        border-color: #f97316;
+        box-shadow: 0 0 6px rgba(249, 115, 22, 0.3);
+    }
+    100% {
+        border-color: #ef4444;
+        box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+    }
+}
+
 .footer-btns-wrapper {
     display: flex;
     align-items: center;
