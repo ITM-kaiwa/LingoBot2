@@ -1,39 +1,52 @@
-// Web Speech STT Engine - LingoBot2 Ver6.3β
-// KEY FIXES:
-//   1. WebM → WAV conversion before sending to Gemini (guaranteed compatibility)
-//   2. Dynamic silence threshold (adapts to ambient noise level)
-//   3. "hasSpoken" gate: auto-stop only triggers AFTER user speaks
+// STT Engine - LingoBot2 Ver6.4β
+// PRIMARY STT: Web Speech API (browser built-in, no Gemini quota usage)
+//   - Releases getUserMedia (Ambient VU) completely before recognition.start()
+//     to eliminate the stream conflict that caused "network" errors in earlier versions.
+//   - VU animation during recording driven by onsoundstart/onspeechstart events.
+//   - 3s silence auto-stop via onspeechend + timer.
+//   - 8s no-speech timeout if user never speaks.
+// AMBIENT VU: real getUserMedia level display when NOT recording.
+// PRONUNCIATION: same Web Speech API, separate SpeechRecognition instance.
 window.LingoSTT = {
-    isListening:   false,
-    mediaRecorder: null,
-    audioChunks:   [],
-    micStream:     null,
+    recognition: null,
+    isListening:  false,
+    retryCount:   0,
+    lastNetworkErrTime: 0,
 
-    // Ambient VU (standby)
+    // Ambient VU
     ambientStream:   null,
     ambientContext:  null,
     ambientAnalyser: null,
     ambientInterval: null,
 
-    // Recording VU + silence detection
-    recContext:   null,
-    recAnalyser:  null,
-    recInterval:  null,
+    // VU animation (recording mode — CSS driven)
+    vuAnimInterval: null,
 
-    SILENCE_MS:    3000,   // 無音判定時間
-    MAX_RECORD_MS: 30000,  // 最大録音時間
-    maxTimer:      null,
+    // Timers
+    silenceTimer:  null,   // fires SILENCE_MS after speech ends
+    noSpeechTimer: null,   // fires NO_SPEECH_MS if user never speaks
+    SILENCE_MS:       3000,
+    NO_SPEECH_MS:     8000,
 
     // =============================================
     // 初期化
     // =============================================
     init() {
-        const micBtn = document.getElementById("micBtn");
-        if (micBtn) micBtn.addEventListener("click", () => this.toggleListening());
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+            this.setVUStatus("🎙️ MIC", "#ef4444", "STT非対応ブラウザ", "#ef4444");
+            window.LingoLog?.add("⚠️ Web Speech API 非対応ブラウザ。Google Chrome をお使いください。");
+            return;
+        }
+        const btn = document.getElementById("micBtn");
+        if (btn) btn.addEventListener("click", () => this.toggleListening());
         setTimeout(() => this.startAmbientVU(), 600);
-        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver6.3β - WAV Convert + Smart Silence) thành công.");
+        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver6.4β - Web Speech API + Smart VU) thành công.");
     },
 
+    // =============================================
+    // 言語・キー
+    // =============================================
     getRecognitionLang() {
         const t = window.LingoApp?.targetLang ?? "jp 日本語";
         if (t.includes("日本語") || t.includes("jp")) return "ja-JP";
@@ -42,10 +55,8 @@ window.LingoSTT = {
         return "ja-JP";
     },
 
-    getApiKey() { return window.LingoApp?.apiKey || ""; },
-
     // =============================================
-    // VU ヘルパー
+    // VU バー共通
     // =============================================
     setVULevel(pct) {
         const bar = document.getElementById("vuMeterBar");
@@ -65,7 +76,7 @@ window.LingoSTT = {
     },
 
     // =============================================
-    // Ambient VU (スタンバイ)
+    // Ambient VU (スタンバイ時 — getUserMedia使用)
     // =============================================
     async startAmbientVU() {
         this.stopAmbientVU();
@@ -90,94 +101,48 @@ window.LingoSTT = {
     },
 
     stopAmbientVU() {
-        if (this.ambientInterval) { clearInterval(this.ambientInterval); this.ambientInterval = null; }
+        if (this.ambientInterval) { clearInterval(this.ambientInterval);   this.ambientInterval = null; }
         if (this.ambientAnalyser) { try { this.ambientAnalyser.disconnect(); } catch(e){} this.ambientAnalyser = null; }
-        if (this.ambientContext)  { try { this.ambientContext.close();      } catch(e){} this.ambientContext  = null; }
+        if (this.ambientContext)  { try { this.ambientContext.close();       } catch(e){} this.ambientContext  = null; }
         if (this.ambientStream)   { this.ambientStream.getTracks().forEach(t => t.stop()); this.ambientStream = null; }
     },
 
     // =============================================
-    // 録音時 VU + 動的閾値 無音検出
+    // 録音中 VU アニメーション (CSS ドリブン)
+    // SpeechRecognition はマイクを内部管理するため
+    // getUserMedia を別途使えないため CSS アニメーションで代替
     // =============================================
-    startRecordingVU(stream) {
-        this.stopRecordingVU();
-        try {
-            this.recContext  = new (window.AudioContext || window.webkitAudioContext)();
-            this.recAnalyser = this.recContext.createAnalyser();
-            this.recAnalyser.fftSize = 256;
-            const src = this.recContext.createMediaStreamSource(stream);
-            src.connect(this.recAnalyser);
-            const data = new Uint8Array(this.recAnalyser.frequencyBinCount);
-
-            // 動的閾値のための変数
-            let baselineSum   = 0;
-            let baselineCount = 0;
-            let baseline      = -1;          // -1 = まだ計測中
-            const BASELINE_FRAMES = 6;       // 6×80ms = 480ms で計測
-            let silentMs  = 0;
-            let hasSpoken = false;           // ユーザーが一度でも発話したか
-            const MIN_RECORDING_MS = 600;    // 最低録音時間
-            let recordingMs = 0;
-
-            this.recInterval = setInterval(() => {
-                this.recAnalyser.getByteFrequencyData(data);
-                const avg   = data.reduce((a, b) => a + b, 0) / data.length;
-                const level = Math.min(100, Math.round(avg * 2.5));
-                this.setVULevel(level);
-                recordingMs += 80;
-
-                // ── フェーズ1: ベースライン計測 (最初の480ms) ──
-                if (baselineCount < BASELINE_FRAMES) {
-                    baselineSum += avg;
-                    baselineCount++;
-                    if (baselineCount === BASELINE_FRAMES) {
-                        baseline = baselineSum / BASELINE_FRAMES;
-                        window.LingoLog?.add(`📊 環境音ベースライン: ${baseline.toFixed(1)} (動的無音閾値 = ${(baseline * 2.5 + 4).toFixed(1)})`);
-                    }
-                    return; // ベースライン計測中は無音判定しない
-                }
-
-                // ── フェーズ2: 動的無音検出 ──
-                // 閾値: ベースラインの2.5倍 + 4 (最低でも8)
-                const silenceThreshold = Math.max(8, baseline * 2.5 + 4);
-                // 発話判定: ベースラインの4倍 以上なら "発話あり"
-                const speechThreshold  = Math.max(15, baseline * 4.0);
-
-                if (avg >= speechThreshold) {
-                    hasSpoken = true;
-                    silentMs  = 0; // 発話中はリセット
-                    this.setVUStatus("🔴 REC", "#ef4444", "発話検出！", "#22c55e");
-                } else if (avg < silenceThreshold) {
-                    if (hasSpoken && recordingMs >= MIN_RECORDING_MS) {
-                        silentMs += 80;
-                        // 残り秒数表示
-                        const remaining = ((this.SILENCE_MS - silentMs) / 1000).toFixed(1);
-                        this.setVUStatus("🔴 REC", "#ef4444", `無音 ${remaining}秒で停止`, "#f97316");
-                        if (silentMs >= this.SILENCE_MS) {
-                            window.LingoLog?.add(`⏱️ 無音${this.SILENCE_MS/1000}秒経過 → 自動停止`);
-                            this.stop("無音AUTO-OFF");
-                        }
-                    } else if (!hasSpoken) {
-                        this.setVUStatus("🔴 REC", "#ef4444", "話してください…", "#f97316");
-                    }
-                } else {
-                    // 閾値の間: 発話後のフェードアウト中などはリセットしない
-                    silentMs = Math.max(0, silentMs - 40);
-                    if (hasSpoken) {
-                        this.setVUStatus("🔴 REC", "#ef4444", "録音中…", "#f97316");
-                    }
-                }
-            }, 80);
-        } catch(e) {
-            window.LingoLog?.add(`⚠️ 録音VU初期化エラー: ${e.message}`);
-        }
+    startVUAnim(highEnergy = false) {
+        this.stopVUAnim();
+        const maxLv = highEnergy ? 88 : 35;
+        let lv = 5, dir = 1;
+        this.vuAnimInterval = setInterval(() => {
+            lv += dir * (Math.random() * 9 + 2);
+            if (lv >= maxLv) dir = -1;
+            if (lv <=  3)    dir =  1;
+            lv = Math.max(3, Math.min(100, lv));
+            this.setVULevel(lv);
+        }, 80);
     },
 
-    stopRecordingVU() {
-        if (this.recInterval)  { clearInterval(this.recInterval); this.recInterval = null; }
-        if (this.recAnalyser)  { try { this.recAnalyser.disconnect(); } catch(e){} this.recAnalyser = null; }
-        if (this.recContext)   { try { this.recContext.close();       } catch(e){} this.recContext   = null; }
-        this.setVULevel(0);
+    stopVUAnim() {
+        if (this.vuAnimInterval) { clearInterval(this.vuAnimInterval); this.vuAnimInterval = null; }
+    },
+
+    // =============================================
+    // タイマー管理
+    // =============================================
+    clearAllTimers() {
+        if (this.silenceTimer)  { clearTimeout(this.silenceTimer);  this.silenceTimer  = null; }
+        if (this.noSpeechTimer) { clearTimeout(this.noSpeechTimer); this.noSpeechTimer = null; }
+    },
+
+    resetSilenceTimer() {
+        if (this.silenceTimer) clearTimeout(this.silenceTimer);
+        this.silenceTimer = setTimeout(() => {
+            window.LingoLog?.add(`⏱️ 発話終了後 ${this.SILENCE_MS/1000}秒 → 自動停止`);
+            this.stop("無音AUTO-OFF");
+        }, this.SILENCE_MS);
     },
 
     // =============================================
@@ -185,317 +150,265 @@ window.LingoSTT = {
     // =============================================
     toggleListening() {
         if (this.isListening) this.stop("ユーザー手動停止");
-        else                  this.start();
+        else { this.retryCount = 0; this.start(); }
     },
 
     // =============================================
-    // 録音開始
+    // 録音開始 (Web Speech API)
     // =============================================
     async start() {
-        if (this.isListening) return;
-        this.stopAmbientVU();
-        await new Promise(r => setTimeout(r, 100));
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR || this.isListening) return;
 
-        let stream;
+        // ── CRITICAL: Ambient VU を停止してマイクを完全解放 ──
+        // getUserMedia ストリームが残っていると SpeechRecognition が
+        // network エラーを出す競合が起きるため、必ず先に解放する
+        this.stopAmbientVU();
+        await new Promise(r => setTimeout(r, 250));  // 解放完了を待つ
+
+        // マイク権限確認 (ユーザーへ許可ダイアログ表示)
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            const tmpStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            tmpStream.getTracks().forEach(t => t.stop()); // 即座に解放
         } catch(e) {
             window.LingoLog?.add(`❌ マイクアクセス拒否: ${e.message}`);
-            this.setVUStatus("🎙️ MIC", "#ef4444", "マイクアクセス拒否", "#ef4444");
+            this.setVUStatus("🎙️ MIC", "#ef4444", "マイク拒否", "#ef4444");
             setTimeout(() => this.startAmbientVU(), 500);
             return;
         }
 
-        this.micStream   = stream;
-        this.audioChunks = [];
-        this.isListening = true;
-        this.startRecordingVU(stream);
+        await new Promise(r => setTimeout(r, 100)); // 解放後の安定待ち
 
+        const lang = this.getRecognitionLang();
+        this.isListening = true;
+        this.clearAllTimers();
+
+        // UI 更新
         const micBtn    = document.getElementById("micBtn");
         const chatInput = document.getElementById("chatInput");
         const iconEl    = document.getElementById("micIconSymbol");
-        if (micBtn)  micBtn.classList.add("recording");
-        if (iconEl)  iconEl.textContent = "⏹️";
+        if (micBtn)    micBtn.classList.add("recording");
+        if (iconEl)    iconEl.textContent = "⏹️";
         if (chatInput) {
             chatInput.classList.add("mic-active");
             chatInput.placeholder = "🎙️ 話してください… (発話後3秒で自動停止)";
             chatInput.value = "";
         }
-        this.setVUStatus("🔴 REC", "#ef4444", "話してください…", "#f97316");
+        this.setVUStatus("🔴 REC", "#ef4444", "待機中…", "#f97316");
+        this.startVUAnim(false); // 待機中は控えめなアニメーション
 
-        const lang     = this.getRecognitionLang();
-        const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-            ? "audio/webm;codecs=opus"
-            : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+        window.LingoLog?.add(`🎙️ 録音開始 [${lang}] [Web Speech API]`);
 
+        // ── SpeechRecognition 設定 ──
+        if (this.recognition) { try { this.recognition.abort(); } catch(e) {} }
+        this.recognition = new SR();
+        this.recognition.lang             = lang;
+        this.recognition.continuous       = false;
+        this.recognition.interimResults   = true;
+        this.recognition.maxAlternatives  = 1;
+
+        let finalText = "";
+
+        // 8秒無音タイムアウト (ユーザーが一度も話さなかった場合)
+        this.noSpeechTimer = setTimeout(() => {
+            window.LingoLog?.add("⏱️ 8秒間無音 → 自動停止");
+            this.stop("8秒タイムアウト");
+        }, this.NO_SPEECH_MS);
+
+        // ── イベント ──
+        this.recognition.onsoundstart = () => {
+            window.LingoLog?.add("🔊 音声検出 (soundstart)");
+            if (this.noSpeechTimer) { clearTimeout(this.noSpeechTimer); this.noSpeechTimer = null; }
+            this.setVUStatus("🔴 REC", "#ef4444", "音声検出…", "#22c55e");
+        };
+
+        this.recognition.onspeechstart = () => {
+            window.LingoLog?.add("🗣️ 発話開始 (speechstart)");
+            this.setVUStatus("🔴 REC", "#ef4444", "発話中…", "#22c55e");
+            this.startVUAnim(true); // 発話中は活発なアニメーション
+        };
+
+        this.recognition.onspeechend = () => {
+            window.LingoLog?.add("🔇 発話終了 (speechend) → 3秒カウントダウン");
+            this.setVUStatus("🔴 REC", "#ef4444", "解析中…", "#f97316");
+            this.stopVUAnim();
+            this.setVULevel(0);
+            this.resetSilenceTimer(); // 3秒後に自動停止
+        };
+
+        this.recognition.onsoundend = () => { this.stopVUAnim(); };
+
+        this.recognition.onresult = (event) => {
+            this.clearAllTimers();
+            let interim = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const text = event.results[i][0].transcript;
+                if (event.results[i].isFinal) finalText += text;
+                else interim += text;
+            }
+            const display = finalText || interim;
+            if (chatInput && display) {
+                chatInput.value = display;
+                chatInput.style.borderColor = "#22c55e";
+                setTimeout(() => { if (chatInput) chatInput.style.borderColor = ""; }, 700);
+            }
+            if (finalText) window.LingoLog?.add(`✅ STT確定: "${finalText}"`);
+            else if (interim) window.LingoLog?.add(`🔄 STT中間: "${interim}"`);
+        };
+
+        this.recognition.onerror = (event) => {
+            const err = event.error;
+            window.LingoLog?.add(`⚠️ STTエラー: ${err}`);
+
+            if (err === "network") {
+                const now = Date.now();
+                // 1回だけ自動リトライ
+                if (this.retryCount < 1 && (now - this.lastNetworkErrTime) > 2000) {
+                    this.retryCount++;
+                    this.lastNetworkErrTime = now;
+                    window.LingoLog?.add("🔄 Networkエラー: 1秒後にリトライ...");
+                    this.isListening = false;
+                    this.stopVUAnim();
+                    try { this.recognition.abort(); } catch(e) {}
+                    setTimeout(() => { if (!this.isListening) this.start(); }, 1000);
+                    return;
+                }
+                window.LingoLog?.add("❌ Googleブラウザ音声認識サーバーへの接続に失敗しました。ネットワーク環境をご確認ください。");
+                this.setVUStatus("⚠️ ERR", "#ef4444", "接続失敗", "#ef4444");
+            } else if (err === "no-speech") {
+                window.LingoLog?.add("🔇 no-speech: 声が検出できませんでした");
+            }
+
+            if (err !== "aborted") this.stop(`エラー停止: ${err}`);
+        };
+
+        this.recognition.onend = () => {
+            window.LingoLog?.add(`🔚 SpeechRecognition.onend (isListening=${this.isListening})`);
+            if (!this.isListening) return;
+
+            if (finalText) {
+                this.stop("認識完了");
+            } else {
+                // テキスト未確定 → 継続リスニング
+                window.LingoLog?.add("🔄 再起動 (テキスト未確定)...");
+                setTimeout(() => {
+                    if (this.isListening && this.recognition) {
+                        try { this.recognition.start(); }
+                        catch(e) { this.stop(`再起動失敗: ${e.message}`); }
+                    }
+                }, 100);
+            }
+        };
+
+        // ── 起動 ──
         try {
-            this.mediaRecorder = mimeType
-                ? new MediaRecorder(stream, { mimeType })
-                : new MediaRecorder(stream);
+            this.recognition.start();
+            window.LingoLog?.add("▶️ SpeechRecognition.start() 呼び出し");
         } catch(e) {
-            this.mediaRecorder = new MediaRecorder(stream);
+            window.LingoLog?.add(`❌ SpeechRecognition 起動失敗: ${e.message}`);
+            this.stop(`起動エラー: ${e.message}`);
         }
-
-        this.mediaRecorder.ondataavailable = (e) => {
-            if (e.data?.size > 0) this.audioChunks.push(e.data);
-        };
-        this.mediaRecorder.onstop = async () => {
-            window.LingoLog?.add("⏹️ MediaRecorder 停止 → WAV変換 → Gemini STT");
-            await this.transcribeAudio(lang);
-        };
-        this.mediaRecorder.start(200);
-
-        window.LingoLog?.add(`🎙️ 録音開始 [言語: ${lang}] [MediaRecorder + Gemini STT]`);
-
-        this.maxTimer = setTimeout(() => {
-            window.LingoLog?.add(`⏱️ 最大録音時間(${this.MAX_RECORD_MS/1000}秒)超過 → 自動停止`);
-            this.stop("最大時間超過");
-        }, this.MAX_RECORD_MS);
     },
 
     // =============================================
     // 録音停止
     // =============================================
     stop(reason = "") {
-        if (!this.isListening && !this.mediaRecorder) return;
-        if (reason) window.LingoLog?.add(`🛑 録音停止 [理由: ${reason}]`);
+        if (reason) window.LingoLog?.add(`🛑 停止 [${reason}]`);
 
         this.isListening = false;
-        if (this.maxTimer) { clearTimeout(this.maxTimer); this.maxTimer = null; }
-        this.stopRecordingVU();
+        this.clearAllTimers();
+        this.stopVUAnim();
 
-        if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
-            try { this.mediaRecorder.stop(); } catch(e) {}
-        }
-
-        if (this.micStream) {
-            this.micStream.getTracks().forEach(t => t.stop());
-            this.micStream = null;
+        if (this.recognition) {
+            try { this.recognition.abort(); } catch(e) {}
+            this.recognition = null;
         }
 
         const micBtn    = document.getElementById("micBtn");
         const chatInput = document.getElementById("chatInput");
         const iconEl    = document.getElementById("micIconSymbol");
-        if (micBtn)  { micBtn.classList.remove("recording"); micBtn.style.transform = ""; }
-        if (iconEl)  iconEl.textContent = "🎙️";
-        if (chatInput) { chatInput.classList.remove("mic-active"); chatInput.style.borderColor = ""; }
+        if (micBtn)    { micBtn.classList.remove("recording"); micBtn.style.transform = ""; }
+        if (iconEl)    iconEl.textContent = "🎙️";
+        if (chatInput) {
+            chatInput.classList.remove("mic-active");
+            chatInput.style.borderColor = "";
+            const dict = window.LingoApp?.i18n?.[window.LingoApp?.uiLang] || {};
+            chatInput.placeholder = dict.placeholder || "メッセージを入力するか、マイクで話してください…";
+        }
 
+        this.setVULevel(0);
+        // SpeechRecognition がマイクを解放するまで少し待ってから Ambient VU 再開
         setTimeout(() => this.startAmbientVU(), 500);
     },
 
     // =============================================
-    // WebM → WAV 変換 (Gemini互換フォーマット)
-    // =============================================
-    async convertToWav(inputBlob) {
-        const TARGET_SAMPLE_RATE = 16000; // STT最適: 16kHz モノラル
-        try {
-            const arrayBuffer = await inputBlob.arrayBuffer();
-            const tmpCtx = new AudioContext();
-            let audioBuffer;
-            try {
-                audioBuffer = await tmpCtx.decodeAudioData(arrayBuffer);
-            } finally {
-                tmpCtx.close();
-            }
-
-            // OfflineAudioContext でリサンプリング (16kHz モノラル)
-            const numSamples = Math.ceil(audioBuffer.duration * TARGET_SAMPLE_RATE);
-            const offlineCtx = new OfflineAudioContext(1, numSamples, TARGET_SAMPLE_RATE);
-            const src = offlineCtx.createBufferSource();
-            src.buffer = audioBuffer;
-            src.connect(offlineCtx.destination);
-            src.start(0);
-            const rendered = await offlineCtx.startRendering();
-            const samples  = rendered.getChannelData(0);
-
-            // PCM 16bit WAV エンコード
-            const dataLen  = samples.length * 2;
-            const buf      = new ArrayBuffer(44 + dataLen);
-            const view     = new DataView(buf);
-            const ws = (off, str) => { for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); };
-
-            ws(0,  "RIFF"); view.setUint32(4,  36 + dataLen, true);
-            ws(8,  "WAVE"); ws(12, "fmt ");
-            view.setUint32(16, 16, true);
-            view.setUint16(20,  1, true);               // PCM
-            view.setUint16(22,  1, true);               // モノラル
-            view.setUint32(24, TARGET_SAMPLE_RATE, true);
-            view.setUint32(28, TARGET_SAMPLE_RATE * 2, true);
-            view.setUint16(32,  2, true);               // ブロックアライン
-            view.setUint16(34, 16, true);               // 16bit
-            ws(36, "data"); view.setUint32(40, dataLen, true);
-
-            let off = 44;
-            for (let i = 0; i < samples.length; i++) {
-                const s = Math.max(-1, Math.min(1, samples[i]));
-                view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-                off += 2;
-            }
-
-            const wavBlob = new Blob([buf], { type: "audio/wav" });
-            window.LingoLog?.add(`🔄 WAV変換完了: ${Math.round(wavBlob.size/1024)}KB (16kHz mono PCM)`);
-            return wavBlob;
-        } catch(e) {
-            window.LingoLog?.add(`⚠️ WAV変換失敗: ${e.message} → 元のWebMで送信`);
-            return inputBlob; // フォールバック: 元のまま送信
-        }
-    },
-
-    // =============================================
-    // Gemini STT 文字起こし
-    // =============================================
-    async transcribeAudio(lang) {
-        if (this.audioChunks.length === 0) {
-            window.LingoLog?.add("⚠️ 録音データなし → スキップ");
-            const ci = document.getElementById("chatInput");
-            if (ci) ci.placeholder = "メッセージを入力するか、マイクで話してください…";
-            return;
-        }
-
-        const rawMime = this.audioChunks[0]?.type || "audio/webm";
-        const rawBlob = new Blob(this.audioChunks, { type: rawMime });
-        this.audioChunks = [];
-
-        const chatInput = document.getElementById("chatInput");
-        if (chatInput) chatInput.placeholder = "🤔 音声を解析中… (Gemini STT)";
-        this.setVUStatus("🤔 STT", "#6366f1", "Gemini解析中…", "#6366f1");
-
-        // WebM → WAV 変換 (Gemini は WAV を確実にサポート)
-        const sendBlob = await this.convertToWav(rawBlob);
-        const sendMime = sendBlob.type || "audio/wav";
-        const langKey  = lang || this.getRecognitionLang();
-        const apiKey   = this.getApiKey();
-
-        window.LingoLog?.add(`📤 Gemini STT 送信: ${Math.round(sendBlob.size/1024)}KB [${sendMime}]`);
-
-        try {
-            const headers = { "Content-Type": sendMime };
-            if (apiKey) headers["X-Api-Key"] = apiKey;
-
-            const res = await fetch(`/api/stt?lang=${langKey}`, {
-                method: "POST", headers, body: sendBlob
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || `HTTP ${res.status}`);
-            }
-
-            const text = (data.text || "").trim();
-            if (text) {
-                if (chatInput) {
-                    chatInput.value = text;
-                    chatInput.style.borderColor = "#22c55e";
-                    chatInput.placeholder = "メッセージを入力するか、マイクで話してください…";
-                    setTimeout(() => { if (chatInput) chatInput.style.borderColor = ""; }, 900);
-                }
-                window.LingoLog?.add(`✅ Gemini STT 完了 [${data.model || "?"}]: "${text}"`);
-                this.setVUStatus("🎙️ MIC", "#22c55e", "認識完了！", "#22c55e");
-                setTimeout(() => this.setVUStatus("🎙️ MIC", "#22c55e", "スタンバイ中", "#94a3b8"), 2500);
-            } else {
-                window.LingoLog?.add("🔇 音声なし、または聞き取れませんでした。");
-                if (chatInput) chatInput.placeholder = "メッセージを入力するか、マイクで話してください…";
-                this.setVUStatus("🎙️ MIC", "#94a3b8", "スタンバイ中", "#cbd5e1");
-            }
-        } catch(e) {
-            window.LingoLog?.add(`❌ Gemini STT エラー: ${e.message}`);
-            if (chatInput) chatInput.placeholder = "STTエラー。テキスト入力をお試しください。";
-            this.setVUStatus("🎙️ MIC", "#ef4444", "STTエラー", "#ef4444");
-            setTimeout(() => this.setVUStatus("🎙️ MIC", "#94a3b8", "スタンバイ中", "#cbd5e1"), 3000);
-        }
-    },
-
-    // =============================================
-    // 発音練習用録音
+    // 発音練習用 STT (別インスタンス)
     // =============================================
     async listenForPronunciation(targetText, callback) {
-        this.stopAmbientVU();
-        await new Promise(r => setTimeout(r, 100));
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { if (callback) callback(targetText, "Not supported"); return; }
 
-        let stream;
+        this.stopAmbientVU();
+        await new Promise(r => setTimeout(r, 250));
+
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            const tmp = await navigator.mediaDevices.getUserMedia({ audio: true });
+            tmp.getTracks().forEach(t => t.stop());
         } catch(e) {
-            window.LingoLog?.add(`⚠️ 発音録音マイクエラー: ${e.message}`);
+            window.LingoLog?.add(`⚠️ 発音マイクエラー: ${e.message}`);
             if (callback) callback("", e.message);
             setTimeout(() => this.startAmbientVU(), 400);
             return;
         }
+        await new Promise(r => setTimeout(r, 100));
 
-        const lang     = this.getRecognitionLang();
-        const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-            ? "audio/webm;codecs=opus" : "audio/webm";
+        const lang   = this.getRecognitionLang();
+        const pronRec = new SR();
+        pronRec.lang            = lang;
+        pronRec.continuous      = false;
+        pronRec.interimResults  = true;
+        pronRec.maxAlternatives = 1;
 
-        let chunks = [];
-        let pronRec;
-        try { pronRec = new MediaRecorder(stream, { mimeType }); }
-        catch(e) { pronRec = new MediaRecorder(stream); }
+        let captured  = "";
+        let finished  = false;
+        let pronTimer = setTimeout(() => finishPron(), 10000);
 
-        // 無音検出 (発音練習用は簡易版)
-        const pCtx  = new (window.AudioContext || window.webkitAudioContext)();
-        const pAnal = pCtx.createAnalyser();
-        pAnal.fftSize = 256;
-        const pSrc  = pCtx.createMediaStreamSource(stream);
-        pSrc.connect(pAnal);
-        const pData = new Uint8Array(pAnal.frequencyBinCount);
-        let silentMs = 0, hasSpoken = false;
-        let baseSamples = [], baseVal = -1;
-
-        const silInterval = setInterval(() => {
-            pAnal.getByteFrequencyData(pData);
-            const avg = pData.reduce((a, b) => a + b, 0) / pData.length;
-            if (baseVal < 0) {
-                baseSamples.push(avg);
-                if (baseSamples.length >= 5) baseVal = baseSamples.reduce((a,b)=>a+b,0)/baseSamples.length;
-                return;
-            }
-            const thr = Math.max(8, baseVal * 2.5 + 4);
-            if (avg >= thr * 1.5) { hasSpoken = true; silentMs = 0; }
-            else if (avg < thr && hasSpoken) {
-                silentMs += 80;
-                if (silentMs >= 1500) finishPron();
-            } else { silentMs = Math.max(0, silentMs - 40); }
-        }, 80);
-
-        const maxT  = setTimeout(() => finishPron(), 10000);
-        let finished = false;
-
-        const finishPron = async () => {
+        const finishPron = () => {
             if (finished) return;
             finished = true;
-            clearInterval(silInterval);
-            clearTimeout(maxT);
-            if (pronRec.state !== "inactive") pronRec.stop();
-            else await sendPronAudio();
-        };
-
-        const sendPronAudio = async () => {
-            stream.getTracks().forEach(t => t.stop());
-            try { pAnal.disconnect(); pCtx.close(); } catch(e) {}
+            clearTimeout(pronTimer);
+            try { pronRec.abort(); } catch(e) {}
+            window.LingoLog?.add(`✅ 発音STT完了: "${captured || "(なし)"}"`);
+            if (callback) callback(captured || "", null);
             setTimeout(() => this.startAmbientVU(), 400);
-
-            if (chunks.length === 0) { if (callback) callback("", "no audio"); return; }
-
-            const rawBlob  = new Blob(chunks, { type: mimeType });
-            const wavBlob  = await this.convertToWav(rawBlob);
-            const apiKey   = this.getApiKey();
-            const headers  = { "Content-Type": wavBlob.type || "audio/wav" };
-            if (apiKey) headers["X-Api-Key"] = apiKey;
-
-            try {
-                const res  = await fetch(`/api/stt?lang=${lang}`, { method:"POST", headers, body: wavBlob });
-                const data = await res.json();
-                if (callback) callback(data.text || "", data.error || null);
-            } catch(e) {
-                if (callback) callback("", e.message);
-            }
         };
 
-        pronRec.ondataavailable = (e) => { if (e.data?.size > 0) chunks.push(e.data); };
-        pronRec.onstop = sendPronAudio;
-        pronRec.start(200);
-        window.LingoLog?.add(`🎙️ 発音録音開始 [言語: ${lang}]`);
+        pronRec.onspeechend = () => {
+            clearTimeout(pronTimer);
+            pronTimer = setTimeout(() => finishPron(), 1500);
+        };
+
+        pronRec.onresult = (e) => {
+            let txt = "";
+            for (let i = e.resultIndex; i < e.results.length; i++) txt += e.results[i][0].transcript;
+            if (txt) captured = txt;
+        };
+
+        pronRec.onerror = (e) => {
+            window.LingoLog?.add(`⚠️ 発音STTエラー: ${e.error}`);
+            finishPron();
+        };
+
+        pronRec.onend = () => finishPron();
+
+        try {
+            pronRec.start();
+            window.LingoLog?.add(`🎙️ 発音STT開始 [${lang}]`);
+        } catch(e) {
+            window.LingoLog?.add(`❌ 発音STT起動失敗: ${e.message}`);
+            finishPron();
+        }
     }
 };
 

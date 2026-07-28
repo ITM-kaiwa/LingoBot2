@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver6.3β Implementation
+// Main Application Controller - LingoBot2 Ver6.4β Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -426,7 +426,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.3β]. WAV Convert + Smart Silence STT");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.4β]. Web Speech API STT (Buội trình duyệt chuẩn)");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
