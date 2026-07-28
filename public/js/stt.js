@@ -1,8 +1,11 @@
-// Web Speech STT Engine & Pronunciation Analyzer - LingoBot2 Ver4.7 Implementation
+// Web Speech STT Engine & Pronunciation Analyzer - LingoBot2 Ver5.6β Implementation
+// Enhanced Microphone Permissions, Retry Logic on Speech Network Errors
 window.LingoSTT = {
     recognition: null,
     isListening: false,
     silenceTimer: null,
+    retryCount: 0,
+    activeStream: null,
 
     init() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -11,17 +14,12 @@ window.LingoSTT = {
             return;
         }
 
-        this.recognition = new SpeechRecognition();
-        this.recognition.continuous = false;
-        this.recognition.interimResults = true;
-        this.recognition.maxAlternatives = 1;
-
         const micBtn = document.getElementById("micBtn");
         if (micBtn) {
             micBtn.addEventListener("click", () => this.toggleListening());
         }
 
-        window.LingoLog.add("Khởi tạo Web Speech STT Engine (LingoBot2 Ver4.7 - 3s Silence Auto-OFF) thành công.");
+        window.LingoLog.add("Khởi tạo Web Speech STT Engine (LingoBot2 Ver5.6β - Micro Auto-Permissions & Network Recovery) thành công.");
     },
 
     getRecognitionLang() {
@@ -34,57 +32,75 @@ window.LingoSTT = {
 
     resetSilenceTimer(onSilenceCallback) {
         if (this.silenceTimer) clearTimeout(this.silenceTimer);
-        // 3 SECONDS SILENCE AUTO-OFF TIMER
+        // 5 SECONDS SILENCE AUTO-OFF TIMER FOR STABILITY
         this.silenceTimer = setTimeout(() => {
-            window.LingoLog.add("⏱️ 無音が3秒間続いたため、自動的にマイクをOFFにしました。 (3s Silence Auto-OFF triggered)");
+            window.LingoLog.add("⏱️ 無音が5秒間続いたため、自動的にマイクをOFFにしました。 (5s Silence Auto-OFF triggered)");
             if (onSilenceCallback) onSilenceCallback();
-        }, 3000);
+        }, 5000);
     },
 
     toggleListening() {
         if (this.isListening) {
             this.stop();
         } else {
+            this.retryCount = 0;
             this.start();
         }
     },
 
+    async requestMicAccess() {
+        try {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.activeStream = stream;
+                return true;
+            }
+        } catch (err) {
+            console.warn("Microphone access error:", err);
+            window.LingoLog.add(`⚠️ Lỗi truy cập Micro: ${err.message}`);
+        }
+        return false;
+    },
+
     async start() {
-        if (!this.recognition) this.init();
-        if (!this.recognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
             alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Google Chrome!");
             return;
         }
 
-        try {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-            }
-        } catch (err) {
-            console.warn("Microphone access check:", err);
+        const hasMic = await this.requestMicAccess();
+        if (!hasMic && this.retryCount === 0) {
+            window.LingoLog.add("⚠️ Cần cấp quyền truy cập Micro trên trình duyệt để nói bằng giọng nói.");
         }
 
         const micBtn = document.getElementById("micBtn");
         const chatInput = document.getElementById("chatInput");
 
+        if (this.recognition) {
+            try { this.recognition.abort(); } catch(e){}
+        }
+
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = false;
+        this.recognition.interimResults = true;
+        this.recognition.maxAlternatives = 1;
         this.recognition.lang = this.getRecognitionLang();
+
         this.isListening = true;
 
         if (micBtn) {
             micBtn.classList.add("recording");
-            micBtn.style.background = "#ef4444";
-            micBtn.style.color = "#ffffff";
         }
 
-        window.LingoLog.add(`Bắt đầu thu âm hội thoại [Language: ${this.recognition.lang}]... (3s Silence Auto-OFF active)`);
+        window.LingoLog.add(`Bắt đầu thu âm hội thoại [Language: ${this.recognition.lang}]...`);
 
         let finalTranscript = "";
 
-        // Reset 3s silence timer when starting
+        // Reset silence timer when starting
         this.resetSilenceTimer(() => this.stop());
 
         this.recognition.onresult = (event) => {
-            // Reset silence timer on every spoken result
             this.resetSilenceTimer(() => this.stop());
 
             let interim = "";
@@ -101,7 +117,22 @@ window.LingoSTT = {
         };
 
         this.recognition.onerror = (event) => {
-            window.LingoLog.add(`Lỗi nhận diện giọng nói: ${event.error}`);
+            const errName = event.error;
+            window.LingoLog.add(`Lỗi nhận diện giọng nói STT: ${errName}`);
+
+            if (errName === "network" && this.retryCount < 2) {
+                this.retryCount++;
+                window.LingoLog.add(`🔄 Tự động thử lại nhận diện giọng nói (Retry #${this.retryCount})...`);
+                setTimeout(() => {
+                    if (this.isListening) this.start();
+                }, 400);
+                return;
+            }
+
+            if (errName === "network") {
+                alert("🎤 Google 音声認識サーバーへの接続エラーが発生しました。インターネット接続をご確認いただくか、テキスト入力をお使いください。");
+            }
+
             this.stop();
         };
 
@@ -126,18 +157,24 @@ window.LingoSTT = {
             this.silenceTimer = null;
         }
         this.isListening = false;
+        
+        if (this.activeStream) {
+            try {
+                this.activeStream.getTracks().forEach(track => track.stop());
+            } catch(e){}
+            this.activeStream = null;
+        }
+
         const micBtn = document.getElementById("micBtn");
         if (micBtn) {
             micBtn.classList.remove("recording");
-            micBtn.style.background = "#fff7ed";
-            micBtn.style.color = "#ea580c";
         }
         if (this.recognition) {
             try { this.recognition.stop(); } catch(e){}
         }
     },
 
-    // PRONUNCIATION ADVISOR STT ENGINE (With 3s Silence Auto-OFF & Status Updates)
+    // PRONUNCIATION ADVISOR STT ENGINE
     async listenForPronunciation(targetText, callback) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -146,13 +183,7 @@ window.LingoSTT = {
             return;
         }
 
-        try {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-            }
-        } catch (err) {
-            console.warn("Microphone access check:", err);
-        }
+        await this.requestMicAccess();
 
         const pronRec = new SpeechRecognition();
         pronRec.continuous = false;
@@ -169,7 +200,7 @@ window.LingoSTT = {
         }
         pronRec.lang = recLang;
 
-        window.LingoLog.add(`Bắt đầu ghi âm Luyện phát âm [Lang: ${recLang}] cho câu: "${targetText}" (3s Silence Auto-OFF active)`);
+        window.LingoLog.add(`Bắt đầu ghi âm Luyện phát âm [Lang: ${recLang}] cho câu: "${targetText}"`);
 
         let capturedText = "";
         let hasFinished = false;
@@ -180,7 +211,11 @@ window.LingoSTT = {
                 hasFinished = true;
                 if (pronSilenceTimer) clearTimeout(pronSilenceTimer);
                 try { pronRec.stop(); } catch(e){}
-                window.LingoLog.add(`Thu âm phát âm hoàn tất (Tự động ngắt khi hết tiếng 3s): "${capturedText || targetText}"`);
+                if (this.activeStream) {
+                    try { this.activeStream.getTracks().forEach(track => track.stop()); } catch(e){}
+                    this.activeStream = null;
+                }
+                window.LingoLog.add(`Thu âm phát âm hoàn tất: "${capturedText || targetText}"`);
                 if (callback) callback(capturedText || targetText, null);
             }
         };
@@ -188,12 +223,11 @@ window.LingoSTT = {
         const resetPronSilence = () => {
             if (pronSilenceTimer) clearTimeout(pronSilenceTimer);
             pronSilenceTimer = setTimeout(() => {
-                window.LingoLog.add("⏱️ 発音練習: 無音が3秒間続いたためマイクを自動OFFにします。 (3s Silence Auto-OFF)");
+                window.LingoLog.add("⏱️ 発音練習: 無音が続いたためマイクを自動OFFにします。");
                 finishRecording();
-            }, 3000);
+            }, 5000);
         };
 
-        // Start 3s silence timer when recording starts
         resetPronSilence();
 
         pronRec.onresult = (event) => {

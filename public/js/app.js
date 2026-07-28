@@ -426,7 +426,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.5β]. Restored Ver5.5 stable flow.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver5.6β]. Mic hover & pulse effect enhanced.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
