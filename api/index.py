@@ -484,6 +484,101 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
         return jsonify({"summary": "Lỗi kết nối summary.", "used_model": "Local"}), 200
 
 
+@app.route("/api/stt", methods=["POST"])
+def stt_transcribe():
+    """
+    Backend STT using Gemini multimodal API.
+    Accepts raw audio bytes (audio/webm) in POST body.
+    Query params: lang (ja-JP / en-US / vi-VN)
+    """
+    try:
+        env_key = get_env_api_key()
+        client_key = sanitize_api_key(request.headers.get("X-Api-Key", ""))
+        api_key = env_key if env_key else client_key
+
+        if not api_key:
+            return jsonify({"error": "API key missing", "text": ""}), 400
+
+        audio_bytes = request.data
+        if not audio_bytes or len(audio_bytes) < 100:
+            return jsonify({"error": "Audio data too short or empty", "text": ""}), 400
+
+        lang = request.args.get("lang", "ja-JP")
+        lang_map = {
+            "ja-JP": "日本語 (Japanese)",
+            "en-US": "English",
+            "vi-VN": "Tiếng Việt (Vietnamese)"
+        }
+        lang_name = lang_map.get(lang, "日本語 (Japanese)")
+
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+        # Determine MIME type from Content-Type header
+        mime_type = request.content_type or "audio/webm"
+        if ";" in mime_type:
+            mime_type = mime_type.split(";")[0].strip()
+        if mime_type not in ["audio/webm", "audio/ogg", "audio/wav", "audio/mp4", "audio/mpeg"]:
+            mime_type = "audio/webm"
+
+        payload = {
+            "contents": [{
+                "parts": [
+                    {
+                        "text": (
+                            f"Please transcribe the following audio recording accurately. "
+                            f"The speaker is using {lang_name}. "
+                            f"Return ONLY the transcribed text with no explanations, "
+                            f"punctuation corrections, or translations. "
+                            f"If the audio is silent or inaudible, return an empty string."
+                        )
+                    },
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": audio_b64
+                        }
+                    }
+                ]
+            }],
+            "generationConfig": {
+                "temperature": 0.1,
+                "maxOutputTokens": 512
+            }
+        }
+
+        # Try audio-capable models (multimodal)
+        audio_models = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
+
+        for model in audio_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            try:
+                res = requests.post(
+                    url,
+                    headers={"Content-Type": "application/json"},
+                    json=payload,
+                    timeout=20
+                )
+                if res.status_code == 200:
+                    res_data = res.json()
+                    candidates = res_data.get("candidates", [])
+                    if candidates and "content" in candidates[0]:
+                        parts = candidates[0]["content"].get("parts", [])
+                        text = "".join([p.get("text", "") for p in parts]).strip()
+                        return jsonify({
+                            "text": text,
+                            "model": model,
+                            "lang": lang
+                        }), 200
+            except Exception as e:
+                continue
+
+        return jsonify({"error": "STT transcription failed", "text": ""}), 500
+
+    except Exception as ex:
+        return jsonify({"error": str(ex), "text": ""}), 500
+
+
+
 @app.route("/")
 def serve_index():
     return send_from_directory(PUBLIC_DIR, "index.html")
