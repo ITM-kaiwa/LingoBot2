@@ -298,15 +298,6 @@
                 <!-- 1. Conversation Mode Input Controls (Visible in Giao tiếp mode) -->
                 <div class="footer-chat-controls" id="chatFooterControls" style="display: flex; flex-direction: column; width: 100%; gap: 6px;">
 
-                    <!-- VU Meter (マイク音量バー) — 録音中のみ表示 -->
-                    <div id="vuMeterWrap" style="display:none; align-items: center; gap: 8px; width: 100%; padding: 0 4px;">
-                        <span style="font-size:0.75rem; color:#f97316; white-space:nowrap; font-weight:600;">🎙️ MIC</span>
-                        <div style="flex:1; height:8px; background:#f1f5f9; border-radius:99px; overflow:hidden; border:1px solid #e2e8f0;">
-                            <div id="vuMeterBar" style="height:100%; width:0%; border-radius:99px; transition:width 0.08s ease; background: linear-gradient(90deg,#3b82f6,#22c55e);"></div>
-                        </div>
-                        <span style="font-size:0.7rem; color:#94a3b8;">発話後3秒で自動停止</span>
-                    </div>
-
                     <!-- Input row -->
                     <div style="display:flex; width:100%; gap:8px; align-items:center;">
                         <div class="footer-input-wrapper">
@@ -343,6 +334,49 @@
                     <span id="txtPronounceStatus">🎙️ マイクで話してください (上の例文から文を選択してください)</span>
                 </div>
             </footer>
+
+            <!-- ========== VU Meter Strip — 常時表示 (フッター直下) ========== -->
+            <div id="vuMeterWrap" style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                padding: 5px 14px 6px;
+                background: #f8fafc;
+                border-top: 1px solid #e2e8f0;
+                box-sizing: border-box;
+            ">
+                <!-- ラベル: 録音中か否かで色が変わる -->
+                <span id="vuMeterLabel" style="
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    white-space: nowrap;
+                    color: #94a3b8;
+                    letter-spacing: 0.04em;
+                    transition: color 0.3s;
+                    min-width: 56px;
+                ">🎙️ MIC</span>
+
+                <!-- バー本体 -->
+                <div style="flex:1; height:7px; background:#e2e8f0; border-radius:99px; overflow:hidden;">
+                    <div id="vuMeterBar" style="
+                        height: 100%;
+                        width: 0%;
+                        border-radius: 99px;
+                        transition: width 0.07s linear;
+                        background: linear-gradient(90deg, #3b82f6, #22c55e);
+                    "></div>
+                </div>
+
+                <!-- ステータステキスト -->
+                <span id="vuMeterStatus" style="
+                    font-size: 0.68rem;
+                    color: #cbd5e1;
+                    white-space: nowrap;
+                    min-width: 80px;
+                    text-align: right;
+                ">スタンバイ中</span>
+            </div>
         </div>
     </div>
 

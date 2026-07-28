@@ -66,15 +66,18 @@ window.LingoSTT = {
             source.connect(this.analyser);
 
             const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-            const micBtn = document.getElementById("micBtn");
-            const vuBar = document.getElementById("vuMeterBar");
-            const vuWrap = document.getElementById("vuMeterWrap");
+            const micBtn      = document.getElementById("micBtn");
+            const vuBar       = document.getElementById("vuMeterBar");
+            const vuLabel     = document.getElementById("vuMeterLabel");
+            const vuStatus    = document.getElementById("vuMeterStatus");
 
-            if (vuWrap) vuWrap.style.display = "flex";
+            // 録音中: ラベル・ステータスをアクティブな色に
+            if (vuLabel)  { vuLabel.style.color  = "#f97316"; }
+            if (vuStatus) { vuStatus.textContent  = "発話後3秒で自動停止"; vuStatus.style.color = "#f97316"; }
 
             this.vuInterval = setInterval(() => {
                 this.analyser.getByteFrequencyData(dataArray);
-                const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+                const avg   = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
                 const level = Math.min(100, Math.round(avg * 2.5));
 
                 // VUバー更新
@@ -93,9 +96,7 @@ window.LingoSTT = {
                     micBtn.style.transform = `scale(${scale})`;
                 }
 
-                // 音量が拾えていることをログに（1秒に1回程度）
                 if (avg > 5) {
-                    // 音声入力あり: サイレンスタイマーをリセット
                     this._soundDetectedAt = Date.now();
                 }
             }, 80);
@@ -128,13 +129,17 @@ window.LingoSTT = {
             this.micStream = null;
         }
 
-        const micBtn = document.getElementById("micBtn");
-        if (micBtn) micBtn.style.transform = "";
+        const micBtn  = document.getElementById("micBtn");
+        const vuBar   = document.getElementById("vuMeterBar");
+        const vuLabel  = document.getElementById("vuMeterLabel");
+        const vuStatus = document.getElementById("vuMeterStatus");
 
-        const vuWrap = document.getElementById("vuMeterWrap");
-        const vuBar  = document.getElementById("vuMeterBar");
-        if (vuWrap) vuWrap.style.display = "none";
-        if (vuBar)  vuBar.style.width = "0%";
+        if (micBtn)  micBtn.style.transform = "";
+
+        // バーをゼロに戻し、ラベルをスタンバイ色に戻す (丸ごと非表示にしない)
+        if (vuBar)    { vuBar.style.width = "0%"; vuBar.style.background = "linear-gradient(90deg, #3b82f6, #22c55e)"; }
+        if (vuLabel)  { vuLabel.style.color  = "#94a3b8"; }
+        if (vuStatus) { vuStatus.textContent  = "スタンバイ中"; vuStatus.style.color = "#cbd5e1"; }
     },
 
     // =============================================
