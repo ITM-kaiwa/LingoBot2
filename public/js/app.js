@@ -1,4 +1,4 @@
-// Main Application Controller - LingoBot2 Ver6.6β Implementation
+// Main Application Controller - LingoBot2 Ver6.8β Implementation
 window.LingoApp = {
     apiKey: "",
     mode: "Giao tiếp",
@@ -8,6 +8,7 @@ window.LingoApp = {
     scenario: "自由会話",
     filterLang: "jp 日本語", // Default Pronunciation Filter: Japanese (日本語)
     filterLevel: "Sơ cấp",    // Default Pronunciation Filter: Beginner (初級)
+    activePronBtn: null,     // Currently recording sample card button
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
     useLocalFallback: false,    // Default Local Mode: OFF (Always labeled "Local", Blue=OFF, Lime Green=ON)
     customSystemPrompt: null,   // Stores dynamic user-edited System Prompt
@@ -426,7 +427,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.6β]. Groq Whisper STT + Gemini Fallback");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.8β]. Groq Whisper STT + Gemini Fallback & Multi-card Rec Switch");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -961,6 +962,33 @@ window.LingoApp = {
         // DO NOT scroll immediately upon pressing record button so user can read the target sentence card!
         const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
 
+        // 1. If currently recording on another (or same) card, cancel previous recording and restore UI
+        if (this.activePronBtn) {
+            const isSameBtn = (this.activePronBtn === recBtn);
+            
+            // Restore previous button UI
+            this.activePronBtn.textContent = dict.btnSampleRecord || "🎙️ 録音＆判定";
+            this.activePronBtn.style.background = "#ffedd5";
+            this.activePronBtn.style.color = "#ea580c";
+            
+            // Cancel active pronunciation recording session
+            if (window.LingoSTT && window.LingoSTT.stopPronunciation) {
+                window.LingoSTT.stopPronunciation(true);
+            }
+            
+            this.activePronBtn = null;
+
+            // If same button was clicked again, cancel recording and stop
+            if (isSameBtn) {
+                if (banner) banner.className = "pronounce-footer-status";
+                if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
+                return;
+            }
+        }
+
+        // 2. Set new active recording button
+        this.activePronBtn = recBtn;
+
         if (recBtn) {
             recBtn.textContent = dict.btnSampleRecording || "🔴 録音中...";
             recBtn.style.background = "#ef4444";
@@ -976,10 +1004,19 @@ window.LingoApp = {
 
         if (window.LingoSTT && window.LingoSTT.listenForPronunciation) {
             window.LingoSTT.listenForPronunciation(cleanTarget, async (spokenText, err) => {
+                // If canceled by another card click, do nothing
+                if (err === "CANCELED") {
+                    return;
+                }
+
                 if (recBtn) {
                     recBtn.textContent = dict.btnSampleRecord || "🎙️ 録音＆判定";
                     recBtn.style.background = "#ffedd5";
                     recBtn.style.color = "#ea580c";
+                }
+
+                if (this.activePronBtn === recBtn) {
+                    this.activePronBtn = null;
                 }
 
                 if (banner) banner.className = "pronounce-footer-status analyzing";

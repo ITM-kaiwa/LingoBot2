@@ -1,19 +1,21 @@
-// STT Engine - LingoBot2 Ver6.6β
+// STT Engine - LingoBot2 Ver6.8β
 // ARCHITECTURE: MediaRecorder (browser) + /api/stt backend
 //   PRIMARY:  Groq Whisper API (whisper-large-v3-turbo) — fast, free tier, no Gemini quota usage
 //   FALLBACK: Gemini multimodal STT — if Groq fails or GROQ_API_KEY not set
 //
-// KEY FEATURES in Ver6.6β:
+// KEY FEATURES in Ver6.8β:
 //   1. Backend selects Groq or Gemini automatically
 //   2. Frontend shows which engine was used in logs
 //   3. 20-second forced stop timer
 //   4. Stop button always works (CSS class as ground truth)
 //   5. Real VU meter during both standby and recording
+//   6. Pronunciation mode active recording cancellation & instant restart on multi-card select
 window.LingoSTT = {
     isListening:   false,
     mediaRecorder: null,
     audioChunks:   [],
     micStream:     null,
+    activePronSession: null,
 
     // Ambient VU (standby — getUserMedia)
     ambientStream:   null,
@@ -42,7 +44,7 @@ window.LingoSTT = {
             btn.addEventListener("click", () => this.toggleListening());
         }
         setTimeout(() => this.startAmbientVU(), 600);
-        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver6.6β - Groq Whisper + Gemini Fallback) thành công.");
+        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver6.8β - Groq Whisper + Gemini Fallback) thành công.");
     },
 
     getRecognitionLang() {
@@ -443,9 +445,19 @@ window.LingoSTT = {
     },
 
     // =============================================
-    // 発音練習用 STT
+    // 発音練習用 STT (セッションキャンセル対応)
     // =============================================
+    stopPronunciation(isCancel = true) {
+        if (this.activePronSession) {
+            this.activePronSession.cancel(isCancel);
+            this.activePronSession = null;
+        }
+    },
+
     async listenForPronunciation(targetText, callback) {
+        // 進行中の発音セッションがあれば停止
+        this.stopPronunciation(true);
+
         this.stopAmbientVU();
         await new Promise(r => setTimeout(r, 100));
 
@@ -468,6 +480,9 @@ window.LingoSTT = {
         try { pronRec = new MediaRecorder(stream, { mimeType }); }
         catch(e) { pronRec = new MediaRecorder(stream); }
 
+        let finished = false;
+        let canceled = false;
+
         // 無音検出
         const pCtx  = new (window.AudioContext || window.webkitAudioContext)();
         const pAnal = pCtx.createAnalyser();
@@ -477,6 +492,7 @@ window.LingoSTT = {
         let silMs = 0, spoken = false, baseSamples = [], baseVal = -1;
 
         const silInterval = setInterval(() => {
+            if (finished || canceled) return;
             pAnal.getByteFrequencyData(pData);
             const avg = pData.reduce((a, b) => a + b, 0) / pData.length;
             if (baseVal < 0) {
@@ -493,20 +509,42 @@ window.LingoSTT = {
         }, 80);
 
         const maxT  = setTimeout(() => finishPron(), 10000);
-        let finished = false;
+
+        const cleanup = () => {
+            clearInterval(silInterval);
+            clearTimeout(maxT);
+            if (stream) {
+                try { stream.getTracks().forEach(t => t.stop()); } catch(e){}
+            }
+            try { pAnal.disconnect(); pCtx.close(); } catch(e) {}
+            setTimeout(() => this.startAmbientVU(), 400);
+        };
 
         const finishPron = async () => {
-            if (finished) return;
+            if (finished || canceled) return;
             finished = true;
-            clearInterval(silInterval); clearTimeout(maxT);
-            if (pronRec.state !== "inactive") pronRec.stop();
-            else await sendPronAudio();
+            cleanup();
+            if (pronRec.state !== "inactive") {
+                try { pronRec.stop(); } catch(e){}
+            } else {
+                await sendPronAudio();
+            }
+        };
+
+        const cancelPron = () => {
+            if (finished || canceled) return;
+            canceled = true;
+            cleanup();
+            if (pronRec.state !== "inactive") {
+                pronRec.onstop = null; // onstopの自動処理をブロック
+                try { pronRec.stop(); } catch(e){}
+            }
+            window.LingoLog?.add("🛑 発音録音がキャンセルされました（別カード選択）");
+            if (callback) callback("", "CANCELED");
         };
 
         const sendPronAudio = async () => {
-            stream.getTracks().forEach(t => t.stop());
-            try { pAnal.disconnect(); pCtx.close(); } catch(e) {}
-            setTimeout(() => this.startAmbientVU(), 400);
+            if (canceled) return;
             if (chunks.length === 0) { if (callback) callback("", "no audio"); return; }
             const rawBlob = new Blob(chunks, { type: mimeType });
             const wavBlob = await this.convertToWav(rawBlob);
@@ -516,14 +554,20 @@ window.LingoSTT = {
             try {
                 const res  = await fetch(`/api/stt?lang=${lang}`, { method:"POST", headers, body: wavBlob });
                 const data = await res.json();
-                if (callback) callback(data.text || "", data.error || null);
-            } catch(e) { if (callback) callback("", e.message); }
+                if (!canceled && callback) callback(data.text || "", data.error || null);
+            } catch(e) { if (!canceled && callback) callback("", e.message); }
         };
 
         pronRec.ondataavailable = (e) => { if (e.data?.size > 0) chunks.push(e.data); };
-        pronRec.onstop = sendPronAudio;
+        pronRec.onstop = () => {
+            if (!canceled) sendPronAudio();
+        };
         pronRec.start(200);
         window.LingoLog?.add(`🎙️ 発音録音開始 [${lang}]`);
+
+        this.activePronSession = {
+            cancel: cancelPron
+        };
     }
 };
 
