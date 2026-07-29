@@ -459,11 +459,11 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 }
 
 .btn-send {
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, #34d399, #10b981);
     color: #ffffff;
     padding: 0 12px !important;
     min-width: auto !important;
-    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
 }
 
 .btn-mic {
@@ -520,7 +520,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
 
 /* PRONUNCIATION PRACTICE MODE: FOOTER STATUS BANNER BAR */
 .pronounce-footer-status {
-    background: linear-gradient(135deg, #ea580c, #c2410c);
+    background: linear-gradient(135deg, #34d399, #10b981);
     color: #ffffff;
     font-weight: 800;
     font-size: 0.92rem;
@@ -532,7 +532,7 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     transition: background 0.3s ease;
 }
 
