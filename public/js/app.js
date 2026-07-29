@@ -1,5 +1,6 @@
-// Main Application Controller - LingoBot2 Ver6.8β Implementation
+// Main Application Controller - LingoBot2 Ver6.9β Implementation
 window.LingoApp = {
+    version: "Ver6.9β",
     apiKey: "",
     mode: "Giao tiếp",
     uiLang: "tiếng Việt",
@@ -427,7 +428,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.8β]. Groq Whisper STT + Gemini Fallback & Multi-card Rec Switch");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.9β]. Dynamic Log Diagnostics Version Fetching");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL

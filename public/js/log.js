@@ -1,4 +1,4 @@
-// System Logger Module - LingoBot2 Ver5.9β Implementation
+// System Logger Module - LingoBot2 Ver6.9β Implementation
 window.LingoLog = {
     logs: [],
     
@@ -14,6 +14,17 @@ window.LingoLog = {
         this.logs.push(logLine);
         console.log(`%c[LingoLog]`, "color: #ea580c; font-weight: bold;", logLine);
         this.render();
+    },
+
+    getAppVersion() {
+        const badge = document.querySelector(".version-badge");
+        if (badge && badge.textContent.trim()) {
+            return `LingoBot2 ${badge.textContent.trim()} (Render & EdgeTTS)`;
+        }
+        if (window.LingoApp?.version) {
+            return `LingoBot2 ${window.LingoApp.version} (Render & EdgeTTS)`;
+        }
+        return "LingoBot2 Ver6.9β (Render & EdgeTTS)";
     },
 
     getClientDiagnostics() {
@@ -39,7 +50,7 @@ window.LingoLog = {
 - Hardware: ${hardwareCores} Cores | Memory: ${memory}
 - Network Status: ${networkType}
 - Timezone: ${timeZone}
-- App Version: LingoBot2 Ver5.9β (Render & EdgeTTS)
+- App Version: ${this.getAppVersion()}
 ==================================================`;
     },
 
