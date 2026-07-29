@@ -1,16 +1,14 @@
-// STT Engine - LingoBot2 Ver6.5β
-// ARCHITECTURE: MediaRecorder (browser built-in recording) + /api/stt (Gemini transcription)
-//   Web Speech API is NOT used — it connects to Google STT servers which are
-//   unreachable from some networks (Vietnam etc.), causing consistent "network" errors.
+// STT Engine - LingoBot2 Ver6.6β
+// ARCHITECTURE: MediaRecorder (browser) + /api/stt backend
+//   PRIMARY:  Groq Whisper API (whisper-large-v3-turbo) — fast, free tier, no Gemini quota usage
+//   FALLBACK: Gemini multimodal STT — if Groq fails or GROQ_API_KEY not set
 //
-// KEY FIXES in Ver6.5β:
-//   1. Button state always matches actual state (button.classList = ground truth)
-//   2. toggleListening() checks button CSS class, NOT isListening flag
-//   3. 20-second forced stop if VU meter is active (MAX_RECORD_MS = 20000)
-//   4. Manual stop button ALWAYS works — pressing ⏹️ calls stop() unconditionally
-//   5. No auto-retry loops — errors fail clearly with helpful message
-//   6. Ambient VU (real audio level) when standby
-//   7. Recording VU (real audio level from same stream) while recording
+// KEY FEATURES in Ver6.6β:
+//   1. Backend selects Groq or Gemini automatically
+//   2. Frontend shows which engine was used in logs
+//   3. 20-second forced stop timer
+//   4. Stop button always works (CSS class as ground truth)
+//   5. Real VU meter during both standby and recording
 window.LingoSTT = {
     isListening:   false,
     mediaRecorder: null,
@@ -44,7 +42,7 @@ window.LingoSTT = {
             btn.addEventListener("click", () => this.toggleListening());
         }
         setTimeout(() => this.startAmbientVU(), 600);
-        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver6.5β - MediaRecorder + Gemini STT) thành công.");
+        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver6.6β - Groq Whisper + Gemini Fallback) thành công.");
     },
 
     getRecognitionLang() {
@@ -262,7 +260,7 @@ window.LingoSTT = {
         this.setUIRecording(lang);
         this.startRecordingVU(stream);
 
-        window.LingoLog?.add(`🎙️ 録音開始 [${lang}] [MediaRecorder — 最大${this.MAX_RECORD_MS/1000}秒]`);
+        window.LingoLog?.add(`🎤 録音開始 [${lang}] [MediaRecorder — Groq Whisper / Gemini フォールバック — 最大${this.MAX_RECORD_MS/1000}秒]`);
 
         // MediaRecorder 設定
         const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
@@ -280,7 +278,7 @@ window.LingoSTT = {
         };
 
         this.mediaRecorder.onstop = async () => {
-            window.LingoLog?.add("⏹️ MediaRecorder 停止 → WAV変換 → Gemini STT 送信");
+            window.LingoLog?.add("⏹️ MediaRecorder 停止 → WAV変換 → Groq/Gemini STT 送信");
             await this.transcribeAudio(lang);
         };
 
@@ -397,13 +395,13 @@ window.LingoSTT = {
         this.audioChunks = [];
 
         const chatInput = document.getElementById("chatInput");
-        if (chatInput) chatInput.placeholder = "🤔 音声解析中… (Gemini STT)";
-        this.setVUStatus("🤔 STT", "#6366f1", "Gemini解析中…", "#6366f1");
+        if (chatInput) chatInput.placeholder = "🤔 音声解析中… (Groq Whisper / Gemini)";
+        this.setVUStatus("🤔 STT", "#6366f1", "解析中…", "#6366f1");
 
         const wavBlob = await this.convertToWav(rawBlob);
         const apiKey  = this.getApiKey();
 
-        window.LingoLog?.add(`📤 Gemini STT 送信 [${Math.round(wavBlob.size/1024)}KB, ${lang}]`);
+        window.LingoLog?.add(`📤 STT 送信 [${Math.round(wavBlob.size/1024)}KB, ${lang}]`);
 
         try {
             const headers = { "Content-Type": "audio/wav" };
@@ -416,7 +414,11 @@ window.LingoSTT = {
 
             if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
-            const text = (data.text || "").trim();
+            const text   = (data.text || "").trim();
+            const engine = data.engine === "groq"
+                ? `🟢 Groq Whisper`
+                : `🔵 Gemini (${data.model || "?"})`;
+
             if (text) {
                 if (chatInput) {
                     chatInput.value = text;
@@ -424,19 +426,19 @@ window.LingoSTT = {
                     chatInput.placeholder = "メッセージを入力するか、マイクで話してください…";
                     setTimeout(() => { if (chatInput) chatInput.style.borderColor = ""; }, 900);
                 }
-                window.LingoLog?.add(`✅ Gemini STT 完了 [${data.model || "?"}]: "${text}"`);
-                this.setVUStatus("🎙️ MIC", "#22c55e", "認識完了！", "#22c55e");
-                setTimeout(() => this.setVUStatus("🎙️ MIC", "#22c55e", "スタンバイ中", "#94a3b8"), 2500);
+                window.LingoLog?.add(`✅ STT完了 [${engine}]: "${text}"`);
+                this.setVUStatus("🎤 MIC", "#22c55e", "認識完了！", "#22c55e");
+                setTimeout(() => this.setVUStatus("🎤 MIC", "#22c55e", "スタンバイ中", "#94a3b8"), 2500);
             } else {
-                window.LingoLog?.add("🔇 音声なし / 聞き取れませんでした。");
+                window.LingoLog?.add(`🔇 [${engine}] 音声なし / 聞き取れませんでした。`);
                 if (chatInput) chatInput.placeholder = "メッセージを入力するか、マイクで話してください…";
-                this.setVUStatus("🎙️ MIC", "#94a3b8", "スタンバイ中", "#cbd5e1");
+                this.setVUStatus("🎤 MIC", "#94a3b8", "スタンバイ中", "#cbd5e1");
             }
         } catch(e) {
-            window.LingoLog?.add(`❌ Gemini STT エラー: ${e.message}`);
+            window.LingoLog?.add(`❌ STT エラー: ${e.message}`);
             if (chatInput) chatInput.placeholder = "STTエラー。テキスト入力をご利用ください。";
-            this.setVUStatus("🎙️ MIC", "#ef4444", "STTエラー", "#ef4444");
-            setTimeout(() => this.setVUStatus("🎙️ MIC", "#94a3b8", "スタンバイ中", "#cbd5e1"), 3000);
+            this.setVUStatus("🎤 MIC", "#ef4444", "STTエラー", "#ef4444");
+            setTimeout(() => this.setVUStatus("🎤 MIC", "#94a3b8", "スタンバイ中", "#cbd5e1"), 3000);
         }
     },
 

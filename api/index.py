@@ -486,44 +486,84 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
 @app.route("/api/stt", methods=["POST"])
 def stt_transcribe():
     """
-    Backend STT using Gemini multimodal API.
+    Backend STT — Groq Whisper primary, Gemini multimodal fallback.
     Accepts raw audio bytes (audio/wav preferred) in POST body.
     Query params: lang (ja-JP / en-US / vi-VN)
     """
     try:
-        env_key = get_env_api_key()
-        client_key = sanitize_api_key(request.headers.get("X-Api-Key", ""))
-        api_key = env_key if env_key else client_key
-
-        if not api_key:
-            return jsonify({"error": "API key missing", "text": ""}), 400
-
         audio_bytes = request.data
         if not audio_bytes or len(audio_bytes) < 50:
             return jsonify({"error": "Audio data too short or empty", "text": ""}), 400
 
-        lang = request.args.get("lang", "ja-JP")
+        lang     = request.args.get("lang", "ja-JP")
+        lang_iso = {"ja-JP": "ja", "en-US": "en", "vi-VN": "vi"}.get(lang, "ja")
         lang_name = {"ja-JP": "Japanese", "en-US": "English", "vi-VN": "Vietnamese"}.get(lang, "Japanese")
 
-        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
-
-        # Determine MIME type
-        raw_ct = request.content_type or "audio/wav"
+        # MIME type
+        raw_ct    = request.content_type or "audio/wav"
         mime_type = raw_ct.split(";")[0].strip() if ";" in raw_ct else raw_ct.strip()
-        SUPPORTED_MIME = ["audio/wav", "audio/mp3", "audio/mpeg", "audio/ogg",
-                          "audio/flac", "audio/aac", "audio/webm"]
-        if mime_type not in SUPPORTED_MIME:
+        SUPPORTED = ["audio/wav", "audio/mp3", "audio/mpeg", "audio/ogg",
+                     "audio/flac", "audio/aac", "audio/webm"]
+        if mime_type not in SUPPORTED:
             mime_type = "audio/wav"
+        ext = {"audio/wav": ".wav", "audio/webm": ".webm",
+               "audio/mp3": ".mp3", "audio/mpeg": ".mp3", "audio/ogg": ".ogg"}.get(mime_type, ".wav")
 
+        # ──────────────────────────────────────────────────────────
+        # 1st ATTEMPT: Groq Whisper API (fast, accurate, free tier)
+        # ──────────────────────────────────────────────────────────
+        groq_key = os.environ.get("GROQ_API_KEY", "")
+        groq_error = None
+
+        if groq_key:
+            try:
+                groq_res = requests.post(
+                    "https://api.groq.com/openai/v1/audio/transcriptions",
+                    headers={"Authorization": f"Bearer {groq_key}"},
+                    files={"file": (f"audio{ext}", audio_bytes, mime_type)},
+                    data={
+                        "model": "whisper-large-v3-turbo",
+                        "language": lang_iso,
+                        "response_format": "text"
+                    },
+                    timeout=30
+                )
+                if groq_res.status_code == 200:
+                    text = groq_res.text.strip()
+                    return jsonify({
+                        "text":   text,
+                        "model":  "groq/whisper-large-v3-turbo",
+                        "engine": "groq",
+                        "lang":   lang
+                    }), 200
+                else:
+                    groq_error = f"HTTP {groq_res.status_code}: {groq_res.text[:200]}"
+            except Exception as e:
+                groq_error = str(e)[:150]
+        else:
+            groq_error = "GROQ_API_KEY not set"
+
+        # ──────────────────────────────────────────────────────────
+        # FALLBACK: Gemini multimodal STT
+        # ──────────────────────────────────────────────────────────
+        env_key    = get_env_api_key()
+        client_key = sanitize_api_key(request.headers.get("X-Api-Key", ""))
+        api_key    = env_key if env_key else client_key
+
+        if not api_key:
+            return jsonify({
+                "error": f"Groq failed ({groq_error}) and no Gemini API key set",
+                "text":  ""
+            }), 500
+
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
         prompt = (
             f"You are a speech-to-text transcriber. "
             f"The audio is spoken in {lang_name}. "
             f"Transcribe it accurately word-for-word. "
-            f"Output ONLY the transcribed text. "
-            f"No explanations, no translations, no extra punctuation. "
+            f"Output ONLY the transcribed text with no explanations or translations. "
             f"If the audio contains no speech, output nothing."
         )
-
         payload = {
             "contents": [{
                 "parts": [
@@ -534,18 +574,12 @@ def stt_transcribe():
             "generationConfig": {"temperature": 0.0, "maxOutputTokens": 1024}
         }
 
-        # Dynamic model discovery (same as /api/chat)
-        dynamic_models, _ = fetch_dynamic_gemini_models(api_key)
-        priority_models = ["gemini-2.5-flash", "gemini-2.0-flash",
-                           "gemini-1.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-pro"]
-        if dynamic_models:
-            ordered = [m for m in priority_models if m in dynamic_models]
-            ordered += [m for m in dynamic_models if m not in priority_models]
-        else:
-            ordered = priority_models
+        # Use dynamic model list (avoids extra API call by trying known models)
+        gemini_models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro",
+                         "gemini-2.0-flash-exp", "gemini-2.5-flash"]
+        model_errors = [f"groq: {groq_error}"]
 
-        model_errors = []
-        for model in ordered[:5]:  # 最大5モデルまで試す
+        for model in gemini_models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             try:
                 res = requests.post(
@@ -555,21 +589,27 @@ def stt_transcribe():
                     timeout=25
                 )
                 if res.status_code == 200:
-                    res_data = res.json()
+                    res_data   = res.json()
                     candidates = res_data.get("candidates", [])
                     if candidates and "content" in candidates[0]:
                         parts = candidates[0]["content"].get("parts", [])
-                        text = "".join([p.get("text", "") for p in parts]).strip()
-                        return jsonify({"text": text, "model": model, "lang": lang}), 200
-                    model_errors.append(f"{model}: no candidates in response")
+                        text  = "".join([p.get("text", "") for p in parts]).strip()
+                        return jsonify({
+                            "text":   text,
+                            "model":  model,
+                            "engine": "gemini",
+                            "lang":   lang
+                        }), 200
+                    model_errors.append(f"{model}: no candidates")
                 else:
-                    err_snippet = res.text[:150] if res.text else "no body"
-                    model_errors.append(f"{model}: HTTP {res.status_code} - {err_snippet}")
+                    model_errors.append(f"{model}: HTTP {res.status_code}")
             except Exception as e:
-                model_errors.append(f"{model}: {str(e)[:80]}")
+                model_errors.append(f"{model}: {str(e)[:60]}")
 
-        error_detail = " | ".join(model_errors)
-        return jsonify({"error": f"All models failed: {error_detail}", "text": ""}), 500
+        return jsonify({
+            "error": "All STT engines failed: " + " | ".join(model_errors),
+            "text":  ""
+        }), 500
 
     except Exception as ex:
         return jsonify({"error": str(ex), "text": ""}), 500
