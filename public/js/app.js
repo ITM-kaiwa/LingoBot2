@@ -687,6 +687,7 @@ window.LingoApp = {
     },
 
     switchMode(modeType) {
+        this.stopResponseTimer(true);
         const tabGiaoTiep = document.getElementById("tabGiaoTiep");
         const tabPhatAm = document.getElementById("tabPhatAm");
         const chatContainer = document.getElementById("chatContainer");
@@ -751,6 +752,7 @@ window.LingoApp = {
     },
 
     endSession() {
+        this.stopResponseTimer(true);
         if (window.LingoTTS) window.LingoTTS.stop();
         window.LingoLog.add("Nhấn [Kết thúc bài học] -> Mở Báo cáo tổng kết.");
         window.LingoSummary.generateReport(this.messages, this.uiLang, this.targetLang, this.level);
@@ -1238,6 +1240,7 @@ window.LingoApp = {
         const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
         
         const playBtn = aiBubbleEl.querySelector(".btn-play");
+        this.waitingForUserResponse = true;
         if (window.LingoTTS) {
             window.LingoTTS.playText(starterText, playBtn);
         }
@@ -1289,6 +1292,8 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
     async handleSendMessage() {
         if (this.isProcessing) return;
 
+        this.stopResponseTimer(false);
+
         const chatInput = document.getElementById("chatInput");
         const text = chatInput ? chatInput.value.trim() : "";
 
@@ -1330,6 +1335,7 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                     window.LingoLog.add(`Sử dụng câu trả lời Local dự phòng [Model: Local]`);
                     const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
                     const playBtn = aiBubbleEl.querySelector(".btn-play");
+                    this.waitingForUserResponse = true;
                     if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
                 } else {
                     if (retrySeconds > 0 && retrySeconds <= 20) {
@@ -1355,6 +1361,7 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                 }
 
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
+                this.waitingForUserResponse = true;
                 if (window.LingoTTS) {
                     window.LingoTTS.playText(reply, playBtn);
                 }

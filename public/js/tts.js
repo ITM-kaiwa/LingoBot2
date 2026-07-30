@@ -1,4 +1,4 @@
-// Text-to-Speech (TTS) Module - LingoBot2 Ver5.5β Implementation (Fixed JSON Audio URL Handling)
+// Text-to-Speech (TTS) Module - LingoBot2 Ver7.0β Implementation (Fixed JSON Audio URL Handling)
 window.LingoTTS = {
     audio: null,
     activePlayBtn: null,
@@ -24,6 +24,9 @@ window.LingoTTS = {
             btn.textContent = defaultText;
         });
         this.activePlayBtn = null;
+        if (window.LingoApp && window.LingoApp.onTtsPlaybackEnded) {
+            window.LingoApp.onTtsPlaybackEnded();
+        }
     },
 
     playText(text, playBtn = null) {
