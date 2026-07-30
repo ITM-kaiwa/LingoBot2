@@ -1,6 +1,6 @@
-// Main Application Controller - LingoBot2 Ver6.9β Implementation
+// Main Application Controller - LingoBot2 Ver7.1β Implementation
 window.LingoApp = {
-    version: "Ver6.9β",
+    version: "Ver7.1β",
     apiKey: "",
     mode: "Giao tiếp",
     uiLang: "tiếng Việt",
@@ -10,6 +10,9 @@ window.LingoApp = {
     filterLang: "jp 日本語", // Default Pronunciation Filter: Japanese (日本語)
     filterLevel: "Sơ cấp",    // Default Pronunciation Filter: Beginner (初級)
     activePronBtn: null,     // Currently recording sample card button
+    waitingForUserResponse: false, // Tracks if AI response ended and waiting for user input
+    responseTimeStart: null,       // Milliseconds when TTS finished speaking
+    responseTimeInterval: null,    // Interval timer ID for elapsed seconds display
     userSelectedTtsModel: null, // Tracks user explicit TTS choice
     useLocalFallback: false,    // Default Local Mode: OFF (Always labeled "Local", Blue=OFF, Lime Green=ON)
     customSystemPrompt: null,   // Stores dynamic user-edited System Prompt
@@ -428,7 +431,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver6.9β]. Dynamic Log Diagnostics Version Fetching");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver7.1β]. Fixed Timer Delay Start");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -1240,10 +1243,10 @@ window.LingoApp = {
         const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
         
         const playBtn = aiBubbleEl.querySelector(".btn-play");
-        this.waitingForUserResponse = true;
         if (window.LingoTTS) {
             window.LingoTTS.playText(starterText, playBtn);
         }
+        this.waitingForUserResponse = true;
     },
 
     resetConversation() {
@@ -1335,9 +1338,9 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                     window.LingoLog.add(`Sử dụng câu trả lời Local dự phòng [Model: Local]`);
                     const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
                     const playBtn = aiBubbleEl.querySelector(".btn-play");
+                    if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
                     this.waitingForUserResponse = true;
                     window.LingoLog?.add("🎯 AIのローカル返答を受信、自動読み上げを開始。waitingForUserResponse=true");
-                    if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
                 } else {
                     if (retrySeconds > 0 && retrySeconds <= 20) {
                         window.LingoLog.add(`Gemini Rate Limit (${retrySeconds}s) -> Thể hiện thông báo đếm ngược từng giây.`);
@@ -1362,11 +1365,11 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                 }
 
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
-                this.waitingForUserResponse = true;
-                window.LingoLog?.add("🎯 AI의 Gemini返答を受信、自動読み上げを開始。waitingForUserResponse=true");
                 if (window.LingoTTS) {
                     window.LingoTTS.playText(reply, playBtn);
                 }
+                this.waitingForUserResponse = true;
+                window.LingoLog?.add("🎯 AIのGemini返答を受信、自動読み上げを開始。waitingForUserResponse=true");
             } else {
                 if (data.api_key_required || data.api_key_invalid) {
                     this.showSetupPromptRow();

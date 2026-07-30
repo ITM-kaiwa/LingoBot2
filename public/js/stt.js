@@ -1,9 +1,9 @@
-// STT Engine - LingoBot2 Ver7.0β
+// STT Engine - LingoBot2 Ver7.1β
 // ARCHITECTURE: MediaRecorder (browser) + /api/stt backend
 //   PRIMARY:  Groq Whisper API (whisper-large-v3-turbo) — fast, free tier, no Gemini quota usage
 //   FALLBACK: Gemini multimodal STT — if Groq fails or GROQ_API_KEY not set
 //
-// KEY FEATURES in Ver7.0β:
+// KEY FEATURES in Ver7.1β:
 //   1. Backend selects Groq or Gemini automatically
 //   2. Frontend shows which engine was used in logs
 //   3. 20-second forced stop timer
@@ -44,7 +44,7 @@ window.LingoSTT = {
             btn.addEventListener("click", () => this.toggleListening());
         }
         setTimeout(() => this.startAmbientVU(), 600);
-        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver7.0β - Groq Whisper + Gemini Fallback) thành công.");
+        window.LingoLog?.add("Khởi tạo STT Engine (LingoBot2 Ver7.1β - Groq Whisper + Gemini Fallback) thành công.");
     },
 
     getRecognitionLang() {
