@@ -1336,6 +1336,7 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                     const aiBubbleEl = this.appendMessage("model", data.reply, modelUsed, retrySeconds);
                     const playBtn = aiBubbleEl.querySelector(".btn-play");
                     this.waitingForUserResponse = true;
+                    window.LingoLog?.add("🎯 AIのローカル返答を受信、自動読み上げを開始。waitingForUserResponse=true");
                     if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
                 } else {
                     if (retrySeconds > 0 && retrySeconds <= 20) {
@@ -1362,6 +1363,7 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
 
                 const playBtn = aiBubbleEl.querySelector(".btn-play");
                 this.waitingForUserResponse = true;
+                window.LingoLog?.add("🎯 AI의 Gemini返答を受信、自動読み上げを開始。waitingForUserResponse=true");
                 if (window.LingoTTS) {
                     window.LingoTTS.playText(reply, playBtn);
                 }
@@ -1553,6 +1555,52 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
     removeTypingIndicator(element) {
         if (element && element.parentNode) {
             element.parentNode.removeChild(element);
+        }
+    },
+
+    // =============================================
+    // CONVERSATION RESPONSE TIMER (Ver7.0β)
+    // =============================================
+    startResponseTimer() {
+        this.stopResponseTimer(false);
+        this.responseTimeStart = Date.now();
+        const displayEl = document.getElementById("responseTimeDisplay");
+        if (displayEl) {
+            displayEl.style.display = "inline-block";
+            displayEl.textContent = "⏱️ 0.0s";
+            window.LingoLog?.add("⏱️ 応答タイマーをスタートしました。");
+        } else {
+            window.LingoLog?.add("⚠️ タイマー表示要素（#responseTimeDisplay）が見つかりません。");
+        }
+        this.responseTimeInterval = setInterval(() => {
+            if (!this.responseTimeStart) return;
+            const diff = (Date.now() - this.responseTimeStart) / 1000;
+            if (displayEl) {
+                displayEl.textContent = `⏱️ ${diff.toFixed(1)}s`;
+            }
+        }, 100);
+    },
+
+    stopResponseTimer(clearDisplay = false) {
+        if (this.responseTimeInterval) {
+            clearInterval(this.responseTimeInterval);
+            this.responseTimeInterval = null;
+        }
+        this.responseTimeStart = null;
+        this.waitingForUserResponse = false;
+        if (clearDisplay) {
+            const displayEl = document.getElementById("responseTimeDisplay");
+            if (displayEl) {
+                displayEl.style.display = "none";
+                displayEl.textContent = "⏱️ 0.0s";
+            }
+        }
+    },
+
+    onTtsPlaybackEnded() {
+        window.LingoLog?.add(`🔊 TTS再生終了。waitingForUserResponse=${this.waitingForUserResponse}`);
+        if (this.waitingForUserResponse) {
+            this.startResponseTimer();
         }
     }
 };

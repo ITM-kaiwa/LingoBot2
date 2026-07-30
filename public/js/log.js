@@ -1,4 +1,4 @@
-// System Logger Module - LingoBot2 Ver6.9β Implementation
+// System Logger Module - LingoBot2 Ver7.0β Implementation
 window.LingoLog = {
     logs: [],
     
@@ -24,7 +24,7 @@ window.LingoLog = {
         if (window.LingoApp?.version) {
             return `LingoBot2 ${window.LingoApp.version} (Render & EdgeTTS)`;
         }
-        return "LingoBot2 Ver6.9β (Render & EdgeTTS)";
+        return "LingoBot2 Ver7.0β (Render & EdgeTTS)";
     },
 
     getClientDiagnostics() {
