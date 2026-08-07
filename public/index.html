@@ -435,7 +435,7 @@
             <div class="modal-footer">
                 <button type="button" id="copyLogBtn" class="modal-btn btn-pill-grey" onclick="window.LingoLog.copy()">📋 Sao chép</button>
                 <button type="button" id="downloadLogBtn" class="modal-btn btn-pill-orange" onclick="window.LingoLog.download()">📥 Tải xuống (.txt)</button>
-                <button type="button" id="closeLogModalBtn" class="modal-btn btn-pill-red" onclick="window.LingoLog.closeModal()">Đóng</button>
+                <button type="button" id="closeLogModalBtn" class="modal-btn btn-pill-black" onclick="window.LingoLog.closeModal()">Đóng</button>
             </div>
         </div>
     </div>
@@ -538,7 +538,7 @@
             </div>
             <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 10px;">
                 <button type="button" class="modal-btn btn-pill-orange" onclick="window.LingoAuth.openHistoryModal()">📚 Lịch sử học tập (History)</button>
-                <button type="button" class="modal-btn btn-pill-grey" onclick="window.LingoApp.openLogModal()">📜 Nhật ký hệ thống (System Logs)</button>
+                <button type="button" class="modal-btn btn-pill-grey" onclick="document.getElementById('adminMenuModal').classList.add('hidden'); window.LingoApp.openLogModal()">📜 Nhật ký hệ thống (System Logs)</button>
             </div>
         </div>
     </div>
