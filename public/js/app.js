@@ -1,6 +1,6 @@
-// Main Application Controller - LingoBot2 Ver7.1β Implementation
+// Main Application Controller - LingoBot2 Ver8.0α Implementation
 window.LingoApp = {
-    version: "Ver7.1β",
+    version: "Ver8.0α",
     apiKey: "",
     mode: "Giao tiếp",
     uiLang: "tiếng Việt",
@@ -431,7 +431,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver7.1β]. Fixed Timer Delay Start");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver8.0α]. Supabase Auth & History integrated.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -757,8 +757,37 @@ window.LingoApp = {
     endSession() {
         this.stopResponseTimer(true);
         if (window.LingoTTS) window.LingoTTS.stop();
-        window.LingoLog.add("Nhấn [Kết thúc bài học] -> Mở Báo cáo tổng kết.");
+        window.LingoLog.add("Nhấn [Kết thúc bài học] -> Mở Báo cáo tổng kết và lưu lịch sử.");
+        
+        // Save to Supabase History
+        this.saveHistoryToSupabase("Giao tiếp (Conversation)", this.scenario, this.messages);
+        
         window.LingoSummary.generateReport(this.messages, this.uiLang, this.targetLang, this.level);
+    },
+
+    async saveHistoryToSupabase(sessionType, theme, dialogueContent) {
+        if (!window.supabaseClient) return;
+        try {
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            if (!session || !session.user) return; // Only save if logged in
+
+            const { error } = await window.supabaseClient
+                .from('learning_history')
+                .insert([{
+                    user_id: session.user.id,
+                    session_type: sessionType,
+                    theme: theme,
+                    dialogue_content: dialogueContent
+                }]);
+            if (error) {
+                console.error("Save History Error:", error);
+                window.LingoLog?.add("❌ Lỗi lưu lịch sử: " + error.message);
+            } else {
+                window.LingoLog?.add(`✅ Đã lưu lịch sử học tập thành công [${sessionType}].`);
+            }
+        } catch (e) {
+            console.error("Save History Catch:", e);
+        }
     },
 
     setupTimestamp() {
@@ -1108,6 +1137,10 @@ window.LingoApp = {
                     `;
 
                     feedbackText.innerHTML = finalFeedbackHtml + actionButtonsHtml;
+                    
+                    // Save history
+                    const historyContent = `[Học viên (User)]:\n${actualSpeech}\n\n[Giáo viên (AI Feedback)]:\n` + (data.reply || "Phản hồi mẫu do lỗi mạng.");
+                    window.LingoApp.saveHistoryToSupabase("Phát âm (Pronunciation)", cleanTarget, historyContent);
                     
                     // ONLY SCROLL AFTER AI ANALYSIS RESULTS ARE READY!
                     if (feedbackBox) {

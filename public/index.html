@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver7.1β - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver7.1β - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Groq Whisper STT.">
+    <title>LingoBot2 Ver8.0α - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver8.0α - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Groq Whisper STT.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=7.1b">
-    <link rel="stylesheet" href="styles/components.css?v=7.1b">
+    <link rel="stylesheet" href="styles/main.css?v=8.0a">
+    <link rel="stylesheet" href="styles/components.css?v=8.0a">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body data-ui-lang="tiếng Việt">
     <div class="app-viewport">
@@ -20,9 +21,9 @@
                 <!-- 1st Row: All Main Controls in Single Line on PC / Sufficient Width -->
                 <div class="header-main-row">
                     <div class="brand-group">
-                        <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Nhấn để xem Nhật ký hệ thống (System Logs)" onclick="window.LingoApp.openLogModal()"><img src="images/logo-bird.jpg" alt="LingoBot mascot" class="logo-badge-img"></button>
+                        <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Admin / System Logs" onclick="window.LingoAuth.promptAdminPassword()"><img src="images/logo-bird.jpg" alt="LingoBot mascot" class="logo-badge-img"></button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver7.1β</span>
+                        <span class="version-badge">Ver8.0α</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -469,10 +470,123 @@
         </div>
     </div>
 
-    <script src="js/log.js?v=7.1b"></script>
-    <script src="js/tts.js?v=7.1b"></script>
-    <script src="js/stt.js?v=7.1b"></script>
-    <script src="js/summary.js?v=7.1b"></script>
-    <script src="js/app.js?v=7.1b"></script>
+    <!-- Auth / Login Modal (Mandatory on startup) -->
+    <div id="authModal" class="modal-backdrop" style="background: rgba(15, 23, 42, 0.95); z-index: 10000; display: flex;">
+        <div class="modal-card" style="max-width: 400px; width: 90%;">
+            <div class="modal-header" style="justify-content: center;">
+                <h2>LingoBot2 - Đăng nhập / Đăng ký</h2>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <!-- Tab Controls -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button type="button" id="tabLogin" class="modal-btn btn-pill-orange" style="flex:1;" onclick="window.LingoAuth.switchAuthTab('login')">Đăng nhập</button>
+                    <button type="button" id="tabRegister" class="modal-btn btn-pill-grey" style="flex:1;" onclick="window.LingoAuth.switchAuthTab('register')">Đăng ký mới</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="loginForm">
+                    <input type="email" id="loginEmail" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 10px;" placeholder="Email (メールアドレス)" />
+                    <input type="password" id="loginPassword" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 15px;" placeholder="Mật khẩu (パスワード)" />
+                    <button type="button" class="btn-start-chat" style="width: 100%;" onclick="window.LingoAuth.handleLogin()">🚀 Đăng nhập (Login)</button>
+                </div>
+
+                <!-- Register Form (Initially Hidden) -->
+                <div id="registerForm" style="display: none;">
+                    <input type="text" id="regName" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 10px;" placeholder="Họ và tên (氏名)" />
+                    
+                    <select id="regGender" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 10px;">
+                        <option value="" disabled selected>Giới tính (性別)</option>
+                        <option value="Male">Nam (男性)</option>
+                        <option value="Female">Nữ (女性)</option>
+                        <option value="Other">Khác (その他)</option>
+                    </select>
+                    
+                    <input type="text" id="regClass" list="classList" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 10px;" placeholder="Lớp (クラス名, e.g. 26M01)" />
+                    <datalist id="classList">
+                        <!-- Options generated by JS -->
+                    </datalist>
+
+                    <input type="email" id="regEmail" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 10px;" placeholder="Email (メールアドレス)" />
+                    <input type="password" id="regPassword" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 15px;" placeholder="Mật khẩu mong muốn (希望するパスワード)" />
+                    
+                    <button type="button" class="btn-start-chat" style="width: 100%;" onclick="window.LingoAuth.handleRegister()">📝 Đăng ký (Register)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Password Prompt Modal -->
+    <div id="adminPasswordModal" class="modal-backdrop hidden" style="z-index: 9999;">
+        <div class="modal-card" style="max-width: 350px;">
+            <div class="modal-header">
+                <h2>🔒 Admin Authentication</h2>
+                <button type="button" class="close-btn" onclick="document.getElementById('adminPasswordModal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <input type="password" id="adminPasswordInput" class="prompt-editor-textarea" style="height: 40px; margin-bottom: 15px;" placeholder="Nhập mật khẩu quản trị..." />
+                <button type="button" class="btn-start-chat" style="width: 100%;" onclick="window.LingoAuth.verifyAdminPassword()">Xác nhận (Confirm)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Menu Modal -->
+    <div id="adminMenuModal" class="modal-backdrop hidden" style="z-index: 9998;">
+        <div class="modal-card" style="max-width: 350px;">
+            <div class="modal-header">
+                <h2>⚙️ Admin Dashboard</h2>
+                <button type="button" class="close-btn" onclick="document.getElementById('adminMenuModal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" class="modal-btn btn-pill-orange" onclick="window.LingoAuth.openHistoryModal()">📚 Lịch sử học tập (History)</button>
+                <button type="button" class="modal-btn btn-pill-grey" onclick="window.LingoApp.openLogModal()">📜 Nhật ký hệ thống (System Logs)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal-backdrop hidden" style="z-index: 9998;">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h2>📚 Lịch sử học tập (Learning History)</h2>
+                <button type="button" class="close-btn" onclick="document.getElementById('historyModal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="historyTableContainer" style="overflow-y: auto; max-height: 50vh;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 8px;">Date</th>
+                                <th style="padding: 8px;">Student</th>
+                                <th style="padding: 8px;">Class</th>
+                                <th style="padding: 8px;">Mode</th>
+                                <th style="padding: 8px;">Theme</th>
+                                <th style="padding: 8px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="historyDetailContainer" class="hidden" style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                    <h3 id="historyDetailTitle">Chi tiết hội thoại (Dialogue Detail)</h3>
+                    <div id="historyDetailContent" style="background: #f8fafc; padding: 10px; border-radius: 6px; font-size: 0.85rem; max-height: 25vh; overflow-y: auto; white-space: pre-wrap;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="historyDownloadTxtBtn" class="modal-btn btn-pill-orange" onclick="window.LingoAuth.downloadHistoryTxt()">📥 Tải TXT</button>
+                <button type="button" id="historyPrintBtn" class="modal-btn btn-pill-grey" onclick="window.LingoAuth.printHistory()">🖨️ In (Print)</button>
+                <button type="button" class="modal-btn btn-pill-red" onclick="document.getElementById('historyModal').classList.add('hidden')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase_client.js?v=8.0a"></script>
+    <script src="js/auth.js?v=8.0a"></script>
+    <script src="js/log.js?v=8.0a"></script>
+    <script src="js/tts.js?v=8.0a"></script>
+    <script src="js/stt.js?v=8.0a"></script>
+    <script src="js/summary.js?v=8.0a"></script>
+    <script src="js/app.js?v=8.0a"></script>
 </body>
 </html>
