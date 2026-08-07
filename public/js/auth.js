@@ -164,7 +164,7 @@ window.LingoAuth = {
 
     verifyAdminPassword() {
         const input = document.getElementById("adminPasswordInput").value;
-        if (input === "Render645＠") {
+        if (input === "Render645@") {
             document.getElementById("adminPasswordModal").classList.add("hidden");
             const menuModal = document.getElementById("adminMenuModal");
             if (menuModal) menuModal.classList.remove("hidden");
