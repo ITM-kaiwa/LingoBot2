@@ -540,6 +540,7 @@ window.LingoApp = {
         const optLevel3 = document.getElementById("optLevel3");
         const chipLevel2 = document.getElementById("chipLevel2");
         const chipLevel3 = document.getElementById("chipLevel3");
+        const pronounceFilterBar = document.getElementById("pronounceFilterBar");
         
         if (!panel) return;
 
@@ -553,6 +554,7 @@ window.LingoApp = {
             if (optLevel3) optLevel3.classList.remove("hidden");
             if (chipLevel2) chipLevel2.classList.remove("hidden");
             if (chipLevel3) chipLevel3.classList.remove("hidden");
+            if (pronounceFilterBar) pronounceFilterBar.classList.remove("hidden");
             window.LingoLog.add("Hiển thị Bảng điều khiển nâng cao (Advanced Header Panel).");
         } else {
             panel.classList.add("hidden");
@@ -563,6 +565,7 @@ window.LingoApp = {
             if (optLevel3) optLevel3.classList.add("hidden");
             if (chipLevel2) chipLevel2.classList.add("hidden");
             if (chipLevel3) chipLevel3.classList.add("hidden");
+            if (pronounceFilterBar) pronounceFilterBar.classList.add("hidden");
             window.LingoLog.add("Ẩn Bảng điều khiển nâng cao (Advanced Header Panel).");
         }
     },
@@ -959,9 +962,15 @@ window.LingoApp = {
             return;
         }
 
-        filtered.forEach(item => {
+        filtered.forEach((item, index) => {
             const card = document.createElement("div");
             card.className = "sample-sentence-item";
+
+            // Hide cards beyond the first one
+            if (index >= 1) {
+                card.classList.add("hidden");
+                card.classList.add("extra-sample-card");
+            }
 
             const headerDiv = document.createElement("div");
             headerDiv.className = "sentence-header";
