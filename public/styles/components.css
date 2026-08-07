@@ -440,6 +440,12 @@
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35) !important;
 }
 
+.btn-pill-black {
+    background: linear-gradient(135deg, #333333, #111111) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
 .pronounce-report-actions {
     display: flex;
     gap: 10px;
