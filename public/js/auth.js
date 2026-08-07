@@ -110,7 +110,10 @@ window.LingoAuth = {
             // Sign up the user
             const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
                 email,
-                password
+                password,
+                options: {
+                    emailRedirectTo: window.location.origin
+                }
             });
 
             if (authError) throw authError;
