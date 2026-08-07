@@ -545,13 +545,16 @@
 
     <!-- History Modal -->
     <div id="historyModal" class="modal-backdrop hidden" style="z-index: 9998;">
-        <div class="modal-card modal-large">
+        <div class="modal-card modal-large" style="max-height: 95vh; height: 95vh;">
             <div class="modal-header">
                 <h2>📚 Lịch sử học tập (Learning History)</h2>
                 <button type="button" class="close-btn" onclick="document.getElementById('historyModal').classList.add('hidden')">&times;</button>
             </div>
-            <div class="modal-body">
-                <div id="historyTableContainer" style="overflow-y: auto; max-height: 50vh;">
+            <div class="modal-body" style="display: flex; flex-direction: column;">
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="historySearchInput" placeholder="Tìm kiếm / Search (Name, Class, Theme, Content...)" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" oninput="window.LingoAuth.filterHistory()">
+                </div>
+                <div id="historyTableContainer" style="overflow-y: auto; flex-grow: 1; max-height: 75vh;">
                     <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                         <thead>
                             <tr style="border-bottom: 2px solid #e2e8f0;">

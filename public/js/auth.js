@@ -177,6 +177,7 @@ window.LingoAuth = {
         document.getElementById("adminMenuModal").classList.add("hidden");
         const modal = document.getElementById("historyModal");
         if (modal) {
+            document.getElementById("historySearchInput").value = "";
             modal.classList.remove("hidden");
             document.getElementById("historyDetailContainer").classList.add("hidden");
             this.fetchLearningHistory();
@@ -212,25 +213,8 @@ window.LingoAuth = {
                 return;
             }
 
-            this.currentHistoryData = data; // store for download/print
-            let html = "";
-            data.forEach((row, index) => {
-                const date = new Date(row.created_at).toLocaleString('vi-VN');
-                const studentName = row.profiles?.name || "Unknown";
-                const className = row.profiles?.class_name || "N/A";
-                
-                html += `
-                    <tr style="border-bottom: 1px solid #f1f5f9; cursor: pointer;" onclick="window.LingoAuth.viewHistoryDetail(${index})" title="Nhấn để xem chi tiết">
-                        <td style="padding: 8px;">${date}</td>
-                        <td style="padding: 8px; font-weight: bold;">${studentName}</td>
-                        <td style="padding: 8px;">${className}</td>
-                        <td style="padding: 8px;"><span style="background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">${row.session_type}</span></td>
-                        <td style="padding: 8px;">${row.theme || "-"}</td>
-                        <td style="padding: 8px; color: #ea580c; text-decoration: underline; font-size: 0.8rem;">Xem</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
+            this.currentHistoryData = data; // store for filtering/download/print
+            this.renderHistoryTable(data);
 
         } catch (error) {
             console.error("Fetch History Error:", error);
@@ -238,9 +222,73 @@ window.LingoAuth = {
         }
     },
 
+    renderHistoryTable(dataToRender) {
+        const tbody = document.getElementById("historyTableBody");
+        if (!tbody) return;
+
+        this.displayedHistoryData = dataToRender; // store for viewHistoryDetail indexing
+        
+        if (!dataToRender || dataToRender.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 15px;'>Không có dữ liệu (No data matches).</td></tr>";
+            return;
+        }
+
+        let html = "";
+        dataToRender.forEach((row, index) => {
+            const date = new Date(row.created_at).toLocaleString('vi-VN');
+            const studentName = row.profiles?.name || "Unknown";
+            const className = row.profiles?.class_name || "N/A";
+            
+            html += `
+                <tr style="border-bottom: 1px solid #f1f5f9; cursor: pointer;" onclick="window.LingoAuth.viewHistoryDetail(${index})" title="Nhấn để xem chi tiết">
+                    <td style="padding: 8px;">${date}</td>
+                    <td style="padding: 8px; font-weight: bold;">${studentName}</td>
+                    <td style="padding: 8px;">${className}</td>
+                    <td style="padding: 8px;"><span style="background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">${row.session_type}</span></td>
+                    <td style="padding: 8px;">${row.theme || "-"}</td>
+                    <td style="padding: 8px; color: #ea580c; text-decoration: underline; font-size: 0.8rem;">Xem</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    },
+
+    filterHistory() {
+        const query = (document.getElementById("historySearchInput").value || "").toLowerCase();
+        if (!this.currentHistoryData) return;
+        
+        const filteredData = this.currentHistoryData.filter(row => {
+            const date = new Date(row.created_at).toLocaleString('vi-VN').toLowerCase();
+            const studentName = (row.profiles?.name || "").toLowerCase();
+            const className = (row.profiles?.class_name || "").toLowerCase();
+            const sessionType = (row.session_type || "").toLowerCase();
+            const theme = (row.theme || "").toLowerCase();
+            
+            let contentStr = "";
+            if (row.dialogue_content) {
+                if (typeof row.dialogue_content === 'string') {
+                    contentStr = row.dialogue_content.toLowerCase();
+                } else if (Array.isArray(row.dialogue_content)) {
+                    contentStr = row.dialogue_content.map(m => (m.content || m.text || "")).join(" ").toLowerCase();
+                } else {
+                    contentStr = JSON.stringify(row.dialogue_content).toLowerCase();
+                }
+            }
+            
+            return date.includes(query) || 
+                   studentName.includes(query) || 
+                   className.includes(query) || 
+                   sessionType.includes(query) || 
+                   theme.includes(query) || 
+                   contentStr.includes(query);
+        });
+        
+        this.renderHistoryTable(filteredData);
+    },
+
     viewHistoryDetail(index) {
-        if (!this.currentHistoryData || !this.currentHistoryData[index]) return;
-        const row = this.currentHistoryData[index];
+        if (!this.displayedHistoryData || !this.displayedHistoryData[index]) return;
+        const row = this.displayedHistoryData[index];
         
         document.getElementById("historyDetailContainer").classList.remove("hidden");
         const date = new Date(row.created_at).toLocaleString('vi-VN');
