@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver8.0α - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver8.0α - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Groq Whisper STT.">
+    <title>LingoBot2 Ver10.1α - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver10.1α - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Groq Whisper STT.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=8.0a">
+    <link rel="stylesheet" href="css/style.css?v=10.1">
     <link rel="stylesheet" href="styles/components.css?v=8.0a">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,7 +23,7 @@
                     <div class="brand-group">
                         <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Admin / System Logs" onclick="window.LingoAuth.promptAdminPassword()"><img src="images/logo-bird.jpg" alt="LingoBot mascot" class="logo-badge-img"></button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver8.0α</span>
+                        <span class="version-badge">Ver10.1α</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -39,7 +39,7 @@
                     <!-- Status Badges with Default UI: VN & Default Target: JP -->
                     <div class="badges-group">
                         <!-- UI Language Selectable Dropdown -->
-                        <div class="badge-pill badge-ui">
+                        <div class="badge-pill badge-ui hidden" id="uiLangWrapper">
                             <span class="badge-prefix" id="lblUiLang">Sử dụng:</span>
                             <select id="uiLangSelect" class="badge-select">
                                 <option value="tiếng Việt" selected>VN</option>
@@ -49,7 +49,7 @@
                         </div>
 
                         <!-- Target Language Dropdown -->
-                        <div class="badge-pill badge-target">
+                        <div class="badge-pill badge-target hidden" id="targetLangWrapper">
                             <span class="badge-prefix" id="lblTargetLang">Mục tiêu:</span>
                             <select id="targetLangSelect" class="badge-select">
                                 <option value="jp 日本語" selected>JP</option>
@@ -161,14 +161,14 @@
                                 <div class="selection-label" id="txtLevelLabel">Trình độ:</div>
                                 <div class="pill-options" id="levelOptions">
                                     <button type="button" id="optLevel1" class="pill-opt active" data-level="Sơ cấp (CEFR A1, A2)">Sơ cấp A1-A2</button>
-                                    <button type="button" id="optLevel2" class="pill-opt" data-level="Trung cấp (CEFR B1, B2)">Trung cấp B1-B2</button>
-                                    <button type="button" id="optLevel3" class="pill-opt" data-level="Cao cấp (CEFR C1, C2)">Cao cấp C1-C2</button>
+                                    <button type="button" id="optLevel2" class="pill-opt hidden" data-level="Trung cấp (CEFR B1, B2)">Trung cấp B1-B2</button>
+                                    <button type="button" id="optLevel3" class="pill-opt hidden" data-level="Cao cấp (CEFR C1, C2)">Cao cấp C1-C2</button>
                                 </div>
                             </div>
 
                             <!-- Categorized Scenarios with Show More Toggle (Daily Conversation Visible initially) -->
                             <div class="selection-group">
-                                <div class="selection-label" id="txtScenarioLabel">Tình huống:</div>
+                                <div class="version-badge" title="Phiên bản thử nghiệm (Beta Phase)">LingoBot2 Ver10.1α</div>
                                 <div class="scenario-categories-container" id="scenarioOptions">
                                     
                                     <!-- 1. Daily Conversation & Free Talk, Hobbies & Sports (Visible by Default) -->
@@ -274,8 +274,8 @@
                                     <span id="lblFilterLevel">Trình độ:</span>
                                     <button type="button" id="chipLevelAll" class="filter-chip" data-level="all">Tất cả</button>
                                     <button type="button" id="chipLevel1" class="filter-chip active" data-level="Sơ cấp">Sơ cấp (A1-A2)</button>
-                                    <button type="button" id="chipLevel2" class="filter-chip" data-level="Trung cấp">Trung cấp (B1-B2)</button>
-                                    <button type="button" id="chipLevel3" class="filter-chip" data-level="Cao cấp">Cao cấp (C1-C2)</button>
+                                    <button type="button" id="chipLevel2" class="filter-chip hidden" data-level="Trung cấp">Trung cấp (B1-B2)</button>
+                                    <button type="button" id="chipLevel3" class="filter-chip hidden" data-level="Cao cấp">Cao cấp (C1-C2)</button>
                                 </div>
                             </div>
                         </div>
@@ -531,7 +531,7 @@
 
     <!-- Admin Menu Modal -->
     <div id="adminMenuModal" class="modal-backdrop hidden" style="z-index: 9998;">
-        <div class="modal-card" style="max-width: 350px;">
+        <div class="modal-card" style="max-width: 420px;">
             <div class="modal-header">
                 <h2>⚙️ Admin Dashboard</h2>
                 <button type="button" class="close-btn" onclick="document.getElementById('adminMenuModal').classList.add('hidden')">&times;</button>

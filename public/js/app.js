@@ -1,6 +1,6 @@
-// Main Application Controller - LingoBot2 Ver8.0α Implementation
+// Main Application Controller - LingoBot2 Ver10.1α Implementation
 window.LingoApp = {
-    version: "Ver8.0α",
+    version: "Ver10.1α",
     apiKey: "",
     mode: "Giao tiếp",
     uiLang: "tiếng Việt",
@@ -431,7 +431,7 @@ window.LingoApp = {
             });
         }
 
-        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver8.0α]. Supabase Auth & History integrated.");
+        window.LingoLog.add("Khởi tạo LingoApp hoàn tất [LingoBot2 Ver10.1α]. Supabase Auth & History integrated.");
     },
 
     // SHOW MORE / SHOW LESS SCENARIOS TOGGLE CONTROL
@@ -534,16 +534,35 @@ window.LingoApp = {
     toggleAdvancedPanel() {
         const panel = document.getElementById("advancedPanel");
         const btn = document.getElementById("btnAdvanced");
+        const uiLangWrapper = document.getElementById("uiLangWrapper");
+        const targetLangWrapper = document.getElementById("targetLangWrapper");
+        const optLevel2 = document.getElementById("optLevel2");
+        const optLevel3 = document.getElementById("optLevel3");
+        const chipLevel2 = document.getElementById("chipLevel2");
+        const chipLevel3 = document.getElementById("chipLevel3");
+        
         if (!panel) return;
 
         const isHidden = panel.classList.contains("hidden");
         if (isHidden) {
             panel.classList.remove("hidden");
             if (btn) btn.classList.add("active");
+            if (uiLangWrapper) uiLangWrapper.classList.remove("hidden");
+            if (targetLangWrapper) targetLangWrapper.classList.remove("hidden");
+            if (optLevel2) optLevel2.classList.remove("hidden");
+            if (optLevel3) optLevel3.classList.remove("hidden");
+            if (chipLevel2) chipLevel2.classList.remove("hidden");
+            if (chipLevel3) chipLevel3.classList.remove("hidden");
             window.LingoLog.add("Hiển thị Bảng điều khiển nâng cao (Advanced Header Panel).");
         } else {
             panel.classList.add("hidden");
             if (btn) btn.classList.remove("active");
+            if (uiLangWrapper) uiLangWrapper.classList.add("hidden");
+            if (targetLangWrapper) targetLangWrapper.classList.add("hidden");
+            if (optLevel2) optLevel2.classList.add("hidden");
+            if (optLevel3) optLevel3.classList.add("hidden");
+            if (chipLevel2) chipLevel2.classList.add("hidden");
+            if (chipLevel3) chipLevel3.classList.add("hidden");
             window.LingoLog.add("Ẩn Bảng điều khiển nâng cao (Advanced Header Panel).");
         }
     },
