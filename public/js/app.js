@@ -73,8 +73,8 @@ window.LingoApp = {
             scenPolice: "👮 Cảnh sát & Thất lạc đồ",
             scenLost: "❓ Bị lạc đường",
 
-            btnShowMore: "👇 Xem thêm",
-            btnShowLess: "👆 Thu gọn",
+            btnShowMore: "Xem thêm",
+            btnShowLess: "Thu gọn",
 
             startBtn: "🚀 Bắt đầu hội thoại ngay",
             pronounceTitle: "🎯 Luyện Phát Âm & Ngữ Điệu (Pronunciation Practice)",
@@ -154,8 +154,8 @@ window.LingoApp = {
             scenPolice: "👮 警察・紛失物の届出会話",
             scenLost: "❓ 道に迷ったときの会話",
 
-            btnShowMore: "👇 もっと見る",
-            btnShowLess: "👆 閉じる",
+            btnShowMore: "もっと見る",
+            btnShowLess: "閉じる",
 
             startBtn: "🚀 会話を開始する",
             pronounceTitle: "🎯 発音・シャドーイング練習",
@@ -235,8 +235,8 @@ window.LingoApp = {
             scenPolice: "👮 Police & Lost Items",
             scenLost: "❓ Getting Lost",
 
-            btnShowMore: "👇 Show More",
-            btnShowLess: "👆 Show Less",
+            btnShowMore: "Show More",
+            btnShowLess: "Show Less",
 
             startBtn: "🚀 Start Conversation Now",
             pronounceTitle: "🎯 Pronunciation & Intonation Practice",
@@ -446,12 +446,12 @@ window.LingoApp = {
         if (this.areMoreScenariosExpanded) {
             container.style.setProperty("display", "block", "important");
             container.classList.remove("hidden");
-            if (btnTxt) btnTxt.textContent = dict.btnShowLess || "👆 Thu gọn";
+            if (btnTxt) btnTxt.textContent = dict.btnShowLess || "Thu gọn";
             window.LingoLog.add("Mở rộng danh sách tất cả tình huống giao tiếp (Hiển thị 23 chủ đề).");
         } else {
             container.style.setProperty("display", "none", "important");
             container.classList.add("hidden");
-            if (btnTxt) btnTxt.textContent = dict.btnShowMore || "👇 Xem thêm";
+            if (btnTxt) btnTxt.textContent = dict.btnShowMore || "Xem thêm";
             window.LingoLog.add("Thu gọn danh sách tình huống giao tiếp (Chỉ hiển thị 日常会話・自由会話).");
         }
     },
@@ -1024,8 +1024,8 @@ window.LingoApp = {
 
             const showMoreBtn = document.createElement("button");
             showMoreBtn.type = "button";
-            showMoreBtn.className = "btn-show-more";
-            showMoreBtn.innerHTML = "👇 " + (dict.btnShowMore || "Xem thêm");
+            showMoreBtn.className = "btn-show-more-scenarios";
+            showMoreBtn.innerHTML = dict.btnShowMore || "Xem thêm";
             showMoreBtn.onclick = () => {
                 const hiddenCards = listEl.querySelectorAll(".extra-sample-card.hidden");
                 hiddenCards.forEach(c => c.classList.remove("hidden"));
