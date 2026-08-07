@@ -570,3 +570,4 @@ button:active, .action-btn:active, .footer-btn:active, .pill-opt:active, .btn-sa
     border-color: #059669;
     background: #ffffff;
 }
+.hidden { display: none !important; }
