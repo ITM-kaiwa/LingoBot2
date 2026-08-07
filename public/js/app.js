@@ -1014,6 +1014,26 @@ window.LingoApp = {
 
             listEl.appendChild(card);
         });
+
+        // Add "Show more" button if there are more than 1 card
+        if (filtered.length > 1) {
+            const dict = this.i18n[this.uiLang] || this.i18n["tiếng Việt"];
+            const showMoreContainer = document.createElement("div");
+            showMoreContainer.style.textAlign = "center";
+            showMoreContainer.style.marginTop = "15px";
+
+            const showMoreBtn = document.createElement("button");
+            showMoreBtn.type = "button";
+            showMoreBtn.className = "btn-show-more";
+            showMoreBtn.innerHTML = "👇 " + (dict.btnShowMore || "Xem thêm");
+            showMoreBtn.onclick = () => {
+                const hiddenCards = listEl.querySelectorAll(".extra-sample-card.hidden");
+                hiddenCards.forEach(c => c.classList.remove("hidden"));
+                showMoreContainer.style.display = "none";
+            };
+            showMoreContainer.appendChild(showMoreBtn);
+            listEl.appendChild(showMoreContainer);
+        }
     },
 
     async assessPronunciation(targetText, recBtn = null) {
