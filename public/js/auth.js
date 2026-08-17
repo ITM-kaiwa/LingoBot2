@@ -146,7 +146,11 @@ window.LingoAuth = {
 
         } catch (error) {
             console.error("Register Error:", error);
-            alert("Đăng ký thất bại: " + error.message);
+            if (error.message && error.message.toLowerCase().includes("rate limit")) {
+                alert("Đăng ký thất bại: Hệ thống đang bị giới hạn số lượng đăng ký. Vui lòng thử lại sau vài phút hoặc báo cho giáo viên (Admin: Tắt Confirm Email hoặc tăng Rate Limit trên Supabase).");
+            } else {
+                alert("Đăng ký thất bại: " + error.message);
+            }
         }
     },
 
