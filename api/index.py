@@ -123,7 +123,7 @@ def execute_gemini_chat(api_key, formatted_contents, system_instruction, scenari
     if key_err:
         return None, key_err
 
-    fallback_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    fallback_models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
     target_models = dynamic_models if dynamic_models else fallback_models
 
     payload = {
@@ -456,7 +456,7 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
             return jsonify({"summary": fallback_summary, "used_model": "Local"}), 200
 
         dynamic_models, _ = fetch_dynamic_gemini_models(api_key)
-        models_to_try = dynamic_models if dynamic_models else ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models_to_try = dynamic_models if dynamic_models else ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
 
         payload = {
             "contents": [{"role": "user", "parts": [{"text": system_prompt}]}],
@@ -575,8 +575,7 @@ def stt_transcribe():
         }
 
         # Use dynamic model list (avoids extra API call by trying known models)
-        gemini_models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro",
-                         "gemini-2.0-flash-exp", "gemini-2.5-flash"]
+        gemini_models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
         model_errors = [f"groq: {groq_error}"]
 
         for model in gemini_models:

@@ -1321,7 +1321,7 @@ window.LingoApp = {
         const langStarters = this.instantStarters[this.targetLang] || this.instantStarters["jp 日本語"];
         const starterText = langStarters[this.scenario] || langStarters["自由会話"] || `こんにちは！${this.scenario}の 会話（かいわ）を 始（はじ）めましょう！ 何（なに）か 質問（しつもん）は ありますか？`;
 
-        const aiBubbleEl = this.appendMessage("model", starterText, "gemini-2.5-flash", 0);
+        const aiBubbleEl = this.appendMessage("model", starterText, "gemini-3.7-flash", 0);
         
         const playBtn = aiBubbleEl.querySelector(".btn-play");
         if (window.LingoTTS) {
