@@ -1,4 +1,4 @@
-import os
+﻿import os
 import json
 import re
 import time
@@ -68,9 +68,6 @@ def sanitize_api_key(key):
 def get_env_api_key():
     return sanitize_api_key(os.environ.get("GOOGLE_API_KEY", ""))
 
-def get_anthropic_api_key():
-    return sanitize_api_key(os.environ.get("ANTHROPIC_API_KEY", ""))
-
 def get_smart_fallback_reply(scenario_name):
     for key, replies in SCENARIO_FALLBACK_REPLIES.items():
         if key in scenario_name or scenario_name in key:
@@ -126,7 +123,7 @@ def execute_gemini_chat(api_key, formatted_contents, system_instruction, scenari
     if key_err:
         return None, key_err
 
-    fallback_models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    fallback_models = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
     target_models = dynamic_models if dynamic_models else fallback_models
 
     payload = {
@@ -169,46 +166,6 @@ def execute_gemini_chat(api_key, formatted_contents, system_instruction, scenari
 
 
 
-def execute_anthropic_chat(api_key, formatted_contents, system_instruction):
-    url = "https://api.anthropic.com/v1/messages"
-    headers = {
-        "x-api-key": api_key,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
-    }
-    
-    anthropic_messages = []
-    for msg in formatted_contents:
-        role = msg["role"]
-        # Anthropic uses "assistant" instead of "model"
-        if role == "model":
-            role = "assistant"
-        text = msg["parts"][0]["text"]
-        anthropic_messages.append({"role": role, "content": text})
-
-    payload = {
-        "model": "claude-3-5-sonnet-20241022",
-        "max_tokens": 2048,
-        "messages": anthropic_messages
-    }
-    if system_instruction:
-        payload["system"] = system_instruction
-        
-    try:
-        res = requests.post(url, headers=headers, json=payload, timeout=15)
-        if res.status_code == 200:
-            res_data = res.json()
-            reply_text = res_data["content"][0]["text"]
-            return {
-                "reply": reply_text,
-                "used_model": payload["model"],
-                "display_model": "Claude 3.5 Sonnet",
-                "logs": ["Đã dùng Anthropic Claude làm fallback."]
-            }, None
-        else:
-            return None, f"Anthropic HTTP {res.status_code}: {res.text}"
-    except Exception as e:
-        return None, str(e)
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
@@ -254,12 +211,6 @@ def chat():
                 res_data["key_source"] = "client"
                 return jsonify(res_data), 200
             elif client_err and "無効" in client_err:
-                anthropic_key = get_anthropic_api_key()
-                if anthropic_key:
-                    anthropic_res, anthropic_err = execute_anthropic_chat(anthropic_key, formatted_contents, system_instruction)
-                    if anthropic_res:
-                        anthropic_res["key_source"] = "env_anthropic"
-                        return jsonify(anthropic_res), 200
 
                 smart_reply = get_smart_fallback_reply(scenario_hint)
                 return jsonify({
@@ -272,12 +223,6 @@ def chat():
                 }), 200
 
         # Step 3: Neither key is valid/configured -> Return Local Fallback & Prompt for UI Key Input
-        anthropic_key = get_anthropic_api_key()
-        if anthropic_key:
-            anthropic_res, anthropic_err = execute_anthropic_chat(anthropic_key, formatted_contents, system_instruction)
-            if anthropic_res:
-                anthropic_res["key_source"] = "env_anthropic"
-                return jsonify(anthropic_res), 200
 
         smart_reply = get_smart_fallback_reply(scenario_hint)
         return jsonify({
@@ -388,9 +333,12 @@ def tensaku():
         text = data.get("text", "")
         ui_lang = data.get("ui_lang", "tiếng Việt")
         
-        anthropic_key = get_anthropic_api_key()
-        if not anthropic_key:
-            return jsonify({"error": "Anthropic API Key is not configured on the server."}), 500
+        raw_client_key = sanitize_api_key(data.get("api_key") or request.headers.get("Authorization", "").replace("Bearer ", ""))
+        env_key = get_env_api_key()
+        api_key = env_key if env_key else raw_client_key
+        
+        if not api_key:
+            return jsonify({"error": "Google API Key is not configured."}), 500
             
         sys_prompt = f"""
 あなたは優秀な語学教師です。ユーザーが書いた日記や作文を添削してください。
@@ -408,28 +356,33 @@ def tensaku():
   "overall_comment": "学習者を励ます一言({ui_lang}で記述)"
 }}
 """
-        
-        url = "https://api.anthropic.com/v1/messages"
-        headers = {
-            "x-api-key": anthropic_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json"
-        }
         payload = {
-            "model": "claude-3-5-sonnet-20241022",
-            "max_tokens": 2048,
-            "system": sys_prompt,
-            "messages": [{"role": "user", "content": text}]
+            "contents": [{"role": "user", "parts": [{"text": text}]}],
+            "systemInstruction": {"parts": [{"text": sys_prompt}]},
+            "generationConfig": {
+                "temperature": 0.3,
+                "responseMimeType": "application/json"
+            }
         }
         
-        res = requests.post(url, headers=headers, json=payload, timeout=20)
-        if res.status_code == 200:
-            content_text = res.json()["content"][0]["text"]
-            content_text = re.sub(r'^```json\s*', '', content_text)
-            content_text = re.sub(r'\s*```$', '', content_text)
-            return jsonify(json.loads(content_text)), 200
-        else:
-            return jsonify({"error": f"Anthropic API Error: {res.text}"}), 500
+        fallback_models = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+        
+        for model in fallback_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            try:
+                res = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=20)
+                if res.status_code == 200:
+                    res_data = res.json()
+                    candidates = res_data.get("candidates", [])
+                    if candidates and "content" in candidates[0]:
+                        parts = candidates[0]["content"].get("parts", [])
+                        content_text = "".join([p.get("text", "") for p in parts])
+                        import json
+                        return jsonify(json.loads(content_text)), 200
+            except Exception as e:
+                continue
+                
+        return jsonify({"error": "All Gemini models failed for tensaku."}), 500
             
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -688,7 +641,7 @@ def stt_transcribe():
         }
 
         # Use dynamic model list (avoids extra API call by trying known models)
-        gemini_models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+        gemini_models = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
         model_errors = [f"groq: {groq_error}"]
 
         for model in gemini_models:
