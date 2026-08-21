@@ -25,6 +25,7 @@ window.LingoApp = {
         "tiếng Việt": {
             tabGiaoTiep: "Giao tiếp",
             tabPhatAm: "Phát âm",
+            tabSakubun: "Viết văn",
             lblUiLang: "Sử dụng:",
             lblTargetLang: "Mục tiêu:",
             btnAdvanced: "Advanced",
@@ -187,6 +188,7 @@ window.LingoApp = {
         "tiếng Anh": {
             tabGiaoTiep: "Conversation",
             tabPhatAm: "Pronunciation",
+            tabSakubun: "Writing",
             lblUiLang: "UI Lang:",
             lblTargetLang: "Target Lang:",
             btnAdvanced: "Advanced",
@@ -448,6 +450,22 @@ window.LingoApp = {
             container.classList.remove("hidden");
             if (btnTxt) btnTxt.textContent = dict.btnShowLess || "Thu gọn";
             window.LingoLog.add("Mở rộng danh sách tất cả tình huống giao tiếp (Hiển thị 23 chủ đề).");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             container.style.setProperty("display", "none", "important");
             container.classList.add("hidden");
@@ -484,6 +502,22 @@ window.LingoApp = {
             this.closePromptEditorModal();
             alert("Đã lưu câu lệnh chỉ định System Prompt mới cho AI thành công!\n(AIに与える指示プロンプトを正常に保存しました)");
             window.LingoLog.add("Đã lưu System Prompt động tùy chỉnh do người dùng thiết lập.");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             alert("Vui lòng nhập câu lệnh Prompt / プロンプト文を入力してください。");
         }
@@ -520,6 +554,22 @@ window.LingoApp = {
                 btn.style.color = "#ffffff";
             }
             window.LingoLog.add("Bật chế độ dự phòng Local Mode (Nút chuyển thành màu vàng xanh Lime Green).");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             if (btn) {
                 btn.className = "action-btn btn-local-blue";
@@ -556,6 +606,22 @@ window.LingoApp = {
             if (chipLevel3) chipLevel3.classList.remove("hidden");
             if (pronounceFilterBar) pronounceFilterBar.classList.remove("hidden");
             window.LingoLog.add("Hiển thị Bảng điều khiển nâng cao (Advanced Header Panel).");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             panel.classList.add("hidden");
             if (btn) btn.classList.remove("active");
@@ -667,7 +733,23 @@ window.LingoApp = {
         document.querySelectorAll(".btn-play").forEach(btn => {
             if (btn.classList.contains("playing")) {
                 btn.textContent = dict.btnPlaying || "▶ 再生中";
-            } else {
+    
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                 btn.textContent = dict.btnPlay || "▶ 再生";
             }
         });
@@ -682,6 +764,22 @@ window.LingoApp = {
     openLogModal() {
         if (window.LingoLog) {
             window.LingoLog.openModal();
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             const modal = document.getElementById("logModal");
             if (modal) modal.classList.remove("hidden");
@@ -715,15 +813,19 @@ window.LingoApp = {
         this.stopResponseTimer(true);
         const tabGiaoTiep = document.getElementById("tabGiaoTiep");
         const tabPhatAm = document.getElementById("tabPhatAm");
+        const tabSakubun = document.getElementById("tabSakubun");
         const chatContainer = document.getElementById("chatContainer");
         const pronounceContainer = document.getElementById("pronounceContainer");
+        const sakubunContainer = document.getElementById("sakubunContainer");
         const chatFooterControls = document.getElementById("chatFooterControls");
         const pronounceFooterStatus = document.getElementById("pronounceFooterStatus");
 
         if (modeType === "PhatAm") {
             if (tabPhatAm) tabPhatAm.classList.add("active");
             if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabSakubun) tabSakubun.classList.remove("active");
             
+            if (sakubunContainer) { sakubunContainer.style.setProperty("display", "none", "important"); }
             if (chatContainer) {
                 chatContainer.style.setProperty("display", "none", "important");
                 chatContainer.classList.add("hidden");
@@ -750,14 +852,32 @@ window.LingoApp = {
             if (statusTxt) statusTxt.textContent = dict.pronounceIdleMsg || "🎙️ マイクで話してください (上の例文から文を選択してください)";
 
             window.LingoLog.add("Màn hình: 🎯 Phát âm (Pronunciation Mode) -> Chuyển thanh Footer thành Status Banner hiển thị trạng thái Mic.");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             if (tabGiaoTiep) tabGiaoTiep.classList.add("active");
             if (tabPhatAm) tabPhatAm.classList.remove("active");
+            if (tabSakubun) tabSakubun.classList.remove("active");
 
             if (pronounceContainer) {
                 pronounceContainer.style.setProperty("display", "none", "important");
                 pronounceContainer.classList.add("hidden");
             }
+            if (sakubunContainer) { sakubunContainer.style.setProperty("display", "none", "important"); }
             if (chatContainer) {
                 chatContainer.style.setProperty("display", "flex", "important");
                 chatContainer.classList.remove("hidden");
@@ -804,7 +924,23 @@ window.LingoApp = {
             if (error) {
                 console.error("Save History Error:", error);
                 window.LingoLog?.add("❌ Lỗi lưu lịch sử: " + error.message);
-            } else {
+    
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                 window.LingoLog?.add(`✅ Đã lưu lịch sử học tập thành công [${sessionType}].`);
             }
         } catch (e) {
@@ -1160,7 +1296,23 @@ window.LingoApp = {
                     let finalFeedbackHtml = "";
                     if (data.reply) {
                         finalFeedbackHtml = window.LingoSummary.markdownToHtml(data.reply);
-                    } else {
+            
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                         finalFeedbackHtml = `<div style="padding:14px; background:#fff7ed; border-radius:14px; border:1px solid #fed7aa;">
                             <h2>【Tiếng Việt (Tiếng Việt)】</h2>
                             <p><strong>Từ nhận diện:</strong> "${actualSpeech}" (Mẫu: "${cleanTarget}")</p>
@@ -1256,6 +1408,22 @@ window.LingoApp = {
             };
             html2pdf().set(opt).from(clone).save();
             window.LingoLog.add("Tải xuống PDF Báo cáo phân tích phát âm.");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
         }
     },
@@ -1422,11 +1590,43 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                     if (window.LingoTTS) window.LingoTTS.playText(data.reply, playBtn);
                     this.waitingForUserResponse = true;
                     window.LingoLog?.add("🎯 AIのローカル返答を受信、自動読み上げを開始。waitingForUserResponse=true");
-                } else {
+        
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                     if (retrySeconds > 0 && retrySeconds <= 20) {
                         window.LingoLog.add(`Gemini Rate Limit (${retrySeconds}s) -> Thể hiện thông báo đếm ngược từng giây.`);
                         this.appendCountdownPromptBubble(retrySeconds);
-                    } else {
+            
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                         window.LingoLog.add(`AI 🤖 quá tải -> Thể hiện thông báo 'ただいまAIが混雑中です'.`);
                         this.appendMessage("model", "ただいまAIが混雑中です");
                     }
@@ -1451,7 +1651,23 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                 }
                 this.waitingForUserResponse = true;
                 window.LingoLog?.add("🎯 AIのGemini返答を受信、自動読み上げを開始。waitingForUserResponse=true");
-            } else {
+    
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                 if (data.api_key_required || data.api_key_invalid) {
                     this.showSetupPromptRow();
                     const errMsg = data.api_key_invalid 
@@ -1461,7 +1677,23 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                     window.LingoLog.add("API Key 要入力/無効: " + errMsg);
                 } else if (retrySeconds > 0 && retrySeconds <= 20) {
                     this.appendCountdownPromptBubble(retrySeconds);
-                } else {
+        
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                     this.appendMessage("model", "ただいまAIが混雑中です");
                 }
             }
@@ -1507,7 +1739,23 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             currentSec -= 1;
             if (currentSec > 0) {
                 textDiv.textContent = `お待たせしてすみません、${currentSec}秒後にもう一度入力をお願いします。`;
-            } else {
+    
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                 clearInterval(timer);
                 textDiv.textContent = `準備ができました。もう一度メッセージを入力してください。`;
                 textDiv.style.color = "#047857";
@@ -1559,11 +1807,43 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
                 currentSec -= 1;
                 if (currentSec > 0) {
                     retryBadge.textContent = `(要リトライ ${currentSec}s)`;
-                } else {
+        
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
+        } else {
                     clearInterval(timer);
                     retryBadge.remove();
                 }
             }, 1000);
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             timeSpan.textContent = `${timeStr} ${formattedModelTag ? '• ' + formattedModelTag : ''}`;
         }
@@ -1653,6 +1933,22 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
             displayEl.style.display = "inline-block";
             displayEl.textContent = "⏱️ 0.0s";
             window.LingoLog?.add("⏱️ 応答タイマーをスタートしました。");
+
+        } else if (modeType === "Sakubun") {
+            if (tabSakubun) tabSakubun.classList.add("active");
+            if (tabGiaoTiep) tabGiaoTiep.classList.remove("active");
+            if (tabPhatAm) tabPhatAm.classList.remove("active");
+            
+            if (chatContainer) chatContainer.style.setProperty("display", "none", "important");
+            if (pronounceContainer) pronounceContainer.style.setProperty("display", "none", "important");
+            if (sakubunContainer) sakubunContainer.style.setProperty("display", "block", "important");
+
+            if (chatFooterControls) chatFooterControls.style.setProperty("display", "none", "important");
+            if (pronounceFooterStatus) pronounceFooterStatus.style.setProperty("display", "none", "important");
+
+            this.mode = "Sakubun";
+            window.LingoLog.add("Màn hình: 📝 Viết văn (Sakubun).");
+
         } else {
             window.LingoLog?.add("⚠️ タイマー表示要素（#responseTimeDisplay）が見つかりません。");
         }
@@ -1691,4 +1987,129 @@ Quy tắc xuất bản tin nhắn (RẤT QUAN TRỌNG):
 
 document.addEventListener("DOMContentLoaded", () => {
     window.LingoApp.init();
+});
+
+
+// ---- SAKUBUN (Viết văn) LOGIC ----
+document.addEventListener("DOMContentLoaded", () => {
+  const textarea = document.getElementById("nt-textarea");
+  const charCount = document.getElementById("nt-char-count");
+  const checkBtn = document.getElementById("nt-check-btn");
+  const resultsEl = document.getElementById("nt-results");
+  const annotatedEl = document.getElementById("nt-annotated");
+  const notesEl = document.getElementById("nt-notes");
+  const stampEl = document.getElementById("nt-stamp");
+  const stampTextEl = document.getElementById("nt-stamp-text");
+
+  if(!textarea || !checkBtn) return;
+
+  textarea.addEventListener("input", function () {
+    charCount.textContent = textarea.value.length;
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderAnnotated(text, notes) {
+    let escaped = escapeHtml(text);
+    let seen = {};
+    notes.forEach(note => {
+      if (seen[note.match]) return;
+      seen[note.match] = true;
+      const escapedMatch = escapeHtml(note.match);
+      if (!escapedMatch) return;
+      const idx = escaped.indexOf(escapedMatch);
+      if (idx === -1) return;
+      escaped = escaped.slice(0, idx) + "<mark>" + escapedMatch + "</mark>" + escaped.slice(idx + escapedMatch.length);
+    });
+    annotatedEl.innerHTML = escaped;
+  }
+
+  function renderNotes(notes) {
+    notesEl.innerHTML = "";
+    if (notes.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "nt-empty-notes";
+      empty.textContent = "特に気になる点は見つかりませんでした。とても自然な文章です!";
+      notesEl.appendChild(empty);
+      return;
+    }
+    notes.forEach(note => {
+      const row = document.createElement("div");
+      row.className = "nt-note";
+
+      const mark = document.createElement("div");
+      mark.className = "nt-note-mark";
+      mark.textContent = "✓";
+
+      const body = document.createElement("div");
+      body.className = "nt-note-body";
+
+      const quote = document.createElement("div");
+      quote.className = "nt-note-quote";
+      quote.textContent = "「" + note.match + "」 -> " + note.correction;
+
+      const comment = document.createElement("div");
+      comment.className = "nt-note-comment";
+      comment.textContent = note.comment;
+
+      body.appendChild(quote);
+      body.appendChild(comment);
+      row.appendChild(mark);
+      row.appendChild(body);
+      notesEl.appendChild(row);
+    });
+  }
+
+  function renderStamp(notes, overallComment) {
+    if (notes.length === 0) {
+      stampEl.innerHTML = "よく<br>書けた";
+    } else {
+      stampEl.innerHTML = "がん<br>ばった";
+    }
+    stampTextEl.textContent = overallComment || "";
+  }
+
+  async function runCheck() {
+    const text = textarea.value.trim();
+    if (!text) return;
+    
+    checkBtn.disabled = true;
+    checkBtn.textContent = "Đang kiểm tra... (Checking...)";
+
+    try {
+      const res = await fetch("/api/tensaku", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text,
+          ui_lang: window.LingoApp.uiLang
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Lỗi kết nối / Server Error: " + res.status);
+      }
+
+      const data = await res.json();
+      
+      const notes = data.issues || [];
+      renderAnnotated(data.corrected_text || text, notes);
+      renderNotes(notes);
+      renderStamp(notes, data.overall_comment);
+      
+      resultsEl.classList.add("nt-visible");
+      
+    } catch (error) {
+      alert("Đã xảy ra lỗi khi chấm bài: " + error.message);
+    } finally {
+      checkBtn.disabled = false;
+      checkBtn.textContent = "添削する";
+    }
+  }
+
+  checkBtn.addEventListener("click", runCheck);
 });

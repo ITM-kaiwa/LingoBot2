@@ -454,3 +454,249 @@
     border-top: 1px dashed #cbd5e1;
     justify-content: flex-end;
 }
+
+
+/* NIKKI TENSAKU STYLES */
+
+  /* ==========================================================
+     nikki-tensaku: scoped styles — every rule is prefixed with
+     .nikki-tensaku / nt- so this can be dropped into an existing
+     app (just the #nikki-tensaku-root div + <style>/<script>)
+     without colliding with other classes.
+     ========================================================== */
+  .nikki-tensaku {
+    --paper: #fdfbf6;
+    --rule: #c7d9e6;
+    --ink: #232b33;
+    --ink-soft: #737b82;
+    --pen: #b33a3a;
+    --pen-soft: #b33a3a14;
+    --hi: #fff1a8;
+    --stamp: #3f7d5c;
+    --stamp-soft: #3f7d5c14;
+
+    font-family: "Zen Maru Gothic", sans-serif;
+    color: var(--ink);
+    background: #eef1ee;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 32px 16px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .nikki-tensaku *, .nikki-tensaku *::before, .nikki-tensaku *::after {
+    box-sizing: border-box;
+  }
+
+  .nt-header { text-align: center; margin-bottom: 20px; }
+  .nt-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .nt-title {
+    font-family: "Shippori Mincho", serif;
+    font-weight: 700;
+    font-size: 28px;
+    margin: 0 0 6px;
+  }
+  .nt-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .nt-card {
+    background: var(--paper);
+    border: 1px solid #dfe2dc;
+    border-radius: 6px;
+    box-shadow: 0 14px 30px -20px rgba(35,43,51,0.4);
+    width: 100%;
+    max-width: 620px;
+    padding: 26px 24px 24px;
+    margin-top: 24px;
+  }
+
+  .nt-label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  /* ruled-notebook textarea */
+  .nt-textarea-wrap {
+    position: relative;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 34px,
+        var(--rule) 34px,
+        var(--rule) 35px
+      );
+  }
+  .nt-textarea {
+    width: 100%;
+    display: block;
+    resize: vertical;
+    min-height: 210px;
+    padding: 10px 14px;
+    line-height: 35px;
+    font-size: 17px;
+    font-family: "Zen Maru Gothic", sans-serif;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+  .nt-textarea::placeholder { color: #b9beb8; }
+
+  .nt-char-count {
+    text-align: right;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  .nt-check-btn {
+    display: block;
+    margin: 18px auto 4px;
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    color: #fdfbf6;
+    background: var(--ink);
+    border: none;
+    border-radius: 3px;
+    padding: 12px 32px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .nt-check-btn:hover { background: var(--pen); }
+  .nt-check-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ---- results ---- */
+  .nt-results { margin-top: 30px; display: none; }
+  .nt-results.nt-visible { display: block; }
+
+  .nt-result-heading {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nt-result-heading::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #dfe2dc;
+  }
+
+  /* the annotated version of the user's own text, marks highlighted */
+  .nt-annotated {
+    font-size: 17px;
+    line-height: 2.3;
+    padding: 4px 2px 18px;
+    white-space: pre-wrap;
+  }
+  .nt-annotated mark {
+    background: var(--hi);
+    border-bottom: 2px solid var(--pen);
+    padding: 0 1px;
+    border-radius: 2px;
+  }
+
+  .nt-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-top: 1px dashed #dfe2dc;
+  }
+  .nt-note:first-of-type { border-top: none; }
+  .nt-note-mark {
+    font-family: "Yomogi", cursive;
+    color: var(--pen);
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .nt-note-body { flex: 1; }
+  .nt-note-quote {
+    font-size: 13px;
+    color: var(--pen);
+    background: var(--pen-soft);
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+  }
+  .nt-note-comment {
+    font-family: "Yomogi", cursive;
+    font-size: 16px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  .nt-empty-notes {
+    text-align: center;
+    padding: 20px 0;
+    color: var(--stamp);
+    font-family: "Yomogi", cursive;
+    font-size: 17px;
+  }
+
+  /* teacher's stamp */
+  .nt-stamp-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #dfe2dc;
+  }
+  .nt-stamp {
+    width: 62px; height: 62px;
+    border: 2.5px solid var(--stamp);
+    border-radius: 50%;
+    color: var(--stamp);
+    font-family: "Shippori Mincho", serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.3;
+    transform: rotate(-8deg);
+    flex-shrink: 0;
+  }
+  .nt-stamp-text {
+    font-size: 13px;
+    color: var(--ink-soft);
+    max-width: 320px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 480px) {
+    .nt-card { padding: 20px 16px 18px; }
+    .nt-textarea { font-size: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nikki-tensaku * { transition: none !important; }
+  }

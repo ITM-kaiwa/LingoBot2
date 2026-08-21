@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoBot2 Ver10.4β - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
-    <meta name="description" content="LingoBot2 Ver10.4β - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Groq Whisper STT.">
+    <title>LingoBot2 Ver11.0α - Đối thoại AI & Luyện phát âm (Render & EdgeTTS)</title>
+    <meta name="description" content="LingoBot2 Ver11.0α - Luyện hội thoại và phát âm ngôn ngữ với AI Gemini Flash, EdgeTTS & Groq Whisper STT.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
                     <div class="brand-group">
                         <button type="button" id="robotLogBtn" class="logo-badge-btn" title="Admin / System Logs" onclick="window.LingoAuth.promptAdminPassword()"><img src="images/logo-bird.jpg" alt="LingoBot mascot" class="logo-badge-img"></button>
                         <span class="brand-title">LingoBot2</span>
-                        <span class="version-badge">Ver10.4β</span>
+                        <span class="version-badge">Ver11.0α</span>
                     </div>
 
                     <!-- Navigation Mode Tabs -->
@@ -292,7 +292,44 @@
                         </div>
                     </div>
                 </div>
-            </main>
+            
+                  <!-- 3. SAKUBUN MODE VIEW (Viết văn) -->
+                  <div class="sakubun-viewport" id="sakubunContainer" style="display: none;">
+                      <div id="nikki-tensaku-root" class="nikki-tensaku">
+
+  <div class="nt-header">
+    <div class="nt-eyebrow">日記・作文 添削練習</div>
+    <h1 class="nt-title">今日の一日を書いてみよう</h1>
+    <p class="nt-sub">短くてOK。書き終わったら「添削する」を押すと、よくある間違いのパターンをチェックします。</p>
+  </div>
+
+  <div class="nt-card">
+    <div class="nt-label">あなたの日記</div>
+    <div class="nt-textarea-wrap">
+      <textarea class="nt-textarea" id="nt-textarea" placeholder="例: 今日は友達と公園で散歩しました。天気がとても良かったです。"></textarea>
+    </div>
+    <div class="nt-char-count"><span id="nt-char-count">0</span> 文字</div>
+
+    <button class="nt-check-btn" id="nt-check-btn">添削する</button>
+
+    <div class="nt-results" id="nt-results">
+      <div class="nt-result-heading">添削された文章</div>
+      <div class="nt-annotated" id="nt-annotated"></div>
+
+      <div class="nt-result-heading">先生からのコメント</div>
+      <div id="nt-notes"></div>
+
+      <div class="nt-stamp-row">
+        <div class="nt-stamp" id="nt-stamp">よく<br>書けた</div>
+        <div class="nt-stamp-text" id="nt-stamp-text"></div>
+      </div>
+    </div>
+  </div>
+
+                      </div>
+                  </div>
+              </main>
+
 
             <!-- Footer Controls with Conversation Input & Pronunciation Status Banner -->
             <footer class="app-footer-bar" id="appFooterBar">
