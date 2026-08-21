@@ -98,15 +98,22 @@ def fetch_dynamic_gemini_models(api_key):
                     valid_chat_models.append(name)
 
             def model_priority(m_name):
+                import re
                 m_lower = m_name.lower()
-                if "2.5-flash" in m_lower: return 0
-                if "2.0-flash" in m_lower: return 1
-                if "1.5-flash" in m_lower: return 2
-                if "flash" in m_lower: return 3
-                if "pro" in m_lower: return 4
-                return 5
+                match = re.search(r'gemini-(\d+)\.(\d+)', m_lower)
+                if match:
+                    major = int(match.group(1))
+                    minor = int(match.group(2))
+                else:
+                    major, minor = 0, 0
+                
+                type_score = 1 if "flash" in m_lower and "8b" not in m_lower else (0 if "pro" in m_lower else -1)
+                
+                # Sort descending: higher major, higher minor, then type_score
+                return (major, minor, type_score)
 
-            valid_chat_models.sort(key=model_priority)
+            # Sort descending by priority (highest versions first)
+            valid_chat_models.sort(key=model_priority, reverse=True)
             return valid_chat_models, None
         else:
             return None, f"HTTP Error {res.status_code}"
@@ -123,7 +130,7 @@ def execute_gemini_chat(api_key, formatted_contents, system_instruction, scenari
     if key_err:
         return None, key_err
 
-    fallback_models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    fallback_models = ["gemini-4.0-flash", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
     target_models = dynamic_models if dynamic_models else fallback_models
 
     payload = {
@@ -365,7 +372,7 @@ def tensaku():
             }
         }
         
-        fallback_models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+        fallback_models = ["gemini-4.0-flash", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
         
         for model in fallback_models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
@@ -522,7 +529,7 @@ Yêu cầu xuất báo cáo bằng Markdown (100% bằng tiếng Việt):
             return jsonify({"summary": fallback_summary, "used_model": "Local"}), 200
 
         dynamic_models, _ = fetch_dynamic_gemini_models(api_key)
-        models_to_try = dynamic_models if dynamic_models else ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models_to_try = dynamic_models if dynamic_models else ["gemini-4.0-flash", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
 
         payload = {
             "contents": [{"role": "user", "parts": [{"text": system_prompt}]}],
